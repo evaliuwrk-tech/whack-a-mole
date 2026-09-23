@@ -65,6 +65,9 @@ img{-webkit-user-drag:none;user-select:none}
 .how ol{margin:0;padding-left:1.3em}
 .how b{color:#b0331f}
 .row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.lvsel{align-items:center;gap:8px}
+.lvsel span{color:var(--moon);font-weight:800;text-shadow:0 2px 0 var(--ink)}
+.lvsel .btn{font-size:15px;padding:6px 12px 8px;border-radius:14px;box-shadow:0 4px 0 var(--ink)}
 
 /* ---------- 圖鑑 ---------- */
 #dex{overflow-y:auto;padding:14px 16px 30px}
@@ -89,7 +92,7 @@ img{-webkit-user-drag:none;user-select:none}
 .timebar{width:100%;max-width:560px;height:10px;border:3px solid var(--ink);border-radius:99px;background:var(--cream);overflow:hidden}
 .timebar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--lantern),var(--gold));transform-origin:left}
 
-.customers{width:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;min-height:clamp(128px,19vh,168px)}
+.customers{width:100%;max-width:560px;display:grid;grid-template-columns:repeat(2,1fr);gap:8px;min-height:clamp(128px,19vh,168px)}
 .cust{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;transition:transform .35s cubic-bezier(.3,1.4,.6,1),opacity .35s}
 .cust.enter{transform:translateY(40px);opacity:0}
 .cust.leave{transform:translateY(-30px);opacity:0}
@@ -127,7 +130,7 @@ img{-webkit-user-drag:none;user-select:none}
 .ring{position:absolute;left:50%;bottom:-6%;transform:translateX(-50%);width:62%;height:9px;border:2px solid var(--ink);border-radius:9px;background:rgba(255,255,255,.85);overflow:hidden}
 .ring i{display:block;height:100%;width:0}
 .ring::before,.ring::after{content:"";position:absolute;top:0;bottom:0;width:2px;background:var(--ink);opacity:.6}
-.ring::before{left:62.5%}.ring::after{left:81%}
+.ring::before{left:45.5%}.ring::after{left:72.7%}
 .tag{position:absolute;left:50%;top:-4%;transform:translateX(-50%);font-size:12px;font-weight:800;background:var(--cream);border:2px solid var(--ink);border-radius:8px;padding:0 5px;white-space:nowrap}
 .food.perfect .tag{background:#c9f5c0}
 .food.perfect{animation:glow .6s ease-in-out infinite alternate}
@@ -152,9 +155,7 @@ body.brushing .grill{box-shadow:0 8px 0 #0b0f24,0 0 0 4px var(--gold),0 0 20px 4
 .heat i{display:block;height:100%;background:linear-gradient(90deg,#f6a02a,#e03a1e);transform-origin:left}
 .tool.warn{animation:warn .5s ease-in-out infinite alternate}
 @keyframes warn{to{background:#ffd0c4}}
-.dots{display:flex;gap:2px;margin-top:2px}
-.dots i{width:7px;height:7px;border-radius:50%;border:1.5px solid var(--ink);background:#fff}
-.dots i.on{background:#a8321a}
+.tool .step{font-size:11px;font-weight:800;color:#a8321a}
 .plate{display:flex;align-items:center;gap:3px;background:#e9eef5;border:3px solid var(--ink);border-radius:26px;box-shadow:0 4px 0 var(--ink);padding:2px 8px}
 .plate .pl{font-size:11px;font-weight:800;writing-mode:vertical-rl;letter-spacing:.1em;color:#556}
 .plate .ps{width:38px;height:38px;border-radius:50%;background:#fff;border:2px dashed #aab;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
@@ -241,13 +242,19 @@ body.brushing .grill{box-shadow:0 8px 0 #0b0f24,0 0 0 4px var(--gold),0 0 20px 4
     <ol>
       <li>客人會用<b>客家話</b>點菜，點一下對話框可以再聽一次。</li>
       <li>從木盤選食材放上烤網，烤到<b>「剛好」</b>時點它，就會送給客人。</li>
-      <li>有 <img src="img/sauce.webp" alt="" style="height:18px;vertical-align:-3px"> 的要先按<b>烤肉醬</b>，再用<b>搓仔</b>刷上去；火變小就加<b>火炭</b>！</li>
-      <li>越到後面越難：看圖 → 看字 → <b>只用耳朵聽</b>！</li>
+      <li>有 <img src="img/sauce.webp" alt="" style="height:18px;vertical-align:-3px"> 的要刷醬：先按<b>搓仔</b>拿刷子 → 再按<b>烤肉醬</b>沾醬 → 點烤網上的菜刷一刷；火變小就加<b>火炭</b>！</li>
+      <li>三個關卡分開闖：<b>看圖</b> → <b>看字</b> → <b>只用耳朵聽</b>，每關招待滿 5 位客人就過關！</li>
     </ol>
   </div>
   <div class="row">
     <button class="btn" id="startBtn">🔥 開始擺攤</button>
     <button class="btn alt" id="dexBtn">📖 食材客語圖鑑</button>
+  </div>
+  <div class="row lvsel">
+    <span>直接選關：</span>
+    <button class="btn alt" data-level="0">① 看圖</button>
+    <button class="btn alt" data-level="1">② 看字</button>
+    <button class="btn alt" data-level="2">③ 聽音</button>
   </div>
 </section>
 
@@ -272,8 +279,8 @@ body.brushing .grill{box-shadow:0 8px 0 #0b0f24,0 0 0 4px var(--gold),0 0 20px 4
   <div class="grill-wrap"><div class="grill" id="grill"><img class="bg" src="img/grill.webp" alt="烤肉架"><div class="embers" id="embers"></div><div class="dim" id="dim"></div></div></div>
   <div class="tools">
     <div class="tool" id="tCoal" data-say="huotan"><span id="coalIcon"></span><span class="lbl"><b>火炭</b><span class="py">foˋ tan</span><span class="heat"><i id="heat"></i></span></span></div>
-    <div class="tool" id="tSauce" data-say="kaorouxiang"><img src="img/sauce.webp" alt=""><span class="lbl"><b>烤肉醬</b><span class="py">kauˋ ngiugˋ jiong</span></span></div>
-    <div class="tool" id="tBrush" data-say="brush"><img src="img/brush.webp" alt="" style="height:26px"><span class="lbl"><b>搓仔</b><span class="py">co eˋ</span><span class="dots" id="dots"><i></i><i></i><i></i></span></span></div>
+    <div class="tool" id="tSauce" data-say="kaorouxiang"><img src="img/sauce.webp" alt=""><span class="lbl"><b>烤肉醬</b><span class="py">kauˋ ngiugˋ jiong</span><span class="step">② 再沾</span></span></div>
+    <div class="tool" id="tBrush" data-say="brush"><img src="img/brush.webp" alt="" style="height:26px"><span class="lbl"><b>搓仔</b><span class="py">co eˋ</span><span class="step" id="brushState">① 先拿</span></span></div>
     <div class="plate" title="保溫盤：沒人點的熟食先放這"><span class="pl">保溫盤</span><div class="ps"></div><div class="ps"></div><div class="ps"></div></div>
   </div>
   <div class="tray" id="tray"></div>
@@ -288,14 +295,11 @@ body.brushing .grill{box-shadow:0 8px 0 #0b0f24,0 0 0 4px var(--gold),0 0 20px 4
     <p id="resLine" style="margin:6px 0 0;font-weight:800"></p>
   </div>
   <div class="panel">
-    <h2 style="font-size:22px">🎧 今晚聽過的客家話</h2>
+    <h2 style="font-size:22px">🎧 這一關聽過的客家話</h2>
     <p style="margin:0;font-size:14px;color:#6d5a4a">點卡片再聽一次・紅色是還要多練習的詞</p>
     <div class="learned" id="learned"></div>
   </div>
-  <div class="row">
-    <button class="btn" id="againBtn">🔁 再烤一次</button>
-    <button class="btn alt" id="homeBtn">🏠 回首頁</button>
-  </div>
+  <div class="row" id="resBtns"></div>
 </section>
 
 <script>
@@ -418,21 +422,23 @@ function buildDex(){
 }
 
 /* ============ 遊戲狀態 ============ */
-const TOTAL = 120, SLOTS = 6;
+const SLOTS = 6, DONE = 1, WARN = 1.6, BURNT = 2.2;   // 熟 → 快焦 → 燒焦
 const SLOT_POS = [[20,32],[50,32],[80,32],[20,70],[50,70],[80,70]];
-const PHASES = [
-  {at:0,  name:'第一關・看圖聽客語', mode:'pic'},
-  {at:40, name:'第二關・看客語字點菜', mode:'text'},
-  {at:80, name:'第三關・只用耳朵聽！', mode:'ear'},
+const LEVELS = [
+  {name:'第一關・看圖聽客語', short:'看字點菜', mode:'pic',  goal:5, time:180, two:0,  tip:'客人的對話框有圖片、客語字和拼音'},
+  {name:'第二關・看客語字點菜', short:'只用耳朵聽', mode:'text', goal:5, time:180, two:.3, tip:'不再有圖片，要認得客語字喔'},
+  {name:'第三關・只用耳朵聽！', short:'', mode:'ear',  goal:5, time:200, two:.3, tip:'客人只用說的！點對話框可以重聽'},
 ];
+const MAX_CUST = 2;
 const FACES = ['🐰','👵','👴','👧','👦','🐱','🐶','🐻','🐼','🦊'];
 let S;   // state
 
-function newState(){
-  return { running:false, t:0, last:0, score:0, served:0, heat:85, sauce:0, brushing:false,
-    grill:Array(SLOTS).fill(null), plate:[null,null,null], custs:[null,null,null], spawnIn:[0.6,3.5,7],
-    phase:-1, stats:{}, lastOrder:[] };
+function newState(level, total=0){
+  return { level, running:false, t:0, last:0, score:0, total, served:0, heat:85, sauce:0, brushing:false,
+    grill:Array(SLOTS).fill(null), plate:[null,null,null], custs:[null,null], spawnIn:[2.5,9],
+    stats:{}, lastOrder:[] };
 }
+const LV = ()=>LEVELS[S.level];
 function stat(id){ return S.stats[id] || (S.stats[id]={heard:0, ok:0, miss:0}); }
 
 /* 木盤 */
@@ -480,11 +486,11 @@ function updateFoodVisual(f){
   const p=f.p, c=n.querySelector('img.c'), r=n.querySelector('img.r'), bar=n.querySelector('.ring i'), tag=n.querySelector('.tag');
   const k=Math.min(1,Math.max(0,(p-.35)/.65));
   c.style.opacity=k; r.style.opacity=1-k;
-  const burntK = Math.min(1,Math.max(0,(p-1.3)/.3));
-  if(p<1.6) c.style.filter = `brightness(${1-burntK*.5}) drop-shadow(0 5px 3px rgba(0,0,0,.55))`;
-  bar.style.width = Math.min(100,p/1.6*100)+'%';
-  bar.style.background = p<1 ? '#f2b33a' : p<1.3 ? '#3fae5a' : '#d8472d';
-  const state = p>=1.6?'burnt': p>=1?'perfect':'cooking';
+  const burntK = Math.min(1,Math.max(0,(p-WARN)/(BURNT-WARN)));
+  if(p<BURNT) c.style.filter = `brightness(${1-burntK*.5}) drop-shadow(0 5px 3px rgba(0,0,0,.55))`;
+  bar.style.width = Math.min(100,p/BURNT*100)+'%';
+  bar.style.background = p<DONE ? '#f2b33a' : p<WARN ? '#3fae5a' : '#d8472d';
+  const state = p>=BURNT?'burnt': p>=DONE?'perfect':'cooking';
   if(n.dataset.state!==state){
     n.dataset.state=state;
     n.classList.toggle('perfect', state==='perfect'); n.classList.toggle('burnt', state==='burnt');
@@ -492,7 +498,7 @@ function updateFoodVisual(f){
     if(state==='perfect'){ tag.textContent='剛好！'; n.appendChild(el('div','steam')); sfx.pop(); }
     if(state==='burnt'){ tag.textContent='臭火𤊶'; n.appendChild(el('div','smoke')); n.appendChild(el('div','smoke')); n.lastChild.style.animationDelay='.6s'; say(PHRASE.burnt); }
   }
-  if(state==='perfect' && p>=1.3 && tag.textContent!=='快焦了！') tag.textContent='快焦了！';
+  if(state==='perfect' && p>=WARN && tag.textContent!=='快焦了！') tag.textContent='快焦了！';
   if(f.glazed && !n.querySelector('.glaze')) n.insertBefore(el('div','glaze'), n.querySelector('.ring'));
 }
 
@@ -500,16 +506,15 @@ function tapSlot(i){
   if(!S.running) return;
   const f=S.grill[i]; if(!f) return;
   const node=f.node;
-  if(S.brushing && !f.glazed && f.p<1.6){
-    if(S.sauce<=0){ toast('搓仔愛先搵烤肉醬<small>刷子要先沾烤肉醬！</small>'); S.brushing=false; updateTools(); return; }
-    f.glazed=true; S.sauce--; S.brushing=false; sfx.brush(); say('kaorouxiang');
+  if(S.brushing && !f.glazed && f.p<BURNT){
+    if(!S.sauce){ toast('搓仔愛先搵烤肉醬<small>刷子還沒沾醬，請按「烤肉醬」</small>'); sfx.bad(); return; }
+    f.glazed=true; S.sauce=0; S.brushing=false; sfx.brush(); say('kaorouxiang');
     floatText(node,'刷烤肉醬 ✓','good'); updateFoodVisual(f);
     updateTools(); return;
   }
-  if(S.brushing){ S.brushing=false; updateTools(); }
-  if(f.p>=1.6){ S.grill[i]=null; renderSlot(i); floatText(node,'丟掉 −3','bad'); S.score=Math.max(0,S.score-3); sfx.bad(); return; }
-  if(f.p<1){ floatText(node,'還沒熟！','bad'); node.animate([{transform:'translateX(-4px)'},{transform:'translateX(4px)'},{transform:'none'}],{duration:200}); say(f.id); return; }
-  const perfect = f.p<1.3;
+  if(f.p>=BURNT){ S.grill[i]=null; renderSlot(i); floatText(node,'丟掉 −3','bad'); S.score=Math.max(0,S.score-3); sfx.bad(); return; }
+  if(f.p<DONE){ floatText(node,'還沒熟！','bad'); node.animate([{transform:'translateX(-4px)'},{transform:'translateX(4px)'},{transform:'none'}],{duration:200}); say(f.id); return; }
+  const perfect = f.p<WARN;
   S.grill[i]=null; renderSlot(i);
   if(!deliver(f.id, node, {perfect, glazed:f.glazed})){
     const pi=S.plate.findIndex(x=>!x);
@@ -557,10 +562,9 @@ function deliver(id, node, {perfect, glazed}){
 }
 
 /* 客人 */
-function currentPhase(){ let k=0; PHASES.forEach((p,i)=>{ if(S.t>=p.at) k=i; }); return k; }
 function makeOrder(){
-  const ph=currentPhase();
-  const n = ph===0 ? 1 : (Math.random()<.5?2:1);
+  const ph=S.level;
+  const n = Math.random()<LV().two ? 2 : 1;
   const busy=new Set(S.custs.filter(Boolean).flatMap(c=>c.order.map(o=>o.id)));
   let pool=FOODS.filter(k=>!busy.has(k)&&!S.lastOrder.includes(k)); if(pool.length<n) pool=FOODS.slice();
   const ids=[]; while(ids.length<n){ const k=rnd(pool); if(!ids.includes(k)) ids.push(k); }
@@ -569,8 +573,8 @@ function makeOrder(){
 }
 function orderAudio(c){ return c.order.flatMap(o=>o.sauce?[o.id,'kaorouxiang']:[o.id]); }
 function spawnCust(slot){
-  const order=makeOrder(), mode=PHASES[currentPhase()].mode;
-  const max = 26 + order.length*12 + (mode==='ear'?6:0);
+  const order=makeOrder(), mode=LV().mode;
+  const max = 60 + (order.length-1)*25 + (mode==='ear'?15:0);   // 耐心（秒）
   const c={slot, order, mode, patience:max, max, face:rnd(FACES), leaving:false};
   const used=S.custs.filter(Boolean).map(x=>x.face); if(used.includes(c.face)) c.face=rnd(FACES.filter(f=>!used.includes(f)));
   S.custs[slot]=c;
@@ -601,7 +605,7 @@ function flashHint(c){
 }
 function leaveCust(c, delay=0){
   c.leaving=true;
-  setTimeout(()=>{ c.el.classList.add('leave'); setTimeout(()=>{ if(S.custs[c.slot]===c){ S.custs[c.slot]=null; c.el.remove(); S.spawnIn[c.slot]=1.5+Math.random()*2.5; } },380); }, delay);
+  setTimeout(()=>{ c.el.classList.add('leave'); setTimeout(()=>{ if(S.custs[c.slot]===c){ S.custs[c.slot]=null; c.el.remove(); S.spawnIn[c.slot]=2.5+Math.random()*3; } },380); }, delay);
 }
 
 /* 工具 */
@@ -609,29 +613,30 @@ function updateTools(){
   $('#heat').style.transform=`scaleX(${S.heat/100})`;
   $('#tCoal').classList.toggle('warn', S.heat<22);
   $('#tBrush').classList.toggle('on', S.brushing);
-  document.body.classList.toggle('brushing', S.brushing);
-  document.querySelectorAll('#dots i').forEach((d,i)=>d.classList.toggle('on', i<S.sauce));
+  $('#tSauce').classList.toggle('on', !!(S.brushing && S.sauce));
+  document.body.classList.toggle('brushing', !!(S.brushing && S.sauce));
+  $('#brushState').textContent = !S.brushing ? '① 先拿' : S.sauce ? '③ 刷菜！' : '拿著了';
 }
 function initTools(){
   $('#coalIcon').innerHTML=COAL_SVG;
   $('#tCoal').onclick=()=>{ if(!S.running) return; say('huotan'); S.heat=Math.min(100,S.heat+40); tone(140,.3,'sawtooth',.08,0,.5); floatText($('#tCoal'),'加火炭 🔥','gold'); updateTools(); };
-  $('#tSauce').onclick=()=>{ if(!S.running) return; say('kaorouxiang'); S.sauce=3; S.brushing=true; sfx.pop(); floatText($('#tSauce'),'沾好醬了！點烤網上的菜刷一刷','good'); updateTools(); };
+  // 刷醬三步驟：① 拿搓仔 → ② 搵烤肉醬 → ③ 點烤網上的菜
   $('#tBrush').onclick=()=>{ if(!S.running) return; say('brush');
-    if(S.sauce<=0){ toast('搓仔愛先搵烤肉醬<small>刷子要先沾烤肉醬！</small>'); return; }
-    S.brushing=!S.brushing; updateTools(); };
+    if(S.brushing){ S.brushing=false; S.sauce=0; floatText($('#tBrush'),'放下搓仔',''); }
+    else { S.brushing=true; S.sauce=0; sfx.pop(); floatText($('#tBrush'),'拿起搓仔，再按烤肉醬','good'); }
+    updateTools(); };
+  $('#tSauce').onclick=()=>{ if(!S.running) return; say('kaorouxiang');
+    if(!S.brushing){ toast('先拿搓仔，再搵烤肉醬<small>請先按「搓仔」拿刷子</small>'); sfx.bad();
+      const b=$('#tBrush'); b.classList.add('warn'); setTimeout(()=>b.classList.remove('warn'),1500); return; }
+    S.sauce=1; sfx.pop(); floatText($('#tSauce'),'沾好醬了！點烤網上的菜刷一刷','good'); updateTools(); };
 }
 
 /* HUD / 關卡 */
 function updateHud(){
-  $('#score').textContent=S.score; $('#served').textContent=S.served;
-  const left=Math.max(0,Math.ceil(TOTAL-S.t)); $('#time').textContent=left;
-  $('#timeChip').classList.toggle('low', left<=10);
-  $('#timebar').style.transform=`scaleX(${Math.max(0,1-S.t/TOTAL)})`;
-}
-function checkPhase(){
-  const k=currentPhase();
-  if(k!==S.phase){ S.phase=k; $('#phase').textContent='🌕 '+PHASES[k].name;
-    if(k>0){ toast(`${PHASES[k].name}<small>${k===1?'不再有圖片，要認得客語字喔':'客人只用說的！點對話框可以重聽'}</small>`,2200); sfx.fanfare(); } }
+  $('#score').textContent=S.total+S.score; $('#served').textContent=`${S.served}/${LV().goal}`;
+  const left=Math.max(0,Math.ceil(LV().time-S.t)); $('#time').textContent=left;
+  $('#timeChip').classList.toggle('low', left<=15);
+  $('#timebar').style.transform=`scaleX(${Math.max(0,1-S.t/LV().time)})`;
 }
 
 /* 主迴圈 */
@@ -639,17 +644,19 @@ function loop(now){
   if(!S.running) return;
   const dt=Math.min(.1,(now-S.last)/1000); S.last=now; S.t+=dt;
   // 火力
-  S.heat=Math.max(0,S.heat-dt*1.6);
+  S.heat=Math.max(0,S.heat-dt*1.0);
   const speed = S.heat<=0 ? .12 : .3 + .9*S.heat/100;
   $('#embers').style.opacity = .15 + .85*S.heat/100;
   $('#dim').style.opacity = (1-S.heat/100)*.45;
   let cooking=0;
-  S.grill.forEach(f=>{ if(!f) return; if(f.p<1.6){ f.p += dt*speed/W[f.id].t; cooking++; } updateFoodVisual(f); });
+  S.grill.forEach(f=>{ if(!f) return; if(f.p<BURNT){ f.p += dt*speed/W[f.id].t; cooking++; } updateFoodVisual(f); });
   setSizzle(Math.min(.12, cooking*.025*(.3+S.heat/100)));
   // 客人
-  for(let i=0;i<3;i++){
+  // 這一關還需要的客人數（已招待 + 正在等的 不超過目標）
+  const need = LV().goal - S.served - S.custs.filter(c=>c&&!c.leaving).length;
+  for(let i=0;i<MAX_CUST;i++){
     const c=S.custs[i];
-    if(!c){ S.spawnIn[i]-=dt; if(S.spawnIn[i]<=0 && TOTAL-S.t>6) spawnCust(i); continue; }
+    if(!c){ S.spawnIn[i]-=dt; if(S.spawnIn[i]<=0 && need>0) spawnCust(i); continue; }
     if(c.leaving) continue;
     c.patience-=dt; const r=Math.max(0,c.patience/c.max);
     c.bar.style.transform=`scaleX(${r})`; c.bar.style.background = r>.5?'#3fae5a': r>.25?'#f2b33a':'#d8472d';
@@ -657,29 +664,44 @@ function loop(now){
       c.reveal=true; c.leaving=true; renderCust(c); c.el.classList.add('angry'); leaveCust(c,1400); }
   }
   if(Math.floor(S.t*4)!==Math.floor((S.t-dt)*4)) updateTools();
-  checkPhase(); updateHud();
-  if(S.t>=TOTAL) return endGame();
+  updateHud();
+  if(S.served>=LV().goal && S.custs.every(c=>!c)) return endLevel(true);   // 等最後一位客人開心離開
+  if(S.t>=LV().time) return endLevel(false);
   requestAnimationFrame(loop);
 }
 
-function startGame(){
+function startLevel(level, total=0){
   ac(); startSizzle();
-  S=newState();
-  $('#customers').innerHTML='<div></div><div></div><div></div>';
+  S=newState(level, total);
+  $('#customers').innerHTML='<div></div><div></div>';
   buildTray(); buildGrill(); renderPlate(); updateTools(); updateHud();
+  $('#phase').textContent='🌕 '+LV().name;
   show('game'); fitGrill();
+  toast(`${LV().name}<small>${LV().tip}・招待 ${LV().goal} 位客人就過關</small>`,2600);
   say(PHRASE.welcome);
-  S.running=true; S.last=performance.now(); checkPhase();
+  S.running=true; S.last=performance.now();
   requestAnimationFrame(loop);
 }
-function endGame(){
+const startGame = ()=>startLevel(0);
+function endLevel(win){
   S.running=false; setSizzle(0);
-  sfx.fanfare(); setTimeout(()=>say(PHRASE.festival),400);
-  const stars = S.score>=320?3 : S.score>=180?2 : S.score>=60?1 : 0;
+  S.custs.forEach(c=>c&&c.el&&c.el.remove());
+  const last = S.level===LEVELS.length-1, lv=LV();
+  const total = S.total + (win?S.score:0);
+  if(win){ sfx.fanfare(); setTimeout(()=>say(last?PHRASE.festival:PHRASE.thanks),400); } else sfx.bad();
+  const stars = !win?0 : S.t<lv.time*.45?3 : S.t<lv.time*.7?2 : 1;
   $('#stars').innerHTML=[0,1,2].map(i=>`<span class="${i<stars?'':'off'}">⭐</span>`).join('');
-  $('#resScore').textContent=S.score+' 分';
-  $('#resTitle').textContent='八月半快樂！';
-  $('#resLine').innerHTML=`今晚招待了 <b>${S.served}</b> 位客人 ・ ${['再多聽幾次就會了！','不錯喔，客語越來越熟了！','好厲害，烤肉攤老闆就是你！','客語烤肉大師！'][stars]}`;
+  $('#resTitle').textContent = !win ? `時間到！${lv.name.split('・')[0]}` : last ? '三關全破！八月半快樂！' : `${lv.name.split('・')[0]}過關！`;
+  $('#resScore').textContent = (win&&last ? total : S.score)+' 分';
+  $('#resLine').innerHTML = !win ? `招待了 <b>${S.served}/${lv.goal}</b> 位客人，再挑戰一次吧！`
+    : last ? '三關總分・你是客語烤肉大師！' : `用了 ${Math.ceil(S.t)} 秒招待 ${lv.goal} 位客人`;
+  const btns=$('#resBtns'); btns.innerHTML='';
+  const B=(txt,cls,fn)=>{ const b=el('button','btn'+(cls?' '+cls:''),txt); b.onclick=fn; btns.appendChild(b); };
+  if(win && !last) B(`▶ 下一關：${lv.short}`,'',()=>startLevel(S.level+1,total));
+  if(!win) B('🔁 再挑戰一次','',()=>startLevel(S.level,S.total));
+  if(win && last) B('🔁 從第一關再玩','',()=>startLevel(0));
+  if(win && !last) B('🔁 重玩此關','alt',()=>startLevel(S.level,S.total));
+  B('🏠 回首頁','alt',()=>show('title'));
   const L=$('#learned'); L.innerHTML='';
   const ids=Object.keys(S.stats).sort((a,b)=>(S.stats[b].miss-S.stats[a].miss)||(S.stats[b].heard-S.stats[a].heard));
   (ids.length?ids:FOODS.slice(0,6)).forEach(id=>{
@@ -701,11 +723,10 @@ addEventListener('resize', fitGrill);
 
 /* ============ 事件 ============ */
 $('#startBtn').onclick=startGame;
-$('#againBtn').onclick=startGame;
-$('#homeBtn').onclick=()=>{ show('title'); };
+document.querySelectorAll('[data-level]').forEach(b=>b.onclick=()=>startLevel(+b.dataset.level));
 $('#dexBtn').onclick=()=>{ buildDex(); show('dex'); say(PHRASE.festival); };
 $('#dexBack').onclick=()=>show('title');
-$('#quitBtn').onclick=()=>{ if(S&&S.running && confirm('要提早收攤嗎？')) endGame(); };
+$('#quitBtn').onclick=()=>{ if(S&&S.running && confirm('要結束這一關嗎？')) endLevel(false); };
 $('#muteBtn').onclick=()=>{ muted=!muted; $('#muteBtn').textContent=muted?'🔇':'🔊'; if(muted){ curVoice&&curVoice.pause(); setSizzle(0);} };
 document.querySelector('.logo').onclick=()=>say(PHRASE.festival);
 initTools();
