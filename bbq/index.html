@@ -73,6 +73,8 @@ img{-webkit-user-drag:none;user-select:none}
 #dex{overflow-y:auto;padding:14px 16px 30px}
 #dex header{width:100%;max-width:960px;display:flex;align-items:center;gap:12px;color:var(--cream);margin-bottom:12px}
 #dex header h2{margin:0;font-size:24px;flex:1;text-shadow:0 3px 0 var(--ink)}
+.dex-tip{width:100%;max-width:960px;margin:0 0 12px;background:rgba(255,248,231,.94);border:3px solid var(--ink);border-radius:14px;box-shadow:0 4px 0 var(--ink);padding:8px 14px;font-size:16px;font-weight:800;text-align:center}
+.dex-tip .tt{display:inline-block;border:2px solid var(--ink);background:#fff;border-radius:10px;padding:0 6px;font-size:14px}
 .dex-grid{width:100%;max-width:960px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
 .card{background:var(--cream);border:3px solid var(--ink);border-radius:16px;box-shadow:0 5px 0 var(--ink);padding:8px 8px 10px;text-align:center;cursor:pointer;position:relative}
 .card:active{transform:translateY(3px);box-shadow:0 2px 0 var(--ink)}
@@ -82,7 +84,8 @@ img{-webkit-user-drag:none;user-select:none}
 .card .hk{font-size:26px;font-weight:800;line-height:1.2;margin-top:4px}
 .card .py{font-size:15px;color:#8a3b12}
 .card .zh{font-size:13px;color:#6d5a4a;margin-top:2px}
-.card .slow{position:absolute;right:6px;top:6px;border:2px solid var(--ink);background:#fff;border-radius:10px;font-size:14px;padding:1px 5px;cursor:pointer}
+.card .slow{position:absolute;right:6px;top:6px;border:2px solid var(--ink);background:#fff;border-radius:10px;font-size:12px;font-weight:800;padding:1px 5px;cursor:pointer}
+.card .slow:hover{background:#fff1b8}
 .card.playing{background:#fff1b8}
 
 /* ---------- 遊戲畫面 ---------- */
@@ -261,6 +264,7 @@ body.brushing .grill{box-shadow:0 8px 0 #0b0f24,0 0 0 4px var(--gold),0 0 20px 4
 <!-- 圖鑑 -->
 <section class="screen" id="dex" hidden>
   <header><button class="icon-btn" id="dexBack" aria-label="返回">←</button><h2>📖 食材客語圖鑑（四縣腔）</h2></header>
+  <p class="dex-tip">👆 點字卡聽客語發音　・　點右上角 <span class="tt">🐢 慢速</span> 可以放慢聆聽</p>
   <div class="dex-grid" id="dexGrid"></div>
 </section>
 
@@ -415,7 +419,7 @@ function buildDex(){
   Object.keys(W).forEach(id=>{
     const w=W[id], c=el('div','card');
     const pics = (w.raw||w.tool) ? `<img src="${rawImg(id)}" alt="">` : `<img src="${rawImg(id)}" alt=""><img src="${cookedImg(id)}" alt="">`;
-    c.innerHTML=`<div class="pics">${pics}</div><div class="hk">${w.hk}</div><div class="py">${w.py}</div><div class="zh">華語：${w.zh}</div><button class="slow" aria-label="慢速">🐢</button>`;
+    c.innerHTML=`<div class="pics">${pics}</div><div class="hk">${w.hk}</div><div class="py">${w.py}</div><div class="zh">華語：${w.zh}</div><button class="slow" aria-label="慢速播放" title="點我放慢聆聽">🐢 慢速</button>`;
     c.onclick=e=>{ const slow=e.target.classList.contains('slow'); document.querySelectorAll('.card.playing').forEach(x=>x.classList.remove('playing')); c.classList.add('playing'); say(id,{slow}).then(()=>c.classList.remove('playing')); };
     g.appendChild(c);
   });
