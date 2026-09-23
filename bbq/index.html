@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="中秋節烤肉小遊戲：邊烤肉邊學客語！聽客人用客語點菜，把江瑤柱、烰菜、豬紅糕烤得香噴噴。">
+<title>八月半烤肉趣</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@500;800&family=Lilita+One&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --night:#141b45; --night2:#2a2f6b; --dusk:#4b3a7a;
+  --moon:#ffe6a0; --lantern:#e0473a; --gold:#f7c948;
+  --ink:#2b1a10; --cream:#fff8e7; --wood:#8a5a36; --wood-dk:#5c3a20; --wood-lt:#b77c4c;
+  --ok:#3fae5a; --bad:#d8472d;
+  --display:"Lilita One","Chiron GoRound TC","Microsoft JhengHei",system-ui,sans-serif;
+  --body:"Chiron GoRound TC","Microsoft JhengHei","PingFang TC",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+[hidden]{display:none!important}
+body{margin:0;font-family:var(--body);color:var(--ink);background:var(--night);overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button{font-family:var(--body);color:var(--ink)}
+img{-webkit-user-drag:none;user-select:none}
+
+/* ---------- 夜空背景 ---------- */
+.sky{position:fixed;inset:0;background:radial-gradient(120% 80% at 80% 0%,var(--dusk),var(--night2) 45%,var(--night) 80%);z-index:0;overflow:hidden}
+.moon{position:absolute;right:max(4vw,16px);top:max(3vh,10px);width:clamp(70px,14vw,150px);aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle at 38% 36%,#fff8d8,var(--moon) 55%,#f2c86a);box-shadow:0 0 40px 12px rgba(255,220,130,.45),0 0 120px 40px rgba(255,210,120,.18)}
+.moon::after{content:"";position:absolute;left:26%;top:52%;width:16%;height:12%;border-radius:50%;background:rgba(210,160,70,.28);box-shadow:34px -22px 0 -2px rgba(210,160,70,.22),14px 12px 0 -4px rgba(210,160,70,.2)}
+.star{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;animation:tw 2.4s ease-in-out infinite alternate}
+@keyframes tw{from{opacity:.25}to{opacity:1}}
+.lanterns{position:absolute;left:0;right:0;top:0;height:70px;pointer-events:none}
+.lanterns::before{content:"";position:absolute;left:-5%;right:-5%;top:6px;height:40px;border-top:2px solid rgba(255,230,170,.35);border-radius:0 0 50% 50%/0 0 100% 100%}
+.lan{position:absolute;top:14px;width:22px;height:28px;border-radius:45%;background:radial-gradient(circle at 50% 40%,#ffb36b,var(--lantern) 60%,#9c2420);box-shadow:0 0 18px 4px rgba(255,120,60,.45);transform-origin:50% -10px;animation:sway 3s ease-in-out infinite alternate}
+.lan::before,.lan::after{content:"";position:absolute;left:25%;right:25%;height:4px;background:#5a2a10;border-radius:2px}
+.lan::before{top:-3px}.lan::after{bottom:-3px}
+@keyframes sway{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
+
+/* ---------- 共用元件 ---------- */
+.chip{background:var(--cream);border:3px solid var(--ink);border-radius:14px;padding:3px 12px 5px;box-shadow:0 4px 0 var(--ink);display:flex;align-items:baseline;gap:6px;justify-content:center}
+.chip small{font-size:12px;font-weight:800;letter-spacing:.06em}
+.chip b{font-family:var(--display);font-size:24px;font-weight:400;font-variant-numeric:tabular-nums;line-height:1}
+.chip.low b{color:var(--bad);animation:pulse .5s ease-in-out infinite alternate}
+@keyframes pulse{to{transform:scale(1.18)}}
+.btn{background:var(--gold);border:3px solid var(--ink);border-radius:18px;box-shadow:0 5px 0 var(--ink);font-size:20px;font-weight:800;padding:10px 22px 12px;cursor:pointer;letter-spacing:.05em}
+.btn.alt{background:var(--cream)}
+.btn:active,.icon-btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--ink)}
+.icon-btn{background:var(--cream);border:3px solid var(--ink);border-radius:12px;box-shadow:0 4px 0 var(--ink);font-size:18px;width:42px;height:38px;cursor:pointer;padding:0}
+.py{font-family:"Segoe UI","Noto Sans",system-ui,sans-serif;font-weight:600;letter-spacing:.02em}
+
+.screen{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center}
+
+/* ---------- 標題畫面 ---------- */
+#title{justify-content:center;gap:18px;padding:24px 16px;text-align:center}
+.logo{color:var(--cream);text-shadow:0 4px 0 var(--ink),0 0 24px rgba(255,200,100,.5)}
+.logo h1{margin:0;font-size:clamp(40px,10vw,76px);font-weight:800;letter-spacing:.08em;-webkit-text-stroke:2px var(--ink);paint-order:stroke fill}
+.logo p{margin:4px 0 0;font-size:clamp(15px,3.6vw,20px);font-weight:800;color:var(--moon);text-shadow:0 2px 0 var(--ink)}
+.parade{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;max-width:560px}
+.parade img{width:clamp(46px,11vw,72px);animation:bob 1.6s ease-in-out infinite alternate;filter:drop-shadow(0 4px 0 rgba(0,0,0,.35))}
+@keyframes bob{from{transform:translateY(0) rotate(-4deg)}to{transform:translateY(-8px) rotate(4deg)}}
+.how{background:rgba(255,248,231,.94);border:3px solid var(--ink);border-radius:18px;box-shadow:0 5px 0 var(--ink);padding:12px 18px;max-width:520px;text-align:left;font-size:15px;line-height:1.65}
+.how ol{margin:0;padding-left:1.3em}
+.how b{color:#b0331f}
+.row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+
+/* ---------- 圖鑑 ---------- */
+#dex{overflow-y:auto;padding:14px 16px 30px}
+#dex header{width:100%;max-width:960px;display:flex;align-items:center;gap:12px;color:var(--cream);margin-bottom:12px}
+#dex header h2{margin:0;font-size:24px;flex:1;text-shadow:0 3px 0 var(--ink)}
+.dex-grid{width:100%;max-width:960px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.card{background:var(--cream);border:3px solid var(--ink);border-radius:16px;box-shadow:0 5px 0 var(--ink);padding:8px 8px 10px;text-align:center;cursor:pointer;position:relative}
+.card:active{transform:translateY(3px);box-shadow:0 2px 0 var(--ink)}
+.card .pics{height:84px;display:flex;align-items:center;justify-content:center;gap:4px}
+.card .pics img{max-height:78px;max-width:48%;object-fit:contain}
+.card .pics img:only-child{max-width:80%}
+.card .hk{font-size:26px;font-weight:800;line-height:1.2;margin-top:4px}
+.card .py{font-size:15px;color:#8a3b12}
+.card .zh{font-size:13px;color:#6d5a4a;margin-top:2px}
+.card .slow{position:absolute;right:6px;top:6px;border:2px solid var(--ink);background:#fff;border-radius:10px;font-size:14px;padding:1px 5px;cursor:pointer}
+.card.playing{background:#fff1b8}
+
+/* ---------- 遊戲畫面 ---------- */
+#game{max-width:1000px;margin:0 auto;left:0;right:0;padding:8px 10px calc(8px + env(safe-area-inset-bottom));gap:6px}
+.hud{width:100%;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
+.phase{color:var(--moon);font-weight:800;font-size:14px;text-shadow:0 2px 0 var(--ink);text-align:center;min-height:18px}
+.timebar{width:100%;max-width:560px;height:10px;border:3px solid var(--ink);border-radius:99px;background:var(--cream);overflow:hidden}
+.timebar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--lantern),var(--gold));transform-origin:left}
+
+.customers{width:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;min-height:clamp(128px,19vh,168px)}
+.cust{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;transition:transform .35s cubic-bezier(.3,1.4,.6,1),opacity .35s}
+.cust.enter{transform:translateY(40px);opacity:0}
+.cust.leave{transform:translateY(-30px);opacity:0}
+.bubble{position:relative;background:var(--cream);border:3px solid var(--ink);border-radius:16px;box-shadow:0 4px 0 var(--ink);padding:5px 6px 6px;width:100%;max-width:230px;cursor:pointer;display:flex;gap:4px;justify-content:center}
+.bubble::after{content:"";position:absolute;left:50%;bottom:-11px;width:14px;height:14px;background:var(--cream);border-right:3px solid var(--ink);border-bottom:3px solid var(--ink);transform:translateX(-50%) rotate(45deg)}
+.ord{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;position:relative;border-radius:10px;padding:2px 1px}
+.ord img{height:clamp(34px,6vh,50px);max-width:100%;object-fit:contain}
+.ord .hk{font-size:clamp(14px,3.6vw,19px);font-weight:800;line-height:1.1;white-space:nowrap}
+.ord .py{font-size:clamp(10px,2.4vw,12px);color:#8a3b12;white-space:nowrap}
+.ord .ear{font-size:clamp(26px,6vh,38px);line-height:1.2}
+.ord .sauce{position:absolute;right:-2px;top:-4px;width:24px;height:24px;border-radius:50%;background:#fff;border:2px solid var(--ink);display:flex;align-items:center;justify-content:center}
+.ord .sauce img{height:18px}
+.ord.done{background:#d7f5d5}
+.ord.done::after{content:"✔";position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);font-size:34px;color:var(--ok);text-shadow:0 0 0 #fff,0 2px 0 #fff;font-weight:800}
+.face{font-size:clamp(34px,7vh,50px);line-height:1;margin-top:10px;filter:drop-shadow(0 3px 0 rgba(0,0,0,.35))}
+.cust.happy .face{animation:jump .5s ease-out 2}
+.cust.angry .face{filter:drop-shadow(0 3px 0 rgba(0,0,0,.35)) hue-rotate(-40deg) saturate(1.6)}
+@keyframes jump{50%{transform:translateY(-12px) scale(1.1)}}
+.patience{width:70%;max-width:120px;height:7px;border:2px solid var(--ink);border-radius:9px;background:#fff;overflow:hidden;margin-top:3px}
+.patience i{display:block;height:100%;background:var(--ok);transform-origin:left}
+
+.grill-wrap{position:relative;width:100%;flex:1 1 0;min-height:90px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.grill{position:relative;width:300px;height:212px;flex:none;border-radius:16px;box-shadow:0 8px 0 #0b0f24,0 0 0 4px var(--ink)}
+.grill>img.bg{position:absolute;inset:0;width:100%;height:100%;border-radius:14px;display:block}
+.embers{position:absolute;inset:4%;border-radius:10px;pointer-events:none;mix-blend-mode:screen;
+  background:radial-gradient(18% 22% at 25% 35%,rgba(255,120,30,.9),transparent 70%),radial-gradient(16% 20% at 68% 30%,rgba(255,150,40,.8),transparent 70%),radial-gradient(20% 24% at 45% 72%,rgba(255,100,20,.85),transparent 70%),radial-gradient(14% 18% at 82% 70%,rgba(255,130,30,.8),transparent 70%);
+  animation:flick 1.3s ease-in-out infinite alternate}
+@keyframes flick{from{filter:brightness(.8)}to{filter:brightness(1.25)}}
+.dim{position:absolute;inset:0;border-radius:14px;background:#0b0d1c;pointer-events:none;transition:opacity .4s}
+.slot{position:absolute;width:25%;aspect-ratio:1;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.slot .food{position:relative;width:100%;height:100%;animation:drop .25s cubic-bezier(.3,1.6,.6,1)}
+@keyframes drop{from{transform:scale(.4) translateY(-30px);opacity:0}}
+.food img{position:absolute;inset:6%;width:88%;height:88%;object-fit:contain;filter:drop-shadow(0 5px 3px rgba(0,0,0,.55))}
+.food .glaze{position:absolute;inset:18%;border-radius:40%;background:radial-gradient(circle at 40% 35%,rgba(255,255,255,.55),rgba(170,50,10,.35) 45%,transparent 70%);mix-blend-mode:overlay;pointer-events:none}
+.ring{position:absolute;left:50%;bottom:-6%;transform:translateX(-50%);width:62%;height:9px;border:2px solid var(--ink);border-radius:9px;background:rgba(255,255,255,.85);overflow:hidden}
+.ring i{display:block;height:100%;width:0}
+.ring::before,.ring::after{content:"";position:absolute;top:0;bottom:0;width:2px;background:var(--ink);opacity:.6}
+.ring::before{left:62.5%}.ring::after{left:81%}
+.tag{position:absolute;left:50%;top:-4%;transform:translateX(-50%);font-size:12px;font-weight:800;background:var(--cream);border:2px solid var(--ink);border-radius:8px;padding:0 5px;white-space:nowrap}
+.food.perfect .tag{background:#c9f5c0}
+.food.perfect{animation:glow .6s ease-in-out infinite alternate}
+@keyframes glow{to{filter:drop-shadow(0 0 10px rgba(255,240,140,.95))}}
+.food.burnt img{filter:brightness(.25) saturate(.3) drop-shadow(0 5px 3px rgba(0,0,0,.55))}
+.food.burnt .tag{background:#555;color:#fff}
+.smoke{position:absolute;left:50%;top:10%;width:30%;aspect-ratio:1;border-radius:50%;background:rgba(200,200,210,.6);filter:blur(4px);animation:smoke 1.4s ease-out infinite;pointer-events:none}
+@keyframes smoke{from{transform:translate(-50%,0) scale(.5);opacity:.8}to{transform:translate(-50%,-120%) scale(1.8);opacity:0}}
+.steam{position:absolute;left:50%;top:0;width:18%;aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.45);filter:blur(3px);animation:smoke 1.8s ease-out infinite;pointer-events:none}
+body.brushing .slot{cursor:crosshair}
+body.brushing .grill{box-shadow:0 8px 0 #0b0f24,0 0 0 4px var(--gold),0 0 20px 4px rgba(247,201,72,.6)}
+
+.tools{width:100%;display:flex;gap:8px;align-items:stretch;justify-content:center;flex-wrap:nowrap}
+.tool{position:relative;background:var(--cream);border:3px solid var(--ink);border-radius:14px;box-shadow:0 4px 0 var(--ink);display:flex;align-items:center;gap:5px;padding:3px 8px 3px 4px;cursor:pointer;min-width:0}
+.tool:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.tool img,.tool svg{height:38px;width:auto;flex:none;max-width:100%;object-fit:contain}
+.tool .lbl{display:flex;flex-direction:column;line-height:1.1;text-align:left}
+.tool .lbl b{font-size:16px}
+.tool .lbl .py{font-size:11px;color:#8a3b12}
+.tool.on{background:#fff1b8;box-shadow:0 4px 0 var(--ink),0 0 0 3px var(--gold)}
+.heat{width:54px;height:8px;border:2px solid var(--ink);border-radius:8px;background:#fff;overflow:hidden;margin-top:2px}
+.heat i{display:block;height:100%;background:linear-gradient(90deg,#f6a02a,#e03a1e);transform-origin:left}
+.tool.warn{animation:warn .5s ease-in-out infinite alternate}
+@keyframes warn{to{background:#ffd0c4}}
+.dots{display:flex;gap:2px;margin-top:2px}
+.dots i{width:7px;height:7px;border-radius:50%;border:1.5px solid var(--ink);background:#fff}
+.dots i.on{background:#a8321a}
+.plate{display:flex;align-items:center;gap:3px;background:#e9eef5;border:3px solid var(--ink);border-radius:26px;box-shadow:0 4px 0 var(--ink);padding:2px 8px}
+.plate .pl{font-size:11px;font-weight:800;writing-mode:vertical-rl;letter-spacing:.1em;color:#556}
+.plate .ps{width:38px;height:38px;border-radius:50%;background:#fff;border:2px dashed #aab;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
+.plate .ps img{width:34px;height:34px;object-fit:contain}
+.plate .ps .gz{position:absolute;right:-3px;top:-3px;width:12px;height:12px;border-radius:50%;background:#a8321a;border:1.5px solid var(--ink)}
+
+.tray{width:100%;background:linear-gradient(var(--wood-lt),var(--wood));border:3px solid var(--ink);border-radius:16px;box-shadow:0 5px 0 var(--wood-dk),inset 0 3px 0 rgba(255,255,255,.2);padding:6px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:5px;max-height:36vh;overflow-y:auto}
+.item{background:rgba(255,248,231,.92);border:2px solid var(--ink);border-radius:12px;padding:2px 2px 3px;display:flex;flex-direction:column;align-items:center;cursor:pointer;min-width:0}
+.item:active{transform:scale(.94)}
+.item img{height:38px;max-width:100%;object-fit:contain}
+.item b{font-size:14px;line-height:1.15;white-space:nowrap}
+.item .py{font-size:9.5px;color:#8a3b12;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.item.hint{animation:hint .45s ease-in-out 3 alternate}
+@keyframes hint{to{background:#ffe27a;transform:scale(1.08)}}
+
+.float{position:fixed;z-index:50;pointer-events:none;font-weight:800;font-size:20px;color:var(--cream);-webkit-text-stroke:1px var(--ink);text-shadow:0 2px 0 var(--ink);animation:rise 1.1s ease-out forwards;white-space:nowrap;transform:translate(-50%,-50%)}
+.float.good{color:#aef59a}.float.bad{color:#ffb4a4}.float.gold{color:var(--gold);font-size:24px}
+@keyframes rise{to{transform:translate(-50%,-190%);opacity:0}}
+.toast{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);z-index:60;background:var(--cream);border:3px solid var(--ink);border-radius:18px;box-shadow:0 6px 0 var(--ink);padding:12px 22px;text-align:center;font-weight:800;font-size:22px;animation:pop .35s cubic-bezier(.3,1.6,.6,1)}
+.toast small{display:block;font-size:14px;color:#8a3b12;margin-top:2px}
+@keyframes pop{from{transform:translate(-50%,-50%) scale(.5);opacity:0}}
+
+/* ---------- 結算 ---------- */
+#result{overflow-y:auto;padding:22px 16px 30px;gap:14px}
+.panel{background:var(--cream);border:3px solid var(--ink);border-radius:20px;box-shadow:0 6px 0 var(--ink);padding:16px;width:100%;max-width:720px;text-align:center}
+.panel h2{margin:0 0 4px;font-size:30px}
+.stars{font-size:42px;letter-spacing:6px}
+.stars .off{filter:grayscale(1);opacity:.35}
+.big{font-family:var(--display);font-size:54px;line-height:1}
+.learned{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:10px}
+.lw{border:2px solid var(--ink);border-radius:12px;padding:4px;cursor:pointer;background:#fff;position:relative}
+.lw img{height:40px}
+.lw b{display:block;font-size:18px}
+.lw .py{font-size:12px;color:#8a3b12}
+.lw .zh{font-size:12px;color:#6d5a4a}
+.lw.miss{background:#ffe9e3}
+.lw .cnt{position:absolute;right:4px;top:2px;font-size:11px;font-weight:800}
+
+@media (max-height:700px){ .tray{grid-template-columns:repeat(auto-fill,minmax(56px,1fr))} .item img{height:30px} .item .py{display:none} .customers{min-height:112px} }
+@media (min-width:760px){ .tray{grid-template-columns:repeat(9,1fr)} }
+@media (max-width:600px){
+  #game{padding:6px 8px calc(6px + env(safe-area-inset-bottom));gap:5px}
+  .hud{gap:5px;flex-wrap:nowrap}
+  .chip{padding:2px 7px 4px;border-radius:12px;box-shadow:0 3px 0 var(--ink)}
+  .chip small{font-size:11px}
+  .chip b{font-size:19px}
+  .icon-btn{width:34px;height:32px;font-size:15px;box-shadow:0 3px 0 var(--ink)}
+  .phase{font-size:13px;min-height:16px}
+  .customers{gap:5px;min-height:128px}
+  .bubble{padding:4px 3px 5px;border-radius:12px}
+  .face{font-size:32px;margin-top:9px}
+  .tools{gap:5px}
+  .tool{flex:1;flex-direction:column;gap:0;padding:2px 3px 3px;justify-content:center}
+  .tool img,.tool svg{height:24px}
+  .tool .lbl{align-items:center;text-align:center}
+  .tool .lbl b{font-size:13px}
+  .tool .lbl .py{display:none}
+  .heat{width:40px}
+  .plate{padding:2px 5px;gap:2px;border-radius:18px}
+  .plate .pl{display:none}
+  .plate .ps{width:30px;height:30px}
+  .plate .ps img{width:27px;height:27px}
+  .tray{grid-template-columns:repeat(6,1fr);gap:4px;padding:5px;max-height:30vh}
+  .item{border-radius:10px;padding:2px 1px}
+  .item img{height:28px}
+  .item b{font-size:12.5px}
+  .item .py{display:none}
+  .tag{font-size:10px;padding:0 3px}
+}
+</style>
+</head>
+<body>
+<div class="sky" id="sky"><div class="moon"></div><div class="lanterns" id="lanterns"></div></div>
+
+<!-- 標題 -->
+<section class="screen" id="title">
+  <div class="logo">
+    <h1>八月半烤肉趣</h1>
+    <p>中秋節來烤肉・邊烤邊學客家話</p>
+  </div>
+  <div class="parade" id="parade"></div>
+  <div class="how">
+    <ol>
+      <li>客人會用<b>客家話</b>點菜，點一下對話框可以再聽一次。</li>
+      <li>從木盤選食材放上烤網，烤到<b>「剛好」</b>時點它，就會送給客人。</li>
+      <li>有 <img src="img/sauce.webp" alt="" style="height:18px;vertical-align:-3px"> 的要先按<b>烤肉醬</b>，再用<b>搓仔</b>刷上去；火變小就加<b>火炭</b>！</li>
+      <li>越到後面越難：看圖 → 看字 → <b>只用耳朵聽</b>！</li>
+    </ol>
+  </div>
+  <div class="row">
+    <button class="btn" id="startBtn">🔥 開始擺攤</button>
+    <button class="btn alt" id="dexBtn">📖 食材客語圖鑑</button>
+  </div>
+</section>
+
+<!-- 圖鑑 -->
+<section class="screen" id="dex" hidden>
+  <header><button class="icon-btn" id="dexBack" aria-label="返回">←</button><h2>📖 食材客語圖鑑（四縣腔）</h2></header>
+  <div class="dex-grid" id="dexGrid"></div>
+</section>
+
+<!-- 遊戲 -->
+<section class="screen" id="game" hidden>
+  <div class="hud">
+    <div class="chip"><small>分數</small><b id="score">0</b></div>
+    <div class="chip" id="timeChip"><small>時間</small><b id="time">120</b></div>
+    <div class="chip"><small>客人</small><b id="served">0</b></div>
+    <button class="icon-btn" id="muteBtn" aria-label="音效">🔊</button>
+    <button class="icon-btn" id="quitBtn" aria-label="結束">✕</button>
+  </div>
+  <div class="timebar"><i id="timebar"></i></div>
+  <div class="phase" id="phase"></div>
+  <div class="customers" id="customers"></div>
+  <div class="grill-wrap"><div class="grill" id="grill"><img class="bg" src="img/grill.webp" alt="烤肉架"><div class="embers" id="embers"></div><div class="dim" id="dim"></div></div></div>
+  <div class="tools">
+    <div class="tool" id="tCoal" data-say="huotan"><span id="coalIcon"></span><span class="lbl"><b>火炭</b><span class="py">foˋ tan</span><span class="heat"><i id="heat"></i></span></span></div>
+    <div class="tool" id="tSauce" data-say="kaorouxiang"><img src="img/sauce.webp" alt=""><span class="lbl"><b>烤肉醬</b><span class="py">kauˋ ngiugˋ jiong</span></span></div>
+    <div class="tool" id="tBrush" data-say="brush"><img src="img/brush.webp" alt="" style="height:26px"><span class="lbl"><b>搓仔</b><span class="py">co eˋ</span><span class="dots" id="dots"><i></i><i></i><i></i></span></span></div>
+    <div class="plate" title="保溫盤：沒人點的熟食先放這"><span class="pl">保溫盤</span><div class="ps"></div><div class="ps"></div><div class="ps"></div></div>
+  </div>
+  <div class="tray" id="tray"></div>
+</section>
+
+<!-- 結算 -->
+<section class="screen" id="result" hidden>
+  <div class="panel">
+    <h2 id="resTitle">八月半快樂！</h2>
+    <div class="stars" id="stars"></div>
+    <div class="big" id="resScore">0</div>
+    <p id="resLine" style="margin:6px 0 0;font-weight:800"></p>
+  </div>
+  <div class="panel">
+    <h2 style="font-size:22px">🎧 今晚聽過的客家話</h2>
+    <p style="margin:0;font-size:14px;color:#6d5a4a">點卡片再聽一次・紅色是還要多練習的詞</p>
+    <div class="learned" id="learned"></div>
+  </div>
+  <div class="row">
+    <button class="btn" id="againBtn">🔁 再烤一次</button>
+    <button class="btn alt" id="homeBtn">🏠 回首頁</button>
+  </div>
+</section>
+
+<script>
+/* ============ 詞彙資料（依「中秋烤肉相關詞彙」，四縣腔） ============ */
+const W = {
+  zhurou:     {hk:'豬肉',   py:'zuˊ ngiugˋ',        zh:'豬肉',     t:7},
+  ganbei:     {hk:'江瑤柱', py:'gongˊ ieuˇ cuˊ',    zh:'干貝',     t:6},
+  tianbula:   {hk:'烰菜',   py:'poˇ coi',           zh:'甜不辣',   t:5},
+  zhuxuegao:  {hk:'豬紅糕', py:'zuˊ fungˇ gauˊ',    zh:'豬血糕',   t:6},
+  xiaojuan:   {hk:'鎖管仔', py:'soˋ gonˋ eˋ',       zh:'小卷',     t:5.5},
+  geli:       {hk:'蜆仔',   py:'hanˋ eˋ',           zh:'蛤蜊',     t:5},
+  yuwan:      {hk:'魚丸',   py:'ngˇ ienˇ',          zh:'魚丸',     t:5},
+  xianggu:    {hk:'香菇',   py:'hiongˊ guˊ',        zh:'香菇',     t:5},
+  xingbaogu:  {hk:'杏鮑菇', py:'hen bauˊ guˊ',      zh:'杏鮑菇',   t:6},
+  jinzhengu:  {hk:'金針菇', py:'gimˊ ziimˊ guˊ',    zh:'金針菇',   t:6},
+  qingjiao:   {hk:'青椒',   py:'qiangˊ zeuˊ',       zh:'青椒',     t:4.5},
+  tianjiao:   {hk:'甜椒',   py:'tiamˇ zeuˊ',        zh:'甜椒',     t:4.5},
+  zhigua:     {hk:'櫛瓜',   py:'jiedˋ guaˊ',        zh:'櫛瓜',     t:4.5},
+  yangcong:   {hk:'蔥頭',   py:'cungˊ teuˇ',        zh:'洋蔥',     t:5},
+  tusi:       {hk:'削胖',   py:'xiog pangˋ',        zh:'吐司',     t:3.5},
+  mianhuatang:{hk:'棉花糖', py:'mienˇ faˊ tongˇ',   zh:'棉花糖',   t:3},
+  shengcai:   {hk:'包蕒',   py:'bauˊ magˋ',         zh:'包心萵苣', raw:true},
+  kaorouxiang:{hk:'烤肉醬', py:'kauˋ ngiugˋ jiong', zh:'烤肉醬',   tool:true, img:'sauce'},
+  brush:      {hk:'搓仔',   py:'co eˋ',             zh:'刷子',     tool:true},
+  huotan:     {hk:'火炭',   py:'foˋ tan',           zh:'木炭',     tool:true, img:'coal'},
+};
+const FOODS = Object.keys(W).filter(k=>!W[k].tool);          // 17 種可點的菜
+const GRILLABLE = FOODS.filter(k=>!W[k].raw);                  // 16 種要烤
+const NO_SAUCE = new Set(['mianhuatang','shengcai','tusi']);
+const PHRASE = {welcome:'p_welcome', order:'p_order', thanks:'p_thanks', yummy:'p_yummy', burnt:'p_burnt', festival:'p_festival'};
+
+const COAL_SVG = `<svg viewBox="0 0 64 48" aria-hidden="true"><ellipse cx="32" cy="42" rx="28" ry="5" fill="rgba(0,0,0,.25)"/>
+<path d="M6 38 L10 24 L22 20 L28 30 L24 40Z" fill="#2c2c30" stroke="#111" stroke-width="2"/>
+<path d="M22 40 L26 22 L40 16 L48 26 L44 41Z" fill="#38383d" stroke="#111" stroke-width="2"/>
+<path d="M40 41 L44 28 L56 26 L60 38 L54 42Z" fill="#2a2a2e" stroke="#111" stroke-width="2"/>
+<path d="M29 30 L36 25 L41 31" fill="none" stroke="#ff7a1a" stroke-width="2.5" stroke-linecap="round"/>
+<path d="M11 32 L17 28" stroke="#ff9a2a" stroke-width="2" stroke-linecap="round"/><path d="M48 35 L54 32" stroke="#ff6a10" stroke-width="2" stroke-linecap="round"/></svg>`;
+const COAL_URL = 'data:image/svg+xml,'+encodeURIComponent(COAL_SVG.replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" '));
+const rawImg = id => id==='huotan' ? COAL_URL : `img/${W[id].img||id}.webp`;
+const cookedImg = id => (W[id].raw||W[id].tool) ? rawImg(id) : `img/${id}_c.webp`;
+
+/* ============ 聲音 ============ */
+let muted = false;
+const voices = {};
+function voice(id){ if(!voices[id]){ const a=new Audio(`audio/${id}.wav`); a.preload='auto'; a.preservesPitch=true; voices[id]=a; } return voices[id]; }
+let sayToken = 0, curVoice = null;
+function say(ids, {slow=false}={}){
+  if(muted) return Promise.resolve();
+  ids = [].concat(ids);
+  const tok = ++sayToken;
+  if(curVoice){ curVoice.pause(); }
+  return ids.reduce((p,id)=>p.then(()=>new Promise(res=>{
+    if(tok!==sayToken) return res();
+    const a = voice(id); curVoice=a;
+    a.playbackRate = slow ? .7 : 1; a.currentTime = 0;
+    a.onended = ()=>setTimeout(res,120); a.onerror=res;
+    a.play().catch(res);
+  })), Promise.resolve());
+}
+// 音效：Web Audio 合成
+let AC=null, sizzleGain=null;
+function ac(){ if(!AC){ AC=new (window.AudioContext||window.webkitAudioContext)(); } if(AC.state==='suspended') AC.resume(); return AC; }
+function tone(freq=660, dur=.12, type='sine', vol=.18, when=0, slide=0){
+  if(muted) return; const c=ac(), t=c.currentTime+when;
+  const o=c.createOscillator(), g=c.createGain(); o.type=type; o.frequency.setValueAtTime(freq,t);
+  if(slide) o.frequency.exponentialRampToValueAtTime(freq*slide,t+dur);
+  g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.001,t+dur); o.connect(g).connect(c.destination); o.start(t); o.stop(t+dur+.02);
+}
+const sfx = {
+  place(){ tone(320,.08,'triangle',.2,0,.6); },
+  ding(){ tone(880,.12,'sine',.2); tone(1320,.2,'sine',.16,.09); },
+  coin(){ tone(988,.08,'square',.08); tone(1319,.25,'square',.08,.07); },
+  bad(){ tone(180,.25,'sawtooth',.12,0,.7); },
+  pop(){ tone(520,.06,'triangle',.18,0,1.6); },
+  brush(){ tone(200,.15,'triangle',.08,0,1.8); },
+  fanfare(){ [523,659,784,1047].forEach((f,i)=>tone(f,.22,'triangle',.16,i*.12)); },
+};
+function startSizzle(){
+  const c=ac(); if(sizzleGain) return;
+  const len=c.sampleRate*2, buf=c.createBuffer(1,len,c.sampleRate), d=buf.getChannelData(0);
+  for(let i=0;i<len;i++){ d[i]=(Math.random()*2-1)*(Math.random()<.02?1:.35); }
+  const src=c.createBufferSource(); src.buffer=buf; src.loop=true;
+  const bp=c.createBiquadFilter(); bp.type='highpass'; bp.frequency.value=2500;
+  sizzleGain=c.createGain(); sizzleGain.gain.value=0;
+  src.connect(bp).connect(sizzleGain).connect(c.destination); src.start();
+}
+function setSizzle(v){ if(sizzleGain) sizzleGain.gain.setTargetAtTime(muted?0:v, ac().currentTime, .2); }
+
+/* ============ 小工具 ============ */
+const $ = s=>document.querySelector(s);
+const rnd = a=>a[Math.floor(Math.random()*a.length)];
+function el(tag, cls, html){ const e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; return e; }
+function floatText(target, text, cls=''){
+  const r = target.getBoundingClientRect ? target.getBoundingClientRect() : target;
+  const f = el('div','float '+cls,text); f.style.left=(r.left+r.width/2)+'px'; f.style.top=(r.top+r.height/3)+'px';
+  document.body.appendChild(f); setTimeout(()=>f.remove(),1150);
+}
+let toastTimer;
+function toast(html, ms=1500){ document.querySelectorAll('.toast').forEach(t=>t.remove()); const t=el('div','toast',html); document.body.appendChild(t); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.remove(),ms); }
+function show(id){ ['title','dex','game','result'].forEach(s=>$('#'+s).hidden = s!==id); }
+
+/* ============ 背景 ============ */
+(function sky(){
+  const s=$('#sky');
+  for(let i=0;i<60;i++){ const st=el('i','star'); st.style.left=Math.random()*100+'%'; st.style.top=Math.random()*60+'%'; st.style.animationDelay=(Math.random()*2.4)+'s'; st.style.opacity=.5; s.appendChild(st); }
+  const L=$('#lanterns'); for(let i=0;i<7;i++){ const l=el('i','lan'); l.style.left=(6+i*14)+'%'; l.style.top=(14+Math.sin(i*1.3)*6+ (i%2?8:0))+'px'; l.style.animationDelay=(i*.4)+'s'; L.appendChild(l); }
+  const P=$('#parade'); ['zhurou_c','ganbei_c','xianggu_c','mianhuatang_c','yuwan_c','tianjiao_c','geli_c'].forEach((n,i)=>{ const im=el('img'); im.src=`img/${n}.webp`; im.alt=''; im.style.animationDelay=(i*.2)+'s'; P.appendChild(im); });
+})();
+
+/* ============ 圖鑑 ============ */
+function buildDex(){
+  const g=$('#dexGrid'); g.innerHTML='';
+  Object.keys(W).forEach(id=>{
+    const w=W[id], c=el('div','card');
+    const pics = (w.raw||w.tool) ? `<img src="${rawImg(id)}" alt="">` : `<img src="${rawImg(id)}" alt=""><img src="${cookedImg(id)}" alt="">`;
+    c.innerHTML=`<div class="pics">${pics}</div><div class="hk">${w.hk}</div><div class="py">${w.py}</div><div class="zh">華語：${w.zh}</div><button class="slow" aria-label="慢速">🐢</button>`;
+    c.onclick=e=>{ const slow=e.target.classList.contains('slow'); document.querySelectorAll('.card.playing').forEach(x=>x.classList.remove('playing')); c.classList.add('playing'); say(id,{slow}).then(()=>c.classList.remove('playing')); };
+    g.appendChild(c);
+  });
+}
+
+/* ============ 遊戲狀態 ============ */
+const TOTAL = 120, SLOTS = 6;
+const SLOT_POS = [[20,32],[50,32],[80,32],[20,70],[50,70],[80,70]];
+const PHASES = [
+  {at:0,  name:'第一關・看圖聽客語', mode:'pic'},
+  {at:40, name:'第二關・看客語字點菜', mode:'text'},
+  {at:80, name:'第三關・只用耳朵聽！', mode:'ear'},
+];
+const FACES = ['🐰','👵','👴','👧','👦','🐱','🐶','🐻','🐼','🦊'];
+let S;   // state
+
+function newState(){
+  return { running:false, t:0, last:0, score:0, served:0, heat:85, sauce:0, brushing:false,
+    grill:Array(SLOTS).fill(null), plate:[null,null,null], custs:[null,null,null], spawnIn:[0.6,3.5,7],
+    phase:-1, stats:{}, lastOrder:[] };
+}
+function stat(id){ return S.stats[id] || (S.stats[id]={heard:0, ok:0, miss:0}); }
+
+/* 木盤 */
+function buildTray(){
+  const tr=$('#tray'); tr.innerHTML='';
+  FOODS.forEach(id=>{
+    const w=W[id], it=el('div','item'); it.dataset.id=id;
+    it.innerHTML=`<img src="${rawImg(id)}" alt=""><b>${w.hk}</b><span class="py">${w.py}</span>`;
+    it.onclick=()=>pickFood(id, it);
+    tr.appendChild(it);
+  });
+}
+/* 烤網格子 */
+function buildGrill(){
+  const g=$('#grill'); g.querySelectorAll('.slot').forEach(s=>s.remove());
+  SLOT_POS.forEach(([x,y],i)=>{ const s=el('div','slot'); s.style.left=x+'%'; s.style.top=y+'%'; s.dataset.i=i; s.onclick=()=>tapSlot(i); g.appendChild(s); });
+}
+
+function pickFood(id, node){
+  if(!S.running) return;
+  if(W[id].raw){               // 包蕒：生食，直接送
+    say(id);
+    if(!deliver(id, node, {perfect:true, glazed:false})){ floatText(node,'沒有人點包蕒喔','bad'); sfx.bad(); }
+    return;
+  }
+  const i = S.grill.findIndex(x=>!x);
+  if(i<0){ floatText(node,'烤網滿了！','bad'); sfx.bad(); return; }
+  say(id); sfx.place();
+  S.grill[i] = {id, p:0, glazed:false, node:null};
+  renderSlot(i);
+  S.brushing=false; updateTools();
+}
+
+function renderSlot(i){
+  const slot=$(`.slot[data-i="${i}"]`), f=S.grill[i];
+  slot.innerHTML='';
+  if(!f) return;
+  const n=el('div','food');
+  n.innerHTML=`<img class="r" src="${rawImg(f.id)}" alt=""><img class="c" src="${cookedImg(f.id)}" alt="" style="opacity:0"><div class="ring"><i></i></div><div class="tag">${W[f.id].hk}</div>`;
+  slot.appendChild(n); f.node=n;
+}
+
+function updateFoodVisual(f){
+  const n=f.node; if(!n) return;
+  const p=f.p, c=n.querySelector('img.c'), r=n.querySelector('img.r'), bar=n.querySelector('.ring i'), tag=n.querySelector('.tag');
+  const k=Math.min(1,Math.max(0,(p-.35)/.65));
+  c.style.opacity=k; r.style.opacity=1-k;
+  const burntK = Math.min(1,Math.max(0,(p-1.3)/.3));
+  if(p<1.6) c.style.filter = `brightness(${1-burntK*.5}) drop-shadow(0 5px 3px rgba(0,0,0,.55))`;
+  bar.style.width = Math.min(100,p/1.6*100)+'%';
+  bar.style.background = p<1 ? '#f2b33a' : p<1.3 ? '#3fae5a' : '#d8472d';
+  const state = p>=1.6?'burnt': p>=1?'perfect':'cooking';
+  if(n.dataset.state!==state){
+    n.dataset.state=state;
+    n.classList.toggle('perfect', state==='perfect'); n.classList.toggle('burnt', state==='burnt');
+    n.querySelectorAll('.smoke,.steam').forEach(x=>x.remove());
+    if(state==='perfect'){ tag.textContent='剛好！'; n.appendChild(el('div','steam')); sfx.pop(); }
+    if(state==='burnt'){ tag.textContent='臭火𤊶'; n.appendChild(el('div','smoke')); n.appendChild(el('div','smoke')); n.lastChild.style.animationDelay='.6s'; say(PHRASE.burnt); }
+  }
+  if(state==='perfect' && p>=1.3 && tag.textContent!=='快焦了！') tag.textContent='快焦了！';
+  if(f.glazed && !n.querySelector('.glaze')) n.insertBefore(el('div','glaze'), n.querySelector('.ring'));
+}
+
+function tapSlot(i){
+  if(!S.running) return;
+  const f=S.grill[i]; if(!f) return;
+  const node=f.node;
+  if(S.brushing && !f.glazed && f.p<1.6){
+    if(S.sauce<=0){ toast('搓仔愛先搵烤肉醬<small>刷子要先沾烤肉醬！</small>'); S.brushing=false; updateTools(); return; }
+    f.glazed=true; S.sauce--; S.brushing=false; sfx.brush(); say('kaorouxiang');
+    floatText(node,'刷烤肉醬 ✓','good'); updateFoodVisual(f);
+    updateTools(); return;
+  }
+  if(S.brushing){ S.brushing=false; updateTools(); }
+  if(f.p>=1.6){ S.grill[i]=null; renderSlot(i); floatText(node,'丟掉 −3','bad'); S.score=Math.max(0,S.score-3); sfx.bad(); return; }
+  if(f.p<1){ floatText(node,'還沒熟！','bad'); node.animate([{transform:'translateX(-4px)'},{transform:'translateX(4px)'},{transform:'none'}],{duration:200}); say(f.id); return; }
+  const perfect = f.p<1.3;
+  S.grill[i]=null; renderSlot(i);
+  if(!deliver(f.id, node, {perfect, glazed:f.glazed})){
+    const pi=S.plate.findIndex(x=>!x);
+    if(pi<0){ S.plate.shift(); S.plate.push(null); }
+    S.plate[S.plate.findIndex(x=>!x)] = {id:f.id, glazed:f.glazed};
+    renderPlate(); floatText(node,'放保溫盤','');
+  }
+}
+
+function renderPlate(){
+  document.querySelectorAll('.plate .ps').forEach((ps,i)=>{
+    const it=S.plate[i]; ps.innerHTML = it ? `<img src="${cookedImg(it.id)}" alt="${W[it.id].hk}">${it.glazed?'<i class="gz"></i>':''}` : '';
+    ps.onclick=()=>{ if(!S.running||!S.plate[i]) return; const it=S.plate[i]; say(it.id);
+      if(deliver(it.id, ps, {perfect:false, glazed:it.glazed})){ S.plate[i]=null; renderPlate(); } else floatText(ps,'沒人點'+W[it.id].hk,'bad'); };
+  });
+}
+
+/* 送餐：找點了這道菜、還沒送到的客人 */
+function deliver(id, node, {perfect, glazed}){
+  let best=null, needSauceRefused=false;
+  for(const c of S.custs){ if(!c||c.leaving) continue;
+    for(const o of c.order){ if(o.id!==id||o.done) continue;
+      if(o.sauce && !glazed){ needSauceRefused=true; continue; }
+      if(!best || c.patience<best.c.patience) best={c,o};
+    }
+  }
+  if(!best){
+    if(needSauceRefused){ toast('客人愛烤肉醬！<small>這位客人要刷烤肉醬（kauˋ ngiugˋ jiong）</small>',1800); say('kaorouxiang'); sfx.bad(); return false; }
+    return false;
+  }
+  const {c,o}=best; o.done=true; stat(id).ok++;
+  let pts=10 + (perfect?5:0) + (o.sauce?5:0);
+  S.score+=pts; sfx.ding();
+  floatText(node, `${W[id].hk} +${pts}${perfect?' 剛好':''}`, perfect?'gold':'good');
+  renderCust(c);
+  if(c.order.every(x=>x.done)){
+    const bonus=Math.round(10*c.patience/c.max); S.score+=bonus; S.served++;
+    c.el.classList.add('happy'); sfx.coin();
+    const allPerfect = perfect && Math.random()<.5;
+    setTimeout(()=>say(allPerfect?[PHRASE.yummy]:[PHRASE.thanks]), 500);
+    floatText(c.el, allPerfect?'還好食喔！':'恁仔細！', 'gold');
+    leaveCust(c, 1100);
+  }
+  updateHud(); return true;
+}
+
+/* 客人 */
+function currentPhase(){ let k=0; PHASES.forEach((p,i)=>{ if(S.t>=p.at) k=i; }); return k; }
+function makeOrder(){
+  const ph=currentPhase();
+  const n = ph===0 ? 1 : (Math.random()<.5?2:1);
+  const busy=new Set(S.custs.filter(Boolean).flatMap(c=>c.order.map(o=>o.id)));
+  let pool=FOODS.filter(k=>!busy.has(k)&&!S.lastOrder.includes(k)); if(pool.length<n) pool=FOODS.slice();
+  const ids=[]; while(ids.length<n){ const k=rnd(pool); if(!ids.includes(k)) ids.push(k); }
+  S.lastOrder = ids;
+  return ids.map(id=>({id, done:false, sauce: !NO_SAUCE.has(id) && Math.random() < (ph===0?.25:.35)}));
+}
+function orderAudio(c){ return c.order.flatMap(o=>o.sauce?[o.id,'kaorouxiang']:[o.id]); }
+function spawnCust(slot){
+  const order=makeOrder(), mode=PHASES[currentPhase()].mode;
+  const max = 26 + order.length*12 + (mode==='ear'?6:0);
+  const c={slot, order, mode, patience:max, max, face:rnd(FACES), leaving:false};
+  const used=S.custs.filter(Boolean).map(x=>x.face); if(used.includes(c.face)) c.face=rnd(FACES.filter(f=>!used.includes(f)));
+  S.custs[slot]=c;
+  order.forEach(o=>stat(o.id).heard++);
+  const host=$('#customers').children[slot];
+  host.innerHTML=''; const e=el('div','cust enter'); host.appendChild(e); c.el=e;
+  renderCust(c);
+  setTimeout(()=>e.classList.remove('enter'),40);
+  say(orderAudio(c));
+}
+function renderCust(c){
+  const items=c.order.map(o=>{
+    const w=W[o.id], sauce=o.sauce?`<span class="sauce"><img src="img/sauce.webp" alt="烤肉醬"></span>`:'';
+    let body;
+    if(o.done || c.reveal || c.mode==='pic') body=`<img src="${cookedImg(o.id)}" alt=""><span class="hk">${w.hk}</span><span class="py">${w.py}</span>`;
+    else if(c.mode==='text') body=`<span class="ear" style="font-size:22px">🍢</span><span class="hk">${w.hk}</span><span class="py">${w.py}</span>`;
+    else body=`<span class="ear">🔊</span><span class="py">點我再聽</span>`;
+    return `<div class="ord${o.done?' done':''}">${body}${sauce}</div>`;
+  }).join('');
+  c.el.innerHTML=`<div class="bubble">${items}</div><div class="face">${c.face}</div><div class="patience"><i></i></div>`;
+  c.el.querySelector('.bubble').onclick=()=>{ say(orderAudio(c)); flashHint(c); };
+  c.bar=c.el.querySelector('.patience i');
+}
+// 第一關點對話框時，木盤上對應食材會閃一下
+function flashHint(c){
+  if(c.mode!=='pic') return;
+  c.order.filter(o=>!o.done).forEach(o=>{ const it=$(`.item[data-id="${o.id}"]`); if(it){ it.classList.remove('hint'); void it.offsetWidth; it.classList.add('hint'); } });
+}
+function leaveCust(c, delay=0){
+  c.leaving=true;
+  setTimeout(()=>{ c.el.classList.add('leave'); setTimeout(()=>{ if(S.custs[c.slot]===c){ S.custs[c.slot]=null; c.el.remove(); S.spawnIn[c.slot]=1.5+Math.random()*2.5; } },380); }, delay);
+}
+
+/* 工具 */
+function updateTools(){
+  $('#heat').style.transform=`scaleX(${S.heat/100})`;
+  $('#tCoal').classList.toggle('warn', S.heat<22);
+  $('#tBrush').classList.toggle('on', S.brushing);
+  document.body.classList.toggle('brushing', S.brushing);
+  document.querySelectorAll('#dots i').forEach((d,i)=>d.classList.toggle('on', i<S.sauce));
+}
+function initTools(){
+  $('#coalIcon').innerHTML=COAL_SVG;
+  $('#tCoal').onclick=()=>{ if(!S.running) return; say('huotan'); S.heat=Math.min(100,S.heat+40); tone(140,.3,'sawtooth',.08,0,.5); floatText($('#tCoal'),'加火炭 🔥','gold'); updateTools(); };
+  $('#tSauce').onclick=()=>{ if(!S.running) return; say('kaorouxiang'); S.sauce=3; S.brushing=true; sfx.pop(); floatText($('#tSauce'),'沾好醬了！點烤網上的菜刷一刷','good'); updateTools(); };
+  $('#tBrush').onclick=()=>{ if(!S.running) return; say('brush');
+    if(S.sauce<=0){ toast('搓仔愛先搵烤肉醬<small>刷子要先沾烤肉醬！</small>'); return; }
+    S.brushing=!S.brushing; updateTools(); };
+}
+
+/* HUD / 關卡 */
+function updateHud(){
+  $('#score').textContent=S.score; $('#served').textContent=S.served;
+  const left=Math.max(0,Math.ceil(TOTAL-S.t)); $('#time').textContent=left;
+  $('#timeChip').classList.toggle('low', left<=10);
+  $('#timebar').style.transform=`scaleX(${Math.max(0,1-S.t/TOTAL)})`;
+}
+function checkPhase(){
+  const k=currentPhase();
+  if(k!==S.phase){ S.phase=k; $('#phase').textContent='🌕 '+PHASES[k].name;
+    if(k>0){ toast(`${PHASES[k].name}<small>${k===1?'不再有圖片，要認得客語字喔':'客人只用說的！點對話框可以重聽'}</small>`,2200); sfx.fanfare(); } }
+}
+
+/* 主迴圈 */
+function loop(now){
+  if(!S.running) return;
+  const dt=Math.min(.1,(now-S.last)/1000); S.last=now; S.t+=dt;
+  // 火力
+  S.heat=Math.max(0,S.heat-dt*1.6);
+  const speed = S.heat<=0 ? .12 : .3 + .9*S.heat/100;
+  $('#embers').style.opacity = .15 + .85*S.heat/100;
+  $('#dim').style.opacity = (1-S.heat/100)*.45;
+  let cooking=0;
+  S.grill.forEach(f=>{ if(!f) return; if(f.p<1.6){ f.p += dt*speed/W[f.id].t; cooking++; } updateFoodVisual(f); });
+  setSizzle(Math.min(.12, cooking*.025*(.3+S.heat/100)));
+  // 客人
+  for(let i=0;i<3;i++){
+    const c=S.custs[i];
+    if(!c){ S.spawnIn[i]-=dt; if(S.spawnIn[i]<=0 && TOTAL-S.t>6) spawnCust(i); continue; }
+    if(c.leaving) continue;
+    c.patience-=dt; const r=Math.max(0,c.patience/c.max);
+    c.bar.style.transform=`scaleX(${r})`; c.bar.style.background = r>.5?'#3fae5a': r>.25?'#f2b33a':'#d8472d';
+    if(c.patience<=0){ c.el.classList.add('angry'); c.order.filter(o=>!o.done).forEach(o=>stat(o.id).miss++); floatText(c.el,'客人走了…','bad'); sfx.bad();
+      c.reveal=true; c.leaving=true; renderCust(c); c.el.classList.add('angry'); leaveCust(c,1400); }
+  }
+  if(Math.floor(S.t*4)!==Math.floor((S.t-dt)*4)) updateTools();
+  checkPhase(); updateHud();
+  if(S.t>=TOTAL) return endGame();
+  requestAnimationFrame(loop);
+}
+
+function startGame(){
+  ac(); startSizzle();
+  S=newState();
+  $('#customers').innerHTML='<div></div><div></div><div></div>';
+  buildTray(); buildGrill(); renderPlate(); updateTools(); updateHud();
+  show('game'); fitGrill();
+  say(PHRASE.welcome);
+  S.running=true; S.last=performance.now(); checkPhase();
+  requestAnimationFrame(loop);
+}
+function endGame(){
+  S.running=false; setSizzle(0);
+  sfx.fanfare(); setTimeout(()=>say(PHRASE.festival),400);
+  const stars = S.score>=320?3 : S.score>=180?2 : S.score>=60?1 : 0;
+  $('#stars').innerHTML=[0,1,2].map(i=>`<span class="${i<stars?'':'off'}">⭐</span>`).join('');
+  $('#resScore').textContent=S.score+' 分';
+  $('#resTitle').textContent='八月半快樂！';
+  $('#resLine').innerHTML=`今晚招待了 <b>${S.served}</b> 位客人 ・ ${['再多聽幾次就會了！','不錯喔，客語越來越熟了！','好厲害，烤肉攤老闆就是你！','客語烤肉大師！'][stars]}`;
+  const L=$('#learned'); L.innerHTML='';
+  const ids=Object.keys(S.stats).sort((a,b)=>(S.stats[b].miss-S.stats[a].miss)||(S.stats[b].heard-S.stats[a].heard));
+  (ids.length?ids:FOODS.slice(0,6)).forEach(id=>{
+    const s=S.stats[id]||{ok:0,miss:0}, w=W[id], d=el('div','lw'+(s.miss>s.ok?' miss':''));
+    d.innerHTML=`<span class="cnt">${s.ok?'✔'+s.ok:''}${s.miss?' ✘'+s.miss:''}</span><img src="${cookedImg(id)}" alt=""><b>${w.hk}</b><span class="py">${w.py}</span><div class="zh">${w.zh}</div>`;
+    d.onclick=()=>say(id); L.appendChild(d);
+  });
+  setTimeout(()=>show('result'),300);
+}
+
+/* 烤網依剩餘空間等比例縮放 */
+function fitGrill(){
+  const wrap=$('.grill-wrap'), g=$('#grill'); if(!wrap||$('#game').hidden) return;
+  const r=wrap.getBoundingClientRect(), ratio=1000/708;
+  let w=r.width-8, h=w/ratio; if(h>r.height-12){ h=r.height-12; w=h*ratio; }
+  g.style.width=Math.max(120,w)+'px'; g.style.height=Math.max(85,h)+'px';
+}
+addEventListener('resize', fitGrill);
+
+/* ============ 事件 ============ */
+$('#startBtn').onclick=startGame;
+$('#againBtn').onclick=startGame;
+$('#homeBtn').onclick=()=>{ show('title'); };
+$('#dexBtn').onclick=()=>{ buildDex(); show('dex'); say(PHRASE.festival); };
+$('#dexBack').onclick=()=>show('title');
+$('#quitBtn').onclick=()=>{ if(S&&S.running && confirm('要提早收攤嗎？')) endGame(); };
+$('#muteBtn').onclick=()=>{ muted=!muted; $('#muteBtn').textContent=muted?'🔇':'🔊'; if(muted){ curVoice&&curVoice.pause(); setSizzle(0);} };
+document.querySelector('.logo').onclick=()=>say(PHRASE.festival);
+initTools();
+// 預載音檔
+Object.keys(W).forEach(voice); Object.values(PHRASE).forEach(voice);
+</script>
+</body>
+</html>
