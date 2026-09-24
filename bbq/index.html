@@ -421,7 +421,7 @@ function buildDex(){
   const g=$('#dexGrid'); g.innerHTML='';
   Object.keys(W).forEach(id=>{
     const w=W[id], c=el('div','card');
-    const pics = (w.raw||w.tool) ? `<img src="${rawImg(id)}" alt="">` : `<img src="${rawImg(id)}" alt=""><img src="${cookedImg(id)}" alt="">`;
+    const pics = `<img src="${cookedImg(id)}" alt="">`;   // 每格只放熟食圖（工具、包蕒用原圖）
     c.innerHTML=`<div class="pics">${pics}</div><div class="hk">${w.hk}</div><div class="py">${w.py}</div><div class="zh">華語：${w.zh}</div><button class="slow" aria-label="慢速播放" title="點我放慢聆聽">🐢 慢速</button>`;
     c.onclick=e=>{ const slow=e.target.classList.contains('slow'); document.querySelectorAll('.card.playing').forEach(x=>x.classList.remove('playing')); c.classList.add('playing'); say(id,{slow}).then(()=>c.classList.remove('playing')); };
     g.appendChild(c);
