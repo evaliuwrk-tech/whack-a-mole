@@ -31,7 +31,15 @@ body{margin:0;font-family:var(--body);color:var(--ink);background:var(--grass-dk
 .chip.time.low b{color:var(--hammer);animation:pulse .5s ease-in-out infinite alternate}
 @keyframes pulse{to{transform:scale(1.18)}}
 .icon-btn{background:var(--cream);border:3px solid var(--ink);border-radius:14px;box-shadow:0 4px 0 var(--ink);font-size:20px;width:46px;cursor:pointer;font-family:var(--body)}
-.accent-btn{width:auto;padding:0 10px;font-size:15px;font-weight:800;background:var(--hero)}
+.accent-chip{position:relative;padding:4px 6px 4px 10px;gap:6px;align-items:center}
+.accent-chip small{line-height:1.15;text-align:center;font-size:12px}
+.accent-chip button{font-family:var(--body);font-weight:800;font-size:15px;padding:3px 9px 4px;border:2.5px solid var(--ink);border-radius:10px;background:#fff;color:var(--ink);cursor:pointer}
+.accent-chip button[aria-pressed="true"]{background:var(--hammer);color:#fff}
+.accent-chip button:focus-visible{outline:3px solid var(--hero);outline-offset:2px}
+.accent-tip{position:absolute;left:50%;top:calc(100% + 12px);transform:translateX(-50%);background:var(--hero);border:3px solid var(--ink);border-radius:14px;padding:5px 12px;font-size:14px;font-weight:800;white-space:nowrap;box-shadow:0 3px 0 var(--ink);pointer-events:none;animation:tipBob 1s ease-in-out infinite;z-index:5}
+.accent-tip::before{content:"";position:absolute;left:50%;top:-11px;margin-left:-9px;border:9px solid transparent;border-top:0;border-bottom:10px solid var(--ink)}
+.accent-tip::after{content:"";position:absolute;left:50%;top:-6px;margin-left:-6px;border:6px solid transparent;border-top:0;border-bottom:7px solid var(--hero)}
+@keyframes tipBob{50%{transform:translateX(-50%) translateY(4px)}}
 .accent{display:flex;align-items:center;gap:6px;margin-top:12px;flex-wrap:wrap}
 .accent span{font-size:13px;font-weight:800;letter-spacing:.08em;margin-right:2px}
 .accent button{font-family:var(--body);font-weight:800;font-size:15px;padding:5px 12px 6px;border:3px solid var(--ink);border-radius:12px;background:#fff;color:var(--ink);box-shadow:0 3px 0 var(--ink);cursor:pointer}
@@ -182,7 +190,12 @@ body{margin:0;font-family:var(--body);color:var(--ink);background:var(--grass-dk
     <div class="chip time" id="timeChip"><small>時間</small><b id="time">30</b></div>
     <div class="chip"><small>連擊</small><b id="combo">0</b></div>
     <div class="chip"><small>最高</small><b id="best">0</b></div>
-    <button class="icon-btn accent-btn" id="accentBtn" type="button" aria-label="切換腔調（海陸腔／四縣腔）" title="切換腔調">海陸</button>
+    <div class="chip accent-chip" role="group" aria-label="切換腔調">
+      <small>腔調<br>切換</small>
+      <button type="button" data-accent="hoi" aria-pressed="true">海陸</button>
+      <button type="button" data-accent="xi" aria-pressed="false">四縣</button>
+      <div class="accent-tip" id="accentTip" hidden>👆 點這裡可以換腔調喔！</div>
+    </div>
     <button class="icon-btn" id="mute" type="button" aria-label="音效開關">🔊</button>
   </div>
   <div class="timebar"><i id="bar"></i></div>
@@ -202,7 +215,7 @@ body{margin:0;font-family:var(--body);color:var(--ink);background:var(--grass-dk
         <h1>咚咚<span>打地鼠</span></h1>
         <p>地鼠從小勇者身邊的洞冒出來，點牠！小勇者就會衝過去一槌敲下。每隻地鼠頭上都有數字，敲中會用<b><span id="accentName">海陸腔</span>客語</b>唸出來。30 秒看你能敲幾隻。</p>
         <div class="accent" role="group" aria-label="選擇腔調">
-          <span>腔調</span>
+          <span>選腔調（遊戲中右上角也能換）</span>
           <button type="button" data-accent="hoi" aria-pressed="true">海陸腔</button>
           <button type="button" data-accent="xi" aria-pressed="false">四縣腔</button>
         </div>
@@ -467,7 +480,7 @@ try { if (localStorage.getItem('whackAccent') === 'xi') accent = 'xi'; } catch (
 function setAccent(a, preview) {
   accent = a;
   document.querySelectorAll('[data-accent]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.accent === a)));
-  $('accentBtn').textContent = ACCENT_NAME[a].slice(0, 2);
+  $('accentTip').hidden = true;
   $('accentName').textContent = ACCENT_NAME[a];
   try { localStorage.setItem('whackAccent', a); } catch (e) {}
   if (preview) {
@@ -477,8 +490,12 @@ function setAccent(a, preview) {
   }
 }
 document.querySelectorAll('[data-accent]').forEach(b => b.addEventListener('click', () => setAccent(b.dataset.accent, true)));
-$('accentBtn').addEventListener('click', () => setAccent(accent === 'hoi' ? 'xi' : 'hoi', true));
 setAccent(accent, false);
+let tipT;
+function showAccentTip() {
+  $('accentTip').hidden = false;
+  clearTimeout(tipT); tipT = setTimeout(() => { $('accentTip').hidden = true; }, 5000);
+}
 
 /* ---------- fx ---------- */
 function fx(cls, x, y, html = '', vars = {}) {
@@ -678,7 +695,7 @@ function startGame() {
   score = 0; combo = 0; maxCombo = 0; hits = 0; swings = 0; timeLeft = GAME_TIME; lastSec = GAME_TIME;
   pose('idle'); hero.classList.remove('flip'); placeHero(home.x, home.y, true);
   setHUD();
-  countdown(() => { running = true; startAt = performance.now(); say('看我的！'); spawn(); raf = requestAnimationFrame(loop); });
+  countdown(() => { running = true; startAt = performance.now(); say('看我的！'); showAccentTip(); spawn(); raf = requestAnimationFrame(loop); });
 }
 function endGame() {
   running = false;
