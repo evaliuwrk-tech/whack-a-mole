@@ -30,6 +30,8 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 .chip.time.low b{color:var(--blood);animation:pulse .5s ease-in-out infinite alternate}
 @keyframes pulse{to{transform:scale(1.18)}}
 .icon-btn{background:var(--plum);border:3px solid var(--ink);border-radius:14px;box-shadow:0 4px 0 var(--ink);font-size:20px;width:46px;cursor:pointer;color:var(--ghost)}
+.home-btn{width:auto;display:flex;align-items:center;gap:4px;padding:0 10px;font-size:18px}
+.home-btn span{font-family:var(--body);font-size:14px;font-weight:800}
 .icon-btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
 .accent-chip{position:relative;padding:4px 6px 4px 10px;gap:6px}
 .accent-chip small{line-height:1.15;text-align:center;font-size:12px}
@@ -204,6 +206,7 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
       <button class="seg" type="button" data-accent="hoi" aria-pressed="false">海陸</button>
       <div class="accent-tip" id="accentTip" hidden>👆 點這裡可以換腔調喔！</div>
     </div>
+    <button class="icon-btn home-btn" id="homeBtn" type="button" aria-label="回首頁" title="回首頁">🏠<span>首頁</span></button>
     <button class="icon-btn" id="bgmBtn" type="button" aria-label="背景音樂開關" aria-pressed="true" title="背景音樂">🎵</button>
     <button class="icon-btn" id="mute" type="button" aria-label="音效開關" title="音效">🔊</button>
   </div>
@@ -338,7 +341,7 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
           <button class="seg" type="button" data-accent="xi" aria-pressed="true">四縣腔</button>
           <button class="seg" type="button" data-accent="hoi" aria-pressed="false">海陸腔</button>
         </div>
-        <div class="btnrow"><button class="big alt" id="reviewBtn" type="button">📖 單字卡</button><button class="big" id="againBtn" type="button">再玩一次</button></div>
+        <div class="btnrow"><button class="big alt" id="homeEndBtn" type="button">🏠 回首頁</button><button class="big alt" id="reviewBtn" type="button">📖 單字卡</button><button class="big" id="againBtn" type="button">再玩一次</button></div>
       </div>
     </div>
   </div>
@@ -833,8 +836,25 @@ function endGame() {
   $('newBest').hidden = !isBest || score === 0;
   $('endTitle').textContent = found >= 15 ? '捉鬼大師！' : found >= 8 ? '膽大的勇者！' : '天光咧！';
   renderVocab();
-  setTimeout(() => { $('endOv').hidden = false; playCarriage(); $('againBtn').focus(); }, 500);
+  clearTimeout(endT);
+  endT = setTimeout(() => { $('endOv').hidden = false; playCarriage(); $('againBtn').focus(); }, 500);
 }
+let endT = 0;
+
+// back to the title screen from anywhere: mid-game, results or word cards
+function goHome() {
+  running = false; target = null;
+  clearInterval(raf); clearTimeout(scareT); clearTimeout(endT);
+  $('prompt').hidden = true; $('accentTip').hidden = true;
+  itemsEl.querySelectorAll('.item').forEach(b => b.classList.add('out'));
+  stopCarriage();
+  $('endOv').hidden = true; $('learnOv').hidden = true;
+  score = 0; combo = 0; setHUD(GAME_TIME);
+  $('startOv').hidden = false;
+  $('startBtn').focus();
+}
+$('homeBtn').addEventListener('click', goHome);
+$('homeEndBtn').addEventListener('click', goHome);
 
 $('sayBtn').addEventListener('click', e => { e.stopPropagation(); speak(target); });
 $('sayBtn').addEventListener('pointerdown', e => e.stopPropagation());
