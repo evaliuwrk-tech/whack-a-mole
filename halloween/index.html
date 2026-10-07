@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="萬聖節小遊戲：拿著手電筒在黑漆漆的鬼屋裡，聽客語找出糖仔、鬼仔、蝠婆、蝲䗁！支援四縣腔、海陸腔。">
+<title>鬼屋手電筒</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@500;800&family=Creepster&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --night:#0d0a1c; --wall:#2a1f45; --plum:#4a3270; --plum-lt:#7b5aa8;
+  --pumpkin:#ff8a1f; --pumpkin-dk:#c95f08; --moon:#fff3c4; --ghost:#f4f1ff;
+  --slime:#9be564; --blood:#ff5470; --ink:#120b22;
+  --body:"Chiron GoRound TC","Microsoft JhengHei","PingFang TC",system-ui,sans-serif;
+  --spooky:"Creepster","Chiron GoRound TC",fantasy,system-ui;
+}
+html,body{height:100%}
+[hidden]{display:none!important}
+body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night);overflow:hidden;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+#app{position:relative;height:100%;display:flex;flex-direction:column}
+
+/* HUD */
+.hud{position:relative;z-index:50;display:flex;gap:8px;justify-content:center;align-items:stretch;flex-wrap:wrap;padding:10px 16px;background:linear-gradient(var(--night),rgba(13,10,28,.85))}
+.chip{background:var(--plum);border:3px solid var(--ink);border-radius:16px;padding:4px 14px 6px;box-shadow:0 4px 0 var(--ink);display:flex;align-items:center;gap:8px;min-width:80px;justify-content:center}
+.chip small{font-size:13px;font-weight:800;letter-spacing:.08em;color:#e4d8ff}
+.chip b{font-family:var(--spooky);font-weight:400;font-size:30px;line-height:1;color:var(--pumpkin);font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.chip.time.low b{color:var(--blood);animation:pulse .5s ease-in-out infinite alternate}
+@keyframes pulse{to{transform:scale(1.18)}}
+.icon-btn{background:var(--plum);border:3px solid var(--ink);border-radius:14px;box-shadow:0 4px 0 var(--ink);font-size:20px;width:46px;cursor:pointer;color:var(--ghost)}
+.icon-btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.accent-chip{position:relative;padding:4px 6px 4px 10px;gap:6px}
+.accent-chip small{line-height:1.15;text-align:center;font-size:12px}
+.seg{font-family:var(--body);font-weight:800;font-size:15px;padding:4px 10px 5px;border:2.5px solid var(--ink);border-radius:10px;background:#efe7ff;color:var(--ink);cursor:pointer}
+.seg[aria-pressed="true"]{background:var(--pumpkin);color:var(--ink)}
+.seg:focus-visible,.icon-btn:focus-visible,.big:focus-visible,.say:focus-visible{outline:3px solid var(--slime);outline-offset:2px}
+.accent-tip{position:absolute;left:50%;top:calc(100% + 12px);transform:translateX(-50%);background:var(--slime);color:var(--ink);border:3px solid var(--ink);border-radius:14px;padding:5px 12px;font-size:14px;font-weight:800;white-space:nowrap;box-shadow:0 3px 0 var(--ink);pointer-events:none;animation:tipBob 1s ease-in-out infinite;z-index:60}
+.accent-tip::before{content:"";position:absolute;left:50%;top:-11px;margin-left:-9px;border:9px solid transparent;border-top:0;border-bottom:10px solid var(--ink)}
+.accent-tip::after{content:"";position:absolute;left:50%;top:-6px;margin-left:-6px;border:6px solid transparent;border-top:0;border-bottom:7px solid var(--slime)}
+@keyframes tipBob{50%{transform:translateX(-50%) translateY(4px)}}
+
+/* room */
+.room{position:relative;flex:1;min-height:0;overflow:hidden;touch-action:none;cursor:none}
+.room > svg.bg{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+.items{position:absolute;inset:0;z-index:1}
+#dark{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
+.item{position:absolute;width:var(--s);height:var(--s);margin:calc(var(--s) / -2) 0 0 calc(var(--s) / -2);padding:0;border:0;background:none;cursor:none;transition:opacity .3s,transform .3s;transform:rotate(var(--r)) scale(1)}
+.item svg{width:100%;height:100%;display:block;overflow:visible;pointer-events:none}
+.item.out{opacity:0;transform:rotate(var(--r)) scale(.4)}
+.item.ghost svg{animation:float 2.4s ease-in-out infinite}
+.item.bat svg{animation:flutter 1.6s ease-in-out infinite}
+.item.bat .wing{transform-origin:50% 55%;animation:flap .22s ease-in-out infinite alternate}
+.item.spider svg{animation:dangle 2.8s ease-in-out infinite;transform-origin:50% -60%}
+@keyframes float{50%{transform:translateY(-10%)}}
+@keyframes flutter{25%{transform:translate(6%,-6%)}75%{transform:translate(-6%,4%)}}
+@keyframes flap{to{transform:scaleY(.35)}}
+@keyframes dangle{50%{transform:rotate(6deg)}}
+.item.found{z-index:7;opacity:1;animation:foundUp .8s ease-out forwards}
+.item.found svg{filter:drop-shadow(0 0 10px var(--moon)) drop-shadow(0 0 22px var(--pumpkin))}
+@keyframes foundUp{30%{transform:rotate(0) scale(1.45)}100%{transform:rotate(0) scale(1.2) translateY(-30%);opacity:0}}
+.item.wrong{animation:shakeX .4s}
+@keyframes shakeX{20%,60%{transform:rotate(var(--r)) translateX(-12%)}40%,80%{transform:rotate(var(--r)) translateX(12%)}}
+
+/* prompt */
+.prompt{position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:20;display:flex;align-items:center;gap:12px;background:rgba(18,11,34,.9);border:3px solid var(--pumpkin);border-radius:20px;padding:8px 12px 8px 18px;box-shadow:0 0 24px rgba(255,138,31,.35);max-width:calc(100% - 32px);box-sizing:border-box}
+.prompt .lbl{font-size:14px;font-weight:800;color:#d9c9ff;letter-spacing:.1em;white-space:nowrap}
+.prompt .word{display:flex;flex-direction:column;line-height:1.1;min-width:0}
+.prompt .hz{font-size:clamp(26px,5vw,38px);font-weight:800;color:var(--moon);letter-spacing:.06em}
+.prompt .py{white-space:nowrap;font-size:15px;color:var(--pumpkin);font-weight:800;letter-spacing:.04em}
+.py sup{font-size:.62em;margin-left:1px}
+.say{flex:none;width:44px;height:44px;border-radius:50%;border:3px solid var(--ink);background:var(--pumpkin);font-size:20px;cursor:pointer;box-shadow:0 3px 0 var(--ink)}
+.say:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.prompt.bump{animation:promptIn .35s cubic-bezier(.3,1.6,.6,1)}
+@keyframes promptIn{from{transform:translateX(-50%) scale(.6)}}
+
+/* fx */
+.fx{position:absolute;pointer-events:none;z-index:30}
+.pop{font-family:var(--spooky);font-size:40px;color:var(--slime);text-shadow:0 3px 0 var(--ink),0 0 12px rgba(155,229,100,.6);animation:rise .9s ease-out forwards;white-space:nowrap}
+.pop.bad{color:var(--blood);text-shadow:0 3px 0 var(--ink)}
+@keyframes rise{0%{transform:translate(-50%,0) scale(.5);opacity:0}20%{transform:translate(-50%,-14px) scale(1.2);opacity:1}100%{transform:translate(-50%,-80px) scale(1);opacity:0}}
+.tag{transform:translate(-50%,0);background:var(--ghost);color:var(--ink);border:3px solid var(--ink);border-radius:14px;padding:4px 10px;font-weight:800;font-size:15px;white-space:nowrap;text-align:center;line-height:1.25;animation:tagIn 1.6s ease-out forwards}
+.tag .py{color:var(--pumpkin-dk);font-size:13px}
+@keyframes tagIn{0%{opacity:0;transform:translate(-50%,8px)}12%{opacity:1;transform:translate(-50%,0)}80%{opacity:1}100%{opacity:0}}
+.spark{width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:radial-gradient(var(--moon),var(--pumpkin) 60%,transparent 70%);animation:spark .7s ease-out forwards}
+@keyframes spark{to{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
+.combo{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);z-index:30;font-family:var(--spooky);font-size:clamp(40px,8vw,72px);color:var(--pumpkin);text-shadow:0 5px 0 var(--ink),0 0 20px rgba(255,138,31,.6);pointer-events:none;white-space:nowrap;animation:comboIn 1s ease-out forwards}
+@keyframes comboIn{0%{transform:translate(-50%,-50%) scale(.2) rotate(-10deg);opacity:0}25%{transform:translate(-50%,-50%) scale(1.15) rotate(3deg);opacity:1}75%{opacity:1}100%{transform:translate(-50%,-70%);opacity:0}}
+.scare{position:absolute;z-index:25;width:min(46vw,300px);top:30%;left:-50%;pointer-events:none;animation:swoop 1.6s ease-in-out forwards}
+.scare svg{width:100%;height:auto;display:block;filter:drop-shadow(0 0 30px rgba(244,241,255,.6))}
+.scare b{position:absolute;left:60%;top:-6%;font-family:var(--spooky);font-weight:400;font-size:clamp(40px,8vw,70px);color:var(--ghost);text-shadow:0 4px 0 var(--ink)}
+@keyframes swoop{0%{left:-50%;transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-30%) rotate(6deg)}100%{left:120%;transform:translateY(10%) rotate(-4deg)}}
+.flash{position:absolute;inset:0;z-index:24;background:rgba(244,241,255,.25);pointer-events:none;animation:flash .35s forwards}
+@keyframes flash{to{opacity:0}}
+
+/* overlays */
+.overlay{position:absolute;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(8,5,18,.72);backdrop-filter:blur(3px);overflow:auto}
+.card{position:relative;background:linear-gradient(160deg,#3a2860,#221640);border:4px solid var(--ink);border-radius:28px;box-shadow:0 8px 0 var(--ink),0 0 40px rgba(123,90,168,.45);padding:22px 24px 22px;max-width:620px;width:100%;display:flex;gap:18px;align-items:center;animation:cardIn .45s cubic-bezier(.3,1.5,.6,1);box-sizing:border-box;margin:auto}
+@keyframes cardIn{from{transform:scale(.6) translateY(40px);opacity:0}}
+.hero-box{position:relative;width:36%;flex:none}
+.hero-box img{display:block;width:100%;filter:drop-shadow(0 0 18px rgba(255,138,31,.35))}
+.hero-box svg.hat{position:absolute;left:22%;top:-15%;width:56%;transform:rotate(-10deg);overflow:visible}
+.card .txt{flex:1;min-width:0}
+.card h1{margin:0;font-size:clamp(34px,8vw,48px);font-weight:800;line-height:1.05;color:var(--pumpkin);text-shadow:0 3px 0 var(--ink),0 0 18px rgba(255,138,31,.5);letter-spacing:.04em;text-wrap:balance}
+.card h1 span{color:var(--moon)}
+.card p{margin:10px 0 0;font-size:15px;line-height:1.65;color:#ece4ff}
+.card p b{color:var(--slime)}
+.accent{display:flex;align-items:center;gap:6px;margin-top:12px;flex-wrap:wrap}
+.accent span{flex-basis:100%;font-size:13px;font-weight:800;letter-spacing:.06em;color:#d9c9ff}
+.big{margin-top:16px;font-family:var(--body);font-weight:800;font-size:22px;letter-spacing:.1em;padding:10px 26px 12px;border:4px solid var(--ink);border-radius:18px;background:var(--pumpkin);color:var(--ink);box-shadow:0 6px 0 var(--ink);cursor:pointer;transition:transform .08s}
+.big:hover{transform:translateY(-2px) rotate(-1.5deg)}
+.big:active{transform:translateY(5px);box-shadow:0 1px 0 var(--ink)}
+.final{font-family:var(--spooky);font-size:66px;line-height:1;color:var(--pumpkin);text-shadow:0 4px 0 var(--ink);margin-top:4px}
+.final small{font-family:var(--body);font-size:16px;font-weight:800;margin-left:6px;color:var(--ghost);text-shadow:none}
+.stats{display:flex;gap:14px;font-size:14px;font-weight:800;margin-top:4px;flex-wrap:wrap;color:#d9c9ff}
+.stats b{color:var(--moon)}
+.badge{display:inline-block;margin-top:8px;background:var(--blood);color:#fff;border:3px solid var(--ink);border-radius:12px;padding:2px 10px;font-weight:800;font-size:14px;transform:rotate(-3deg)}
+.vocab{margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
+.vocab h2{grid-column:1/-1;margin:0;font-size:14px;letter-spacing:.1em;color:#d9c9ff}
+.vrow{display:flex;align-items:center;gap:8px;background:rgba(13,10,28,.55);border:2px solid var(--plum-lt);border-radius:14px;padding:6px 8px}
+.vrow svg{width:34px;height:34px;flex:none;overflow:visible}
+.vrow div{flex:1;min-width:0;line-height:1.2}
+.vrow .hz{font-weight:800;font-size:18px;color:var(--moon);white-space:nowrap}
+.vrow .py{font-size:13px;color:var(--pumpkin);font-weight:800;white-space:nowrap}
+.vrow .say{width:34px;height:34px;font-size:15px;border-width:2.5px}
+.credit{font-size:11px!important;line-height:1.4!important;opacity:.6;margin-top:12px!important}
+
+@media (max-width:640px){
+  .hud{gap:6px;padding:8px 10px}
+  .chip{min-width:62px;padding:3px 9px 5px;gap:5px}
+  .chip small{font-size:12px}
+  .chip b{font-size:24px}
+  .card{flex-direction:column;text-align:center;padding:18px 16px}
+  .hero-box{width:34%;margin-top:14px}
+  .accent,.stats{justify-content:center}
+  .prompt{gap:8px;padding:6px 8px 6px 12px;top:auto;bottom:calc(12px + env(safe-area-inset-bottom, 0px))}
+  .prompt .lbl{font-size:12px}
+}
+@media (hover:none){.room,.item{cursor:auto}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="hud">
+    <div class="chip"><small>分數</small><b id="score">0</b></div>
+    <div class="chip time" id="timeChip"><small>時間</small><b id="time">60</b></div>
+    <div class="chip"><small>連續</small><b id="combo">0</b></div>
+    <div class="chip accent-chip" role="group" aria-label="切換腔調">
+      <small>腔調<br>切換</small>
+      <button class="seg" type="button" data-accent="xi" aria-pressed="true">四縣</button>
+      <button class="seg" type="button" data-accent="hoi" aria-pressed="false">海陸</button>
+      <div class="accent-tip" id="accentTip" hidden>👆 點這裡可以換腔調喔！</div>
+    </div>
+    <button class="icon-btn" id="mute" type="button" aria-label="音效開關">🔊</button>
+  </div>
+
+  <div class="room" id="room">
+    <svg class="bg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <pattern id="paper" width="80" height="80" patternUnits="userSpaceOnUse">
+          <rect width="80" height="80" fill="#2a1f45"/><rect width="34" height="80" fill="#30244f"/>
+          <path d="M57 22 q6 -10 12 0 q-6 10 -12 0z M17 62 q6 -10 12 0 q-6 10 -12 0z" fill="#3a2c5e"/>
+        </pattern>
+        <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b281e"/><stop offset="1" stop-color="#1e140f"/></linearGradient>
+        <radialGradient id="moonGlow"><stop offset="0" stop-color="#fff3c4" stop-opacity=".9"/><stop offset="1" stop-color="#fff3c4" stop-opacity="0"/></radialGradient>
+      </defs>
+      <rect width="1600" height="1000" fill="url(#paper)"/>
+      <!-- wainscot -->
+      <rect y="560" width="1600" height="150" fill="#3a2a22"/>
+      <g fill="none" stroke="#24180f" stroke-width="6"><rect x="30" y="585" width="230" height="100" rx="6"/><rect x="290" y="585" width="230" height="100" rx="6"/><rect x="1080" y="585" width="230" height="100" rx="6"/><rect x="1340" y="585" width="230" height="100" rx="6"/></g>
+      <rect y="552" width="1600" height="14" fill="#4b3628"/>
+      <!-- floor -->
+      <rect y="706" width="1600" height="294" fill="url(#floor)"/>
+      <g stroke="#160e09" stroke-width="4"><path d="M0 760 H1600 M0 830 H1600 M0 910 H1600"/><path d="M800 706 L700 1000 M520 706 L300 1000 M1080 706 L1300 1000 M260 706 L-80 1000 M1340 706 L1680 1000"/></g>
+      <!-- window -->
+      <rect x="1140" y="110" width="290" height="370" rx="10" fill="#4a3424"/>
+      <rect x="1160" y="130" width="250" height="330" fill="#13234d"/>
+      <circle cx="1330" cy="215" r="120" fill="url(#moonGlow)"/>
+      <circle cx="1330" cy="215" r="55" fill="#fff3c4"/>
+      <circle cx="1312" cy="200" r="10" fill="#efe0a6"/><circle cx="1345" cy="235" r="7" fill="#efe0a6"/>
+      <path d="M1160 380 q40 -30 80 -10 q30 -40 70 -20 q40 -30 100 10 V460 H1160z" fill="#0b1430"/>
+      <g stroke="#4a3424" stroke-width="12"><path d="M1285 130 V460 M1160 295 H1410"/></g>
+      <path d="M1120 100 H1450 V120 H1120z" fill="#24180f"/>
+      <path d="M1130 112 q30 180 -10 390 l40 -10 q-20 -190 30 -370z" fill="#5a2b6e"/>
+      <path d="M1440 112 q-30 180 10 390 l-40 -10 q20 -190 -30 -370z" fill="#5a2b6e"/>
+      <!-- clock -->
+      <rect x="120" y="250" width="150" height="460" rx="12" fill="#3d2618"/>
+      <path d="M110 260 q85 -90 170 0z" fill="#2d1b10"/>
+      <circle cx="195" cy="330" r="48" fill="#e8dcc0" stroke="#1d120a" stroke-width="8"/>
+      <path d="M195 330 L195 298 M195 330 L218 342" stroke="#1d120a" stroke-width="6" stroke-linecap="round"/>
+      <rect x="160" y="420" width="70" height="200" rx="35" fill="#24160d"/>
+      <circle cx="195" cy="570" r="22" fill="#b98a2e"/><path d="M195 440 V550" stroke="#b98a2e" stroke-width="5"/>
+      <!-- portrait -->
+      <rect x="600" y="150" width="200" height="250" rx="8" fill="#6a4a1e" stroke="#2d1b10" stroke-width="10"/>
+      <rect x="625" y="175" width="150" height="200" fill="#1e2a2a"/>
+      <ellipse cx="700" cy="255" rx="40" ry="50" fill="#3e4f4a"/><path d="M640 375 q60 -90 120 0z" fill="#3e4f4a"/>
+      <circle cx="685" cy="250" r="6" fill="#ffe36e"/><circle cx="715" cy="250" r="6" fill="#ffe36e"/>
+      <!-- shelf -->
+      <rect x="880" y="380" width="200" height="16" fill="#4b3628"/>
+      <path d="M900 396 l14 26 M1060 396 l-14 26" stroke="#4b3628" stroke-width="8"/>
+      <rect x="900" y="330" width="34" height="50" rx="6" fill="#4d7a5a" opacity=".85"/><rect x="945" y="345" width="28" height="35" rx="5" fill="#7a4d6e" opacity=".85"/><path d="M990 380 v-60 h50 v60z" fill="#3a2a22"/><path d="M995 325 h40 M995 340 h40" stroke="#6a4a2e" stroke-width="5"/>
+      <!-- table with candle -->
+      <rect x="440" y="560" width="360" height="22" rx="6" fill="#5a3a26"/>
+      <rect x="470" y="582" width="20" height="160" fill="#3d2618"/><rect x="750" y="582" width="20" height="160" fill="#3d2618"/>
+      <rect x="600" y="500" width="22" height="60" rx="4" fill="#f2e6c9"/><path d="M611 500 q-10 -18 0 -32 q10 14 0 32z" fill="#ffb347"/>
+      <ellipse cx="611" cy="562" rx="30" ry="6" fill="#b98a2e"/>
+      <!-- pumpkin decoration -->
+      <g transform="translate(1180 820)">
+        <ellipse cx="0" cy="0" rx="90" ry="66" fill="#c95f08"/><ellipse cx="0" cy="0" rx="40" ry="66" fill="#e0740f"/>
+        <path d="M-6 -66 q4 -26 20 -30" stroke="#3d5a1e" stroke-width="12" fill="none" stroke-linecap="round"/>
+        <path d="M-42 -14 l18 -18 l18 18z M6 -14 l18 -18 l18 18z M-46 18 q46 34 92 0 l-14 10 l-10 -10 l-12 12 l-12 -12 l-12 12 l-10 -10z" fill="#ffd36b"/>
+      </g>
+      <!-- cobwebs -->
+      <g stroke="#bdb3d8" stroke-opacity=".5" stroke-width="2" fill="none">
+        <path d="M0 0 L180 0 M0 0 L0 180 M0 0 L160 120 M0 0 L110 170 M0 0 L170 60"/>
+        <path d="M60 0 q-6 34 -60 52 M110 0 q-6 64 -110 104 M160 0 q0 100 -160 160"/>
+        <path d="M1600 0 L1450 0 M1600 0 L1600 140 M1600 0 L1480 100 M1540 0 q4 30 60 46 M1500 0 q4 60 100 86"/>
+      </g>
+      <!-- rug -->
+      <ellipse cx="800" cy="900" rx="420" ry="70" fill="#4a2448" opacity=".8"/>
+      <ellipse cx="800" cy="900" rx="360" ry="52" fill="none" stroke="#7b3a6e" stroke-width="8" opacity=".8"/>
+    </svg>
+    <div class="items" id="items"></div>
+    <canvas id="dark"></canvas>
+    <div class="prompt" id="prompt" hidden>
+      <span class="lbl">找出</span>
+      <span class="word"><span class="hz" id="pHz"></span><span class="py" id="pPy"></span></span>
+      <button class="say" id="sayBtn" type="button" aria-label="再聽一次">🔊</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="startOv">
+    <div class="card">
+      <div class="hero-box"><img src="img/hero-idle.webp" alt="拿著大槌子的金髮小勇者"><svg class="hat" viewBox="0 0 100 80" aria-hidden="true"><use href="#hat"/></svg></div>
+      <div class="txt">
+        <h1>鬼屋<span>手電筒</span></h1>
+        <p>停電了！鬼屋裡黑漆漆，只剩你的手電筒。仔細聽<b>客語</b>，用光照出牠，點下去就抓到了。60 秒看你能找到幾個！</p>
+        <p style="font-size:13px;margin-top:6px">電腦：移動滑鼠照亮　手機：手指滑動照亮、點一下抓</p>
+        <div class="accent" role="group" aria-label="選擇腔調">
+          <span>選腔調（遊戲中右上角也能換）</span>
+          <button class="seg" type="button" data-accent="xi" aria-pressed="true">四縣腔</button>
+          <button class="seg" type="button" data-accent="hoi" aria-pressed="false">海陸腔</button>
+        </div>
+        <button class="big" id="startBtn" type="button">打開手電筒！</button>
+        <p class="credit">客語語音：客家委員會「臺灣客語語音資料庫」語音合成（四縣腔、海陸腔）</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="endOv" hidden>
+    <div class="card">
+      <div class="hero-box"><img src="img/hero-win.webp" alt="雙手叉腰得意笑的小勇者"><svg class="hat" viewBox="0 0 100 80" aria-hidden="true"><use href="#hat"/></svg></div>
+      <div class="txt">
+        <h1 id="endTitle">天光咧！</h1>
+        <div class="final"><span id="finalScore">0</span><small>分</small></div>
+        <div class="stats"><span>找到 <b id="stFound">0</b> 個</span><span>最高連續 <b id="stCombo">0</b></span><span>最高分 <b id="stBest">0</b></span></div>
+        <div id="newBest" class="badge" hidden>新紀錄！</div>
+        <div class="vocab" id="vocab"><h2>今晚學到的客語</h2></div>
+        <div class="accent" role="group" aria-label="選擇腔調">
+          <button class="seg" type="button" data-accent="xi" aria-pressed="true">四縣腔</button>
+          <button class="seg" type="button" data-accent="hoi" aria-pressed="false">海陸腔</button>
+        </div>
+        <button class="big" id="againBtn" type="button">再玩一次</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="hat" viewBox="0 0 100 80">
+      <ellipse cx="50" cy="68" rx="48" ry="10" fill="#2b1748" stroke="#120b22" stroke-width="3"/>
+      <path d="M22 66 Q40 40 46 14 Q50 0 70 6 Q58 12 60 30 Q64 50 78 66Z" fill="#3b2066" stroke="#120b22" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M26 60 Q52 66 76 60 L77 66 Q52 72 24 66Z" fill="#ff8a1f" stroke="#120b22" stroke-width="2"/>
+      <path d="M52 30 l3 6 6 1 -5 4 1 6 -5 -3 -5 3 1 -6 -5 -4 6 -1z" fill="#fff3c4"/>
+    </symbol>
+    <symbol id="i-candy" viewBox="0 0 100 100">
+      <path d="M28 50 L6 32 L10 50 L6 68Z" fill="var(--c2)" stroke="#120b22" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M72 50 L94 32 L90 50 L94 68Z" fill="var(--c2)" stroke="#120b22" stroke-width="3" stroke-linejoin="round"/>
+      <ellipse cx="50" cy="50" rx="26" ry="22" fill="var(--c1)" stroke="#120b22" stroke-width="3.5"/>
+      <path d="M36 34 q10 16 0 32 M50 28 q10 22 0 44 M64 34 q10 16 0 32" stroke="#fff" stroke-width="4" fill="none" opacity=".75" stroke-linecap="round"/>
+      <ellipse cx="42" cy="40" rx="6" ry="3.5" fill="#fff" opacity=".7"/>
+    </symbol>
+    <symbol id="i-ghost" viewBox="0 0 100 100">
+      <path d="M18 92 V46 Q18 10 50 10 Q82 10 82 46 V92 L72 82 L62 92 L50 82 L38 92 L28 82Z" fill="#f4f1ff" stroke="#120b22" stroke-width="3.5" stroke-linejoin="round"/>
+      <ellipse cx="38" cy="44" rx="6" ry="8" fill="#120b22"/><ellipse cx="62" cy="44" rx="6" ry="8" fill="#120b22"/>
+      <ellipse cx="50" cy="62" rx="7" ry="9" fill="#120b22"/>
+      <ellipse cx="28" cy="56" rx="6" ry="3.5" fill="#ffb3c4" opacity=".8"/><ellipse cx="72" cy="56" rx="6" ry="3.5" fill="#ffb3c4" opacity=".8"/>
+    </symbol>
+    <symbol id="i-bat" viewBox="0 0 100 100">
+      <g class="wing"><path d="M44 50 Q30 26 4 34 Q14 40 12 50 Q22 46 26 56 Q34 50 44 58Z" fill="#3b2066" stroke="#120b22" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M56 50 Q70 26 96 34 Q86 40 88 50 Q78 46 74 56 Q66 50 56 58Z" fill="#3b2066" stroke="#120b22" stroke-width="3" stroke-linejoin="round"/></g>
+      <path d="M40 40 L38 26 L46 36 Z M60 40 L62 26 L54 36Z" fill="#4a2a7a" stroke="#120b22" stroke-width="2.5" stroke-linejoin="round"/>
+      <ellipse cx="50" cy="52" rx="15" ry="17" fill="#4a2a7a" stroke="#120b22" stroke-width="3"/>
+      <circle cx="44" cy="48" r="4" fill="#ffe36e"/><circle cx="56" cy="48" r="4" fill="#ffe36e"/>
+      <path d="M45 60 l3 4 l2 -3 l2 3 l3 -4" fill="#fff" stroke="#120b22" stroke-width="1.5" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="i-spider" viewBox="0 0 100 100">
+      <path d="M50 -40 V36" stroke="#d9d2ee" stroke-width="2" opacity=".7"/>
+      <g stroke="#120b22" stroke-width="4" fill="none" stroke-linecap="round">
+        <path d="M40 52 Q24 38 14 46 M40 58 Q22 56 12 66 M42 64 Q28 72 22 86 M44 68 Q38 82 36 94"/>
+        <path d="M60 52 Q76 38 86 46 M60 58 Q78 56 88 66 M58 64 Q72 72 78 86 M56 68 Q62 82 64 94"/>
+      </g>
+      <circle cx="50" cy="44" r="10" fill="#2a2338" stroke="#120b22" stroke-width="3"/>
+      <ellipse cx="50" cy="62" rx="15" ry="16" fill="#2a2338" stroke="#120b22" stroke-width="3"/>
+      <circle cx="46" cy="43" r="3.2" fill="#fff"/><circle cx="54" cy="43" r="3.2" fill="#fff"/>
+      <circle cx="46" cy="43.5" r="1.6" fill="#120b22"/><circle cx="54" cy="43.5" r="1.6" fill="#120b22"/>
+      <path d="M44 62 h12 M46 68 h8" stroke="#9be564" stroke-width="3" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="big-ghost" viewBox="0 0 200 200">
+      <path d="M30 190 V90 Q30 14 100 14 Q170 14 170 90 V190 L150 170 L130 190 L110 170 L90 190 L70 170 L50 190Z" fill="#f4f1ff" stroke="#120b22" stroke-width="6" stroke-linejoin="round"/>
+      <ellipse cx="74" cy="88" rx="14" ry="20" fill="#120b22"/><ellipse cx="126" cy="88" rx="14" ry="20" fill="#120b22"/>
+      <ellipse cx="100" cy="132" rx="22" ry="28" fill="#120b22"/>
+      <path d="M30 110 Q0 100 6 70 M170 110 Q200 100 194 70" stroke="#120b22" stroke-width="6" fill="#f4f1ff" stroke-linecap="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<script>
+(() => {
+const WORDS = {
+  candy:  { zh: '糖果', xi: { hz: '糖仔',   py: 'tong11 e31' },    hoi: { hz: '糖仔', py: 'tong55 er55' } },
+  ghost:  { zh: '鬼',   xi: { hz: '鬼仔',   py: 'gui31 e31' },     hoi: { hz: '鬼仔', py: 'gui24 er55' } },
+  bat:    { zh: '蝙蝠', xi: { hz: '蝠婆仔', py: 'pid5 po11 e31' }, hoi: { hz: '蝠婆', py: 'pid2 po55' } },
+  spider: { zh: '蜘蛛', xi: { hz: '蝲䗁',   py: 'la11 kia11' },    hoi: { hz: '蝲䗁', py: 'la55 kia55' } },
+};
+const KINDS = Object.keys(WORDS);
+const CANDY_COLORS = [['#ff8a1f', '#ffd36b'], ['#9be564', '#c9f7a4'], ['#b07cff', '#e2ccff'], ['#ff5470', '#ffb3c4']];
+const GAME_TIME = 60;
+
+const $ = id => document.getElementById(id);
+const room = $('room'), itemsEl = $('items'), canvas = $('dark'), ctx = canvas.getContext('2d');
+const pyHTML = s => s.replace(/(\d+)/g, '<sup>$1</sup>');
+const iconSVG = (kind, colors) => `<svg viewBox="0 0 100 100" style="${colors ? `--c1:${colors[0]};--c2:${colors[1]}` : '--c1:#ff8a1f;--c2:#ffd36b'}"><use href="#i-${kind}"/></svg>`;
+
+/* ---------- storage ---------- */
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+};
+let best = +store.get('hauntBest') || 0;
+
+/* ---------- audio ---------- */
+let muted = store.get('hauntMute') === '1';
+$('mute').textContent = muted ? '🔇' : '🔊';
+const voices = { xi: {}, hoi: {} };
+for (const acc of ['xi', 'hoi']) for (const k of KINDS) {
+  const a = new Audio(`audio/${acc}_${k}.wav`); a.preload = 'auto'; voices[acc][k] = a;
+}
+function speak(kind) {
+  if (muted) return;
+  const a = voices[accent][kind];
+  try { a.currentTime = 0; const p = a.play(); if (p) p.catch(() => {}); } catch (e) {}
+}
+let ac = null;
+function audio() { if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } if (ac && ac.state === 'suspended') ac.resume(); return ac; }
+function tone(f1, f2, dur, type = 'sine', vol = .15, delay = 0) {
+  if (muted || !audio()) return;
+  const t = ac.currentTime + delay, o = ac.createOscillator(), g = ac.createGain();
+  o.type = type; o.frequency.setValueAtTime(f1, t); o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur);
+  o.connect(g).connect(ac.destination); o.start(t); o.stop(t + dur + .02);
+}
+function noise(dur, vol = .2, freq = 1200) {
+  if (muted || !audio()) return;
+  const len = ac.sampleRate * dur, buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+  const s = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
+  f.type = 'bandpass'; f.frequency.value = freq; g.gain.value = vol;
+  s.buffer = buf; s.connect(f).connect(g).connect(ac.destination); s.start();
+}
+const sfx = {
+  click: () => { tone(900, 500, .05, 'square', .06); },
+  good: () => [660, 880, 1320].forEach((f, i) => tone(f, f, .14, 'triangle', .13, i * .06)),
+  bad: () => { tone(220, 110, .25, 'sawtooth', .12); },
+  boo: () => { tone(520, 140, .9, 'sine', .22); tone(530, 150, .9, 'triangle', .1); noise(.6, .12, 400); },
+  tick: () => tone(1100, 1100, .04, 'sine', .07),
+  start: () => { tone(330, 330, .12, 'triangle', .12); tone(494, 494, .12, 'triangle', .12, .12); tone(659, 659, .3, 'triangle', .12, .24); },
+  end: () => [659, 587, 523, 784].forEach((f, i) => tone(f, f, .2, 'triangle', .14, i * .15)),
+};
+$('mute').addEventListener('click', () => {
+  muted = !muted; $('mute').textContent = muted ? '🔇' : '🔊';
+  store.set('hauntMute', muted ? '1' : '0');
+});
+
+/* ---------- accent ---------- */
+let accent = store.get('hauntAccent') || (store.get('whackAccent') === 'hoi' ? 'hoi' : 'xi');
+function setAccent(a, preview) {
+  accent = a;
+  document.querySelectorAll('[data-accent]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.accent === a)));
+  $('accentTip').hidden = true;
+  store.set('hauntAccent', a);
+  if (target) showPrompt(false);
+  renderVocab();
+  if (preview) speak(target || KINDS[Math.floor(Math.random() * KINDS.length)]);
+}
+document.querySelectorAll('[data-accent]').forEach(b => b.addEventListener('click', () => setAccent(b.dataset.accent, true)));
+let tipT;
+function showAccentTip() { $('accentTip').hidden = false; clearTimeout(tipT); tipT = setTimeout(() => { $('accentTip').hidden = true; }, 5000); }
+
+/* ---------- flashlight ---------- */
+let W = 0, H = 0, R = 120, light = { x: 0, y: 0 }, dim = 0, needDraw = true;
+function resize() {
+  W = room.clientWidth; H = room.clientHeight;
+  canvas.width = W; canvas.height = H;
+  R = Math.max(70, Math.min(W, H) * (W < 640 ? 0.2 : 0.16));
+  if (!light.x) light = { x: W / 2, y: H * 0.6 };
+  needDraw = true;
+}
+function draw() {
+  if (needDraw || dim > 0) {
+    needDraw = false;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = 'rgba(6,4,16,0.975)';
+    ctx.fillRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'destination-out';
+    // moonlight from the window (faint)
+    const mx = W * 0.83, my = H * 0.29, mr = Math.min(W, H) * 0.22;
+    let g = ctx.createRadialGradient(mx, my, 0, mx, my, mr);
+    g.addColorStop(0, 'rgba(0,0,0,.55)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g; ctx.fillRect(mx - mr, my - mr, mr * 2, mr * 2);
+    // the flashlight beam (flickers when a ghost swoops by)
+    const flick = dim > 0 ? (Math.random() < .5 ? .25 : .8) : 1;
+    if (dim > 0) dim--;
+    g = ctx.createRadialGradient(light.x, light.y, 0, light.x, light.y, R * 1.35);
+    g.addColorStop(0, `rgba(0,0,0,${flick})`); g.addColorStop(.6, `rgba(0,0,0,${flick})`); g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(light.x, light.y, R * 1.35, 0, Math.PI * 2); ctx.fill();
+    // warm tint inside the beam
+    ctx.globalCompositeOperation = 'source-over';
+    g = ctx.createRadialGradient(light.x, light.y, 0, light.x, light.y, R);
+    g.addColorStop(0, 'rgba(255,236,170,.10)'); g.addColorStop(1, 'rgba(255,236,170,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(light.x, light.y, R, 0, Math.PI * 2); ctx.fill();
+  }
+  requestAnimationFrame(draw);
+}
+function moveLight(x, y) { light = { x, y }; needDraw = true; }
+
+let down = null;
+room.addEventListener('pointerdown', e => {
+  const r = room.getBoundingClientRect();
+  down = { x: e.clientX, y: e.clientY, t: performance.now() };
+  moveLight(e.clientX - r.left, e.clientY - r.top);
+  audio();
+});
+room.addEventListener('pointermove', e => {
+  const r = room.getBoundingClientRect();
+  moveLight(e.clientX - r.left, e.clientY - r.top);
+});
+room.addEventListener('pointerup', e => {
+  if (!down) return;
+  const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
+  down = null;
+  if (moved > 14) return;   // a drag only moves the light
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const it = el && el.closest('.item');
+  if (it && running) pick(it);
+});
+itemsEl.addEventListener('focusin', e => {
+  const it = e.target.closest('.item'); if (!it) return;
+  moveLight(parseFloat(it.style.left) / 100 * W, parseFloat(it.style.top) / 100 * H);
+});
+itemsEl.addEventListener('keydown', e => {
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.closest('.item') && running) { e.preventDefault(); pick(e.target.closest('.item')); }
+});
+
+/* ---------- fx ---------- */
+function fx(cls, x, y, html = '', vars = {}) {
+  const el = document.createElement('div');
+  el.className = 'fx ' + cls; el.style.left = x + 'px'; el.style.top = y + 'px'; el.innerHTML = html;
+  for (const k in vars) el.style.setProperty(k, vars[k]);
+  room.appendChild(el);
+  setTimeout(() => el.remove(), 1800);
+}
+function sparks(x, y) {
+  for (let i = 0; i < 10; i++) {
+    const a = Math.PI * 2 * i / 10, r = 40 + Math.random() * 40;
+    fx('spark', x, y, '', { '--dx': Math.cos(a) * r + 'px', '--dy': Math.sin(a) * r + 'px' });
+  }
+}
+
+/* ---------- game ---------- */
+let running = false, score = 0, combo = 0, maxCombo = 0, found = 0, target = null, roundAt = 0, endAt = 0, raf = 0, lastSec = GAME_TIME, scareT = 0, lock = false;
+const foundKinds = new Set();
+
+function setHUD(t = GAME_TIME) {
+  $('score').textContent = score; $('combo').textContent = combo;
+  $('time').textContent = Math.max(0, Math.ceil(t));
+  $('timeChip').classList.toggle('low', running && t <= 10);
+}
+
+function scatter() {
+  itemsEl.innerHTML = '';
+  const narrow = W < 640;
+  const cols = narrow ? 3 : 4, rows = narrow ? 4 : 3, n = narrow ? 7 : 9;
+  const top = narrow ? 0.07 : 0.22, bottom = narrow ? 0.8 : 0.93;
+  const cells = [];
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) cells.push([c, r]);
+  cells.sort(() => Math.random() - .5);
+  // 1–2 of the target, the rest a mix of the other three
+  const kinds = [target];
+  if (Math.random() < .4) kinds.push(target);
+  const others = KINDS.filter(k => k !== target);
+  while (kinds.length < n) kinds.push(others[kinds.length % others.length]);
+  kinds.sort(() => Math.random() - .5);
+  const size = Math.max(56, Math.min(W, H) * (narrow ? 0.15 : 0.12));
+  kinds.forEach((kind, i) => {
+    const [c, r] = cells[i];
+    const x = (c + 0.2 + Math.random() * 0.6) / cols;
+    const y = top + (r + 0.2 + Math.random() * 0.6) / rows * (bottom - top);
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = `item ${kind} out`;
+    b.dataset.kind = kind;
+    b.setAttribute('aria-label', WORDS[kind].zh);
+    b.style.left = x * 100 + '%'; b.style.top = y * 100 + '%';
+    b.style.setProperty('--s', size * (0.85 + Math.random() * 0.3) + 'px');
+    b.style.setProperty('--r', (Math.random() * 24 - 12) + 'deg');
+    b.innerHTML = iconSVG(kind, kind === 'candy' ? CANDY_COLORS[Math.floor(Math.random() * CANDY_COLORS.length)] : null);
+    b.querySelector('svg').style.animationDelay = -Math.random() * 2 + 's';
+    itemsEl.appendChild(b);
+    requestAnimationFrame(() => requestAnimationFrame(() => b.classList.remove('out')));
+  });
+}
+
+function showPrompt(animate) {
+  const w = WORDS[target][accent];
+  $('pHz').textContent = w.hz;
+  $('pPy').innerHTML = pyHTML(w.py);
+  $('prompt').hidden = false;
+  if (animate) { $('prompt').classList.remove('bump'); void $('prompt').offsetWidth; $('prompt').classList.add('bump'); }
+}
+
+function nextRound() {
+  const choices = KINDS.filter(k => k !== target);
+  target = choices[Math.floor(Math.random() * choices.length)];
+  scatter();
+  showPrompt(true);
+  setTimeout(() => speak(target), 250);
+  roundAt = performance.now();
+  lock = false;
+}
+
+function pick(it) {
+  if (lock || it.classList.contains('found')) return;
+  const kind = it.dataset.kind;
+  const rr = room.getBoundingClientRect(), ir = it.getBoundingClientRect();
+  const cx = ir.left - rr.left + ir.width / 2, cy = ir.top - rr.top + ir.height / 2;
+  if (kind === target) {
+    lock = true;
+    const fast = performance.now() - roundAt < 3000;
+    combo++; found++; maxCombo = Math.max(maxCombo, combo);
+    foundKinds.add(kind);
+    const pts = 10 + (fast ? 5 : 0) + (combo >= 5 ? 5 : 0);
+    score += pts;
+    it.classList.add('found');
+    sfx.good(); speak(kind);
+    sparks(cx, cy);
+    fx('pop', cx, cy - ir.height / 2, '+' + pts);
+    if (combo > 0 && combo % 5 === 0) {
+      const c = document.createElement('div'); c.className = 'combo'; c.textContent = combo + ' 連續！';
+      room.appendChild(c); setTimeout(() => c.remove(), 1000);
+    }
+    setHUD(timeLeft());
+    itemsEl.querySelectorAll('.item:not(.found)').forEach(b => b.classList.add('out'));
+    setTimeout(() => { if (running) nextRound(); }, 850);
+  } else {
+    combo = 0;
+    endAt -= 2000;   // wrong pick costs two seconds
+    sfx.bad();
+    it.classList.remove('wrong'); void it.offsetWidth; it.classList.add('wrong');
+    const w = WORDS[kind][accent];
+    fx('tag', cx, cy + ir.height / 2 + 4, `這係「${w.hz}」<br><span class="py">${pyHTML(w.py)}</span>`);
+    fx('pop bad', cx, cy - ir.height / 2, '−2秒');
+    setHUD(timeLeft());
+  }
+}
+
+function scare() {
+  if (!running) return;
+  const s = document.createElement('div');
+  s.className = 'scare';
+  s.style.top = (20 + Math.random() * 40) + '%';
+  s.innerHTML = '<svg viewBox="0 0 200 200"><use href="#big-ghost"/></svg><b>嘩！</b>';
+  room.appendChild(s);
+  const fl = document.createElement('div'); fl.className = 'flash'; room.appendChild(fl);
+  setTimeout(() => fl.remove(), 400); setTimeout(() => s.remove(), 1700);
+  dim = 40;
+  sfx.boo();
+  scareT = setTimeout(scare, 13000 + Math.random() * 9000);
+}
+
+const timeLeft = () => (endAt - performance.now()) / 1000;
+function loop() {
+  if (!running) return;
+  const t = timeLeft();
+  const s = Math.ceil(t);
+  if (s !== lastSec) { lastSec = s; if (s <= 5 && s > 0) sfx.tick(); }
+  setHUD(t);
+  if (t <= 0) return endGame();
+  raf = requestAnimationFrame(loop);
+}
+
+function startGame() {
+  audio();
+  $('startOv').hidden = true; $('endOv').hidden = true;
+  score = 0; combo = 0; maxCombo = 0; found = 0; target = null; lastSec = GAME_TIME;
+  foundKinds.clear();
+  running = true;
+  endAt = performance.now() + GAME_TIME * 1000;
+  sfx.start();
+  showAccentTip();
+  nextRound();
+  clearTimeout(scareT); scareT = setTimeout(scare, 9000 + Math.random() * 5000);
+  raf = requestAnimationFrame(loop);
+}
+
+function renderVocab() {
+  const v = $('vocab');
+  v.querySelectorAll('.vrow').forEach(r => r.remove());
+  KINDS.forEach(k => {
+    const w = WORDS[k][accent];
+    const row = document.createElement('div');
+    row.className = 'vrow';
+    row.innerHTML = `${iconSVG(k)}<div><div class="hz">${w.hz}</div><div class="py">${pyHTML(w.py)}</div></div><button class="say" type="button" aria-label="聽「${w.hz}」">🔊</button>`;
+    row.querySelector('button').addEventListener('click', () => speak(k));
+    v.appendChild(row);
+  });
+}
+
+function endGame() {
+  running = false;
+  cancelAnimationFrame(raf); clearTimeout(scareT);
+  setHUD(0);
+  sfx.end();
+  $('prompt').hidden = true;
+  itemsEl.querySelectorAll('.item').forEach(b => b.classList.add('out'));
+  const isBest = score > best;
+  if (isBest) { best = score; store.set('hauntBest', best); }
+  $('finalScore').textContent = score;
+  $('stFound').textContent = found;
+  $('stCombo').textContent = maxCombo;
+  $('stBest').textContent = best;
+  $('newBest').hidden = !isBest || score === 0;
+  $('endTitle').textContent = found >= 15 ? '捉鬼大師！' : found >= 8 ? '膽大的勇者！' : '天光咧！';
+  renderVocab();
+  setTimeout(() => { $('endOv').hidden = false; $('againBtn').focus(); }, 500);
+}
+
+$('sayBtn').addEventListener('click', e => { e.stopPropagation(); speak(target); });
+$('sayBtn').addEventListener('pointerdown', e => e.stopPropagation());
+$('sayBtn').addEventListener('pointerup', e => e.stopPropagation());
+$('startBtn').addEventListener('click', startGame);
+$('againBtn').addEventListener('click', startGame);
+
+let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(resize, 80); });
+resize();
+setAccent(accent, false);
+// a few things lurking in the dark behind the start card
+target = 'candy'; scatter(); target = null;
+requestAnimationFrame(draw);
+})();
+</script>
+</body>
+</html>
