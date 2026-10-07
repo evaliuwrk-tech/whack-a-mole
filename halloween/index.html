@@ -47,22 +47,22 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 .items{position:absolute;inset:0;z-index:1}
 #dark{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
 .item{position:absolute;width:var(--s);height:var(--s);margin:calc(var(--s) / -2) 0 0 calc(var(--s) / -2);padding:0;border:0;background:none;cursor:none;transition:opacity .3s,transform .3s;transform:rotate(var(--r)) scale(1)}
-.item svg{width:100%;height:100%;display:block;overflow:visible;pointer-events:none}
+.item img{width:100%;height:100%;display:block;object-fit:contain;pointer-events:none;-webkit-user-drag:none}
 .item.out{opacity:0;transform:rotate(var(--r)) scale(.4)}
-.item.ghost svg{animation:float 2.4s ease-in-out infinite}
-.item.bat svg{animation:flutter 1.6s ease-in-out infinite}
-.item.bat .wing{transform-origin:50% 55%;animation:flap .22s ease-in-out infinite alternate}
-.item.spider svg{animation:dangle 2.8s ease-in-out infinite;transform-origin:50% -60%}
+.item.ghost img{animation:float 2.4s ease-in-out infinite}
+.item.bat img{animation:flutter 1.6s ease-in-out infinite}
+.item.spider img{animation:dangle 2.8s ease-in-out infinite;transform-origin:50% -60%}
+.item.spider::before{content:"";position:absolute;left:50%;bottom:55%;width:2px;height:110%;background:linear-gradient(rgba(217,210,238,0),rgba(217,210,238,.7))}
 @keyframes float{50%{transform:translateY(-10%)}}
-.item.cat svg{animation:purr 3s ease-in-out infinite;transform-origin:50% 100%}
-.item.broom svg{animation:sweep 2.2s ease-in-out infinite;transform-origin:78% 6%}
+.item.cat img{animation:purr 3s ease-in-out infinite;transform-origin:50% 100%}
+.item.broom img{animation:sweep 2.2s ease-in-out infinite;transform-origin:80% 10%}
 @keyframes purr{50%{transform:scale(1.04,.97)}}
 @keyframes sweep{50%{transform:rotate(-12deg)}}
 @keyframes flutter{25%{transform:translate(6%,-6%)}75%{transform:translate(-6%,4%)}}
 @keyframes flap{to{transform:scaleY(.35)}}
 @keyframes dangle{50%{transform:rotate(6deg)}}
 .item.found{z-index:7;opacity:1;animation:foundUp .8s ease-out forwards}
-.item.found svg{filter:drop-shadow(0 0 10px var(--moon)) drop-shadow(0 0 22px var(--pumpkin))}
+.item.found img{filter:drop-shadow(0 0 10px var(--moon)) drop-shadow(0 0 22px var(--pumpkin))}
 @keyframes foundUp{30%{transform:rotate(0) scale(1.45)}100%{transform:rotate(0) scale(1.2) translateY(-30%);opacity:0}}
 .item.wrong{animation:shakeX .4s}
 @keyframes shakeX{20%,60%{transform:rotate(var(--r)) translateX(-12%)}40%,80%{transform:rotate(var(--r)) translateX(12%)}}
@@ -75,7 +75,7 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 .zh{display:inline-block;font-size:13px;font-weight:800;color:var(--ink);background:#d9c9ff;border-radius:8px;padding:1px 7px 2px;letter-spacing:.04em;white-space:nowrap;vertical-align:middle}
 .zh::before{content:"華語 ";opacity:.6;font-size:.85em}
 .prompt .zh{font-size:15px}
-.vrow .zh{margin-left:6px;font-size:11px}
+.vrow .zh{margin-top:3px;font-size:11px}
 .tag .zh{margin-left:4px;font-size:12px}
 .prompt .hz{font-size:clamp(26px,5vw,38px);font-weight:800;color:var(--moon);letter-spacing:.06em}
 .prompt .py{white-space:nowrap;font-size:15px;color:var(--pumpkin);font-weight:800;letter-spacing:.04em}
@@ -97,7 +97,7 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 .combo{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);z-index:30;font-family:var(--spooky);font-size:clamp(40px,8vw,72px);color:var(--pumpkin);text-shadow:0 5px 0 var(--ink),0 0 20px rgba(255,138,31,.6);pointer-events:none;white-space:nowrap;animation:comboIn 1s ease-out forwards}
 @keyframes comboIn{0%{transform:translate(-50%,-50%) scale(.2) rotate(-10deg);opacity:0}25%{transform:translate(-50%,-50%) scale(1.15) rotate(3deg);opacity:1}75%{opacity:1}100%{transform:translate(-50%,-70%);opacity:0}}
 .scare{position:absolute;z-index:25;width:min(46vw,300px);top:30%;left:-50%;pointer-events:none;animation:swoop 1.6s ease-in-out forwards}
-.scare svg{width:100%;height:auto;display:block;filter:drop-shadow(0 0 30px rgba(244,241,255,.6))}
+.scare img{width:100%;height:auto;display:block;filter:drop-shadow(0 0 30px rgba(244,241,255,.6))}
 .scare b{position:absolute;left:60%;top:-6%;font-family:var(--spooky);font-weight:400;font-size:clamp(40px,8vw,70px);color:var(--ghost);text-shadow:0 4px 0 var(--ink)}
 @keyframes swoop{0%{left:-50%;transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-30%) rotate(6deg)}100%{left:120%;transform:translateY(10%) rotate(-4deg)}}
 .flash{position:absolute;inset:0;z-index:24;background:rgba(244,241,255,.25);pointer-events:none;animation:flash .35s forwards}
@@ -131,6 +131,33 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 .big{margin-top:16px;font-family:var(--body);font-weight:800;font-size:22px;letter-spacing:.1em;padding:10px 26px 12px;border:4px solid var(--ink);border-radius:18px;background:var(--pumpkin);color:var(--ink);box-shadow:0 6px 0 var(--ink);cursor:pointer;transition:transform .08s}
 .big:hover{transform:translateY(-2px) rotate(-1.5deg)}
 .big:active{transform:translateY(5px);box-shadow:0 1px 0 var(--ink)}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#endOv .btnrow,.learn .btnrow{justify-content:center}
+.big.alt{background:#efe7ff;font-size:18px;letter-spacing:.04em}
+.bgm-seg{display:block;margin-top:12px}
+.bgm-seg[aria-pressed="false"]{background:#4a3d66;color:#cfc3ea}
+#bgmBtn[aria-pressed="false"]{opacity:.45;text-decoration:line-through}
+.learn{flex-direction:column;text-align:center;max-width:430px;gap:12px}
+.learn .accent{justify-content:center;margin-top:0}
+.learn .btnrow .big{margin-top:4px}
+.ltitle{margin:0;font-size:26px;color:var(--pumpkin);letter-spacing:.1em;text-shadow:0 3px 0 var(--ink)}
+.ltitle small{font-size:14px;color:#d9c9ff;text-shadow:none;margin-left:6px;letter-spacing:.04em}
+.fcard{position:relative;width:100%;box-sizing:border-box;background:radial-gradient(circle at 50% 30%,#4a3270,#1c1233 75%);border:3px solid var(--pumpkin);border-radius:24px;padding:18px 16px 14px;cursor:pointer;box-shadow:0 0 30px rgba(255,138,31,.25),inset 0 0 40px rgba(0,0,0,.4);touch-action:pan-y}
+.fcard:focus-visible{outline:3px solid var(--slime);outline-offset:3px}
+.fcard.turn{animation:turn .35s ease-out}
+@keyframes turn{from{transform:perspective(600px) rotateY(70deg);opacity:.2}}
+.fcard img{display:block;margin:0 auto;height:clamp(110px,26vh,190px);width:auto;max-width:80%;object-fit:contain;filter:drop-shadow(0 0 16px rgba(255,243,196,.35));-webkit-user-drag:none}
+.lhz{margin-top:10px;font-size:clamp(40px,11vw,54px);font-weight:800;color:var(--moon);letter-spacing:.1em;line-height:1.1}
+.lpy{font-size:20px;color:var(--pumpkin);font-weight:800;margin:4px 0 8px}
+.fcard .zh{font-size:16px;padding:3px 10px 4px}
+.lsay{display:block;margin-top:10px;font-size:12px;color:#d9c9ff;opacity:.8}
+.lnav{display:flex;align-items:center;justify-content:center;gap:14px}
+.navb{width:48px;height:48px;border-radius:50%;border:3px solid var(--ink);background:var(--pumpkin);color:var(--ink);font-size:28px;font-weight:800;line-height:1;cursor:pointer;box-shadow:0 3px 0 var(--ink)}
+.navb:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.navb:focus-visible{outline:3px solid var(--slime);outline-offset:2px}
+.dots{display:flex;gap:7px}
+.dots button{width:12px;height:12px;padding:0;border-radius:50%;border:2px solid var(--ink);background:#4a3d66;cursor:pointer}
+.dots button[aria-current="true"]{background:var(--moon);transform:scale(1.25)}
 .final{font-family:var(--spooky);font-size:66px;line-height:1;color:var(--pumpkin);text-shadow:0 4px 0 var(--ink);margin-top:4px}
 .final small{font-family:var(--body);font-size:16px;font-weight:800;margin-left:6px;color:var(--ghost);text-shadow:none}
 .stats{display:flex;gap:14px;font-size:14px;font-weight:800;margin-top:4px;flex-wrap:wrap;color:#d9c9ff}
@@ -139,7 +166,7 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 .vocab{margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
 .vocab h2{grid-column:1/-1;margin:0;font-size:14px;letter-spacing:.1em;color:#d9c9ff}
 .vrow{display:flex;align-items:center;gap:8px;background:rgba(13,10,28,.55);border:2px solid var(--plum-lt);border-radius:14px;padding:6px 8px}
-.vrow svg{width:34px;height:34px;flex:none;overflow:visible}
+.vrow img{width:40px;height:40px;flex:none;object-fit:contain}
 .vrow div{flex:1;min-width:0;line-height:1.2}
 .vrow .hz{font-weight:800;font-size:18px;color:var(--moon);white-space:nowrap}
 .vrow .py{font-size:13px;color:var(--pumpkin);font-weight:800;white-space:nowrap}
@@ -177,7 +204,8 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
       <button class="seg" type="button" data-accent="hoi" aria-pressed="false">海陸</button>
       <div class="accent-tip" id="accentTip" hidden>👆 點這裡可以換腔調喔！</div>
     </div>
-    <button class="icon-btn" id="mute" type="button" aria-label="音效開關">🔊</button>
+    <button class="icon-btn" id="bgmBtn" type="button" aria-label="背景音樂開關" aria-pressed="true" title="背景音樂">🎵</button>
+    <button class="icon-btn" id="mute" type="button" aria-label="音效開關" title="音效">🔊</button>
   </div>
 
   <div class="room" id="room">
@@ -250,7 +278,7 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
     <canvas id="dark"></canvas>
     <div class="prompt" id="prompt" hidden>
       <span class="lbl">找出</span>
-      <span class="word"><span class="hzline"><span class="hz" id="pHz"></span><span class="zh" id="pZh"></span></span><span class="py" id="pPy"></span></span>
+      <span class="word"><span class="hzline"><span class="hz" id="pHz"></span></span><span class="py" id="pPy"></span></span>
       <button class="say" id="sayBtn" type="button" aria-label="再聽一次">🔊</button>
     </div>
   </div>
@@ -267,9 +295,33 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
           <button class="seg" type="button" data-accent="xi" aria-pressed="true">四縣腔</button>
           <button class="seg" type="button" data-accent="hoi" aria-pressed="false">海陸腔</button>
         </div>
-        <button class="big" id="startBtn" type="button">打開手電筒！</button>
+        <div class="btnrow"><button class="big alt" id="learnBtn" type="button">📖 先學單字卡</button><button class="big" id="startBtn" type="button">打開手電筒！</button></div>
+        <button class="seg bgm-seg" id="bgmSeg" type="button" aria-pressed="true">🎵 背景音樂：開</button>
         <p class="credit">客語語音：客家委員會「臺灣客語語音資料庫」語音合成（四縣腔、海陸腔）</p>
       </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="learnOv" hidden>
+    <div class="card learn">
+      <h2 class="ltitle">單字卡 <small id="lCount">1 / 6</small></h2>
+      <div class="fcard" id="fcard" role="button" tabindex="0" aria-label="再聽一次">
+        <img id="lImg" src="img/items/candy.webp" alt="">
+        <div class="lhz" id="lHz"></div>
+        <div class="py lpy" id="lPy"></div>
+        <div><span class="zh" id="lZh"></span></div>
+        <span class="lsay">🔊 點卡片再聽一次・左右滑動換卡</span>
+      </div>
+      <div class="lnav">
+        <button class="navb" id="lPrev" type="button" aria-label="上一張">‹</button>
+        <div class="dots" id="lDots"></div>
+        <button class="navb" id="lNext" type="button" aria-label="下一張">›</button>
+      </div>
+      <div class="accent" role="group" aria-label="選擇腔調">
+        <button class="seg" type="button" data-accent="xi" aria-pressed="true">四縣腔</button>
+        <button class="seg" type="button" data-accent="hoi" aria-pressed="false">海陸腔</button>
+      </div>
+      <div class="btnrow"><button class="big alt" id="lBack" type="button">返回</button><button class="big" id="lStart" type="button">學會了，開始！</button></div>
     </div>
   </div>
 
@@ -286,7 +338,7 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
           <button class="seg" type="button" data-accent="xi" aria-pressed="true">四縣腔</button>
           <button class="seg" type="button" data-accent="hoi" aria-pressed="false">海陸腔</button>
         </div>
-        <button class="big" id="againBtn" type="button">再玩一次</button>
+        <div class="btnrow"><button class="big alt" id="reviewBtn" type="button">📖 單字卡</button><button class="big" id="againBtn" type="button">再玩一次</button></div>
       </div>
     </div>
   </div>
@@ -294,65 +346,6 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
-    <symbol id="i-candy" viewBox="0 0 100 100">
-      <path d="M28 50 L6 32 L10 50 L6 68Z" fill="var(--c2)" stroke="#120b22" stroke-width="3" stroke-linejoin="round"/>
-      <path d="M72 50 L94 32 L90 50 L94 68Z" fill="var(--c2)" stroke="#120b22" stroke-width="3" stroke-linejoin="round"/>
-      <ellipse cx="50" cy="50" rx="26" ry="22" fill="var(--c1)" stroke="#120b22" stroke-width="3.5"/>
-      <path d="M36 34 q10 16 0 32 M50 28 q10 22 0 44 M64 34 q10 16 0 32" stroke="#fff" stroke-width="4" fill="none" opacity=".75" stroke-linecap="round"/>
-      <ellipse cx="42" cy="40" rx="6" ry="3.5" fill="#fff" opacity=".7"/>
-    </symbol>
-    <symbol id="i-ghost" viewBox="0 0 100 100">
-      <path d="M18 92 V46 Q18 10 50 10 Q82 10 82 46 V92 L72 82 L62 92 L50 82 L38 92 L28 82Z" fill="#f4f1ff" stroke="#120b22" stroke-width="3.5" stroke-linejoin="round"/>
-      <ellipse cx="38" cy="44" rx="6" ry="8" fill="#120b22"/><ellipse cx="62" cy="44" rx="6" ry="8" fill="#120b22"/>
-      <ellipse cx="50" cy="62" rx="7" ry="9" fill="#120b22"/>
-      <ellipse cx="28" cy="56" rx="6" ry="3.5" fill="#ffb3c4" opacity=".8"/><ellipse cx="72" cy="56" rx="6" ry="3.5" fill="#ffb3c4" opacity=".8"/>
-    </symbol>
-    <symbol id="i-bat" viewBox="0 0 100 100">
-      <g class="wing"><path d="M44 50 Q30 26 4 34 Q14 40 12 50 Q22 46 26 56 Q34 50 44 58Z" fill="#3b2066" stroke="#120b22" stroke-width="3" stroke-linejoin="round"/>
-      <path d="M56 50 Q70 26 96 34 Q86 40 88 50 Q78 46 74 56 Q66 50 56 58Z" fill="#3b2066" stroke="#120b22" stroke-width="3" stroke-linejoin="round"/></g>
-      <path d="M40 40 L38 26 L46 36 Z M60 40 L62 26 L54 36Z" fill="#4a2a7a" stroke="#120b22" stroke-width="2.5" stroke-linejoin="round"/>
-      <ellipse cx="50" cy="52" rx="15" ry="17" fill="#4a2a7a" stroke="#120b22" stroke-width="3"/>
-      <circle cx="44" cy="48" r="4" fill="#ffe36e"/><circle cx="56" cy="48" r="4" fill="#ffe36e"/>
-      <path d="M45 60 l3 4 l2 -3 l2 3 l3 -4" fill="#fff" stroke="#120b22" stroke-width="1.5" stroke-linejoin="round"/>
-    </symbol>
-    <symbol id="i-spider" viewBox="0 0 100 100">
-      <path d="M50 -40 V36" stroke="#d9d2ee" stroke-width="2" opacity=".7"/>
-      <g stroke="#120b22" stroke-width="4" fill="none" stroke-linecap="round">
-        <path d="M40 52 Q24 38 14 46 M40 58 Q22 56 12 66 M42 64 Q28 72 22 86 M44 68 Q38 82 36 94"/>
-        <path d="M60 52 Q76 38 86 46 M60 58 Q78 56 88 66 M58 64 Q72 72 78 86 M56 68 Q62 82 64 94"/>
-      </g>
-      <circle cx="50" cy="44" r="10" fill="#2a2338" stroke="#120b22" stroke-width="3"/>
-      <ellipse cx="50" cy="62" rx="15" ry="16" fill="#2a2338" stroke="#120b22" stroke-width="3"/>
-      <circle cx="46" cy="43" r="3.2" fill="#fff"/><circle cx="54" cy="43" r="3.2" fill="#fff"/>
-      <circle cx="46" cy="43.5" r="1.6" fill="#120b22"/><circle cx="54" cy="43.5" r="1.6" fill="#120b22"/>
-      <path d="M44 62 h12 M46 68 h8" stroke="#9be564" stroke-width="3" stroke-linecap="round"/>
-    </symbol>
-    <symbol id="i-cat" viewBox="0 0 100 100">
-      <path d="M70 84 Q96 84 92 60 Q90 48 82 52" fill="none" stroke="#120b22" stroke-width="9" stroke-linecap="round"/>
-      <path d="M70 84 Q96 84 92 60 Q90 48 82 52" fill="none" stroke="#2a2338" stroke-width="5" stroke-linecap="round"/>
-      <path d="M28 92 Q22 60 36 46 L64 46 Q78 60 72 92Z" fill="#2a2338" stroke="#120b22" stroke-width="3.5" stroke-linejoin="round"/>
-      <path d="M26 30 L28 6 L42 20 Q50 17 58 20 L72 6 L74 30 Q78 52 50 54 Q22 52 26 30Z" fill="#2a2338" stroke="#120b22" stroke-width="3.5" stroke-linejoin="round"/>
-      <path d="M31 14 L33 24 L39 20Z M69 14 L67 24 L61 20Z" fill="#ff8fb0"/>
-      <ellipse cx="40" cy="33" rx="6" ry="7" fill="#ffe36e"/><ellipse cx="60" cy="33" rx="6" ry="7" fill="#ffe36e"/>
-      <ellipse cx="40" cy="33" rx="2" ry="5.5" fill="#120b22"/><ellipse cx="60" cy="33" rx="2" ry="5.5" fill="#120b22"/>
-      <path d="M47 41 h6 l-3 3z" fill="#ff8fb0"/>
-      <path d="M50 44 q-4 4 -8 2 M50 44 q4 4 8 2" stroke="#e4d8ff" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <path d="M34 42 L18 39 M34 45 L18 47 M66 42 L82 39 M66 45 L82 47" stroke="#e4d8ff" stroke-width="1.5" stroke-linecap="round" opacity=".8"/>
-      <path d="M38 92 v-10 M62 92 v-10" stroke="#120b22" stroke-width="3" stroke-linecap="round"/>
-    </symbol>
-    <symbol id="i-broom" viewBox="0 0 100 100">
-      <path d="M78 6 L44 58" stroke="#120b22" stroke-width="9" stroke-linecap="round"/>
-      <path d="M78 6 L44 58" stroke="#8a5530" stroke-width="5" stroke-linecap="round"/>
-      <path d="M46 52 Q34 56 14 92 Q30 90 34 96 Q42 84 46 96 Q52 82 60 88 Q58 70 56 60Z" fill="#e8b84a" stroke="#120b22" stroke-width="3.5" stroke-linejoin="round"/>
-      <path d="M40 66 L26 88 M46 66 L38 92 M51 66 L50 88" stroke="#b9862a" stroke-width="2.5" stroke-linecap="round"/>
-      <path d="M41 54 Q50 52 57 60 L54 65 Q47 58 38 59Z" fill="#7b5aa8" stroke="#120b22" stroke-width="2.5" stroke-linejoin="round"/>
-    </symbol>
-    <symbol id="big-ghost" viewBox="0 0 200 200">
-      <path d="M30 190 V90 Q30 14 100 14 Q170 14 170 90 V190 L150 170 L130 190 L110 170 L90 190 L70 170 L50 190Z" fill="#f4f1ff" stroke="#120b22" stroke-width="6" stroke-linejoin="round"/>
-      <ellipse cx="74" cy="88" rx="14" ry="20" fill="#120b22"/><ellipse cx="126" cy="88" rx="14" ry="20" fill="#120b22"/>
-      <ellipse cx="100" cy="132" rx="22" ry="28" fill="#120b22"/>
-      <path d="M30 110 Q0 100 6 70 M170 110 Q200 100 194 70" stroke="#120b22" stroke-width="6" fill="#f4f1ff" stroke-linecap="round"/>
-    </symbol>
   </defs>
 </svg>
 
@@ -368,13 +361,12 @@ const WORDS = {
   broom:  { zh: '掃把', xi: { hz: '掃把',   py: 'so baˋ' },      hoi: { hz: '掃把', py: 'soˇ baˊ' } },
 };
 const KINDS = Object.keys(WORDS);
-const CANDY_COLORS = [['#ff8a1f', '#ffd36b'], ['#9be564', '#c9f7a4'], ['#b07cff', '#e2ccff'], ['#ff5470', '#ffb3c4']];
 const GAME_TIME = 60;
 
 const $ = id => document.getElementById(id);
 const room = $('room'), itemsEl = $('items'), canvas = $('dark'), ctx = canvas.getContext('2d');
 const pyHTML = s => s;
-const iconSVG = (kind, colors) => `<svg viewBox="0 0 100 100" style="${colors ? `--c1:${colors[0]};--c2:${colors[1]}` : '--c1:#ff8a1f;--c2:#ffd36b'}"><use href="#i-${kind}"/></svg>`;
+const icon = kind => `<img src="img/items/${kind}.webp" alt="" draggable="false">`;
 
 /* ---------- storage ---------- */
 const store = {
@@ -392,6 +384,7 @@ for (const acc of ['xi', 'hoi']) for (const k of KINDS) {
 }
 function speak(kind) {
   if (muted) return;
+  bgmDuck();
   const a = voices[accent][kind];
   try { a.currentTime = 0; const p = a.play(); if (p) p.catch(() => {}); } catch (e) {}
 }
@@ -426,6 +419,62 @@ $('mute').addEventListener('click', () => {
   store.set('hauntMute', muted ? '1' : '0');
 });
 
+/* ---------- background music (synthesised, loops) ---------- */
+// A-minor music-box tune over a plucked bass, with a soft clock tick; 8 bars of eighth notes
+const MEL = [69,72,76,72,68,71,76,71, 69,72,76,81,80,76,71,68, 65,69,72,69,64,68,71,68, 69,76,74,72,71,68,69,0,
+             76,0,77,76,74,0,72,71, 72,0,74,72,71,0,68,64, 65,69,72,77,76,72,68,71, 69,0,64,0,69,0,0,0];
+const BASS = [45,40, 45,40, 41,40, 45,40, 45,38, 45,40, 41,40, 45,45];
+const BGM = { gain: null, timer: 0, next: 0, step: 0, level: .5 };
+const EIGHTH = 60 / 104 / 2;
+let bgmOn = store.get('hauntBgm') !== '0';
+const midiHz = m => 440 * Math.pow(2, (m - 69) / 12);
+function bgmNote(freq, t, dur, type, vol) {
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .01); g.gain.exponentialRampToValueAtTime(.0008, t + dur);
+  o.connect(g).connect(BGM.gain); o.start(t); o.stop(t + dur + .05);
+}
+function bgmTick() {
+  while (BGM.next < ac.currentTime + .35) {
+    const i = BGM.step % 64, t = BGM.next;
+    if (MEL[i]) { bgmNote(midiHz(MEL[i]), t, .45, 'sine', .07); bgmNote(midiHz(MEL[i] + 12), t, .25, 'triangle', .025); }
+    if (i % 2 === 0) bgmNote(midiHz(BASS[Math.floor(i / 4)]), t, .32, 'triangle', .11);
+    if (i % 2 === 0) bgmNote(i % 8 === 0 ? 2400 : 3000, t, .03, 'square', .006);
+    BGM.next += EIGHTH; BGM.step++;
+  }
+}
+function bgmStart() {
+  if (!bgmOn || document.hidden || !audio() || BGM.timer) return;
+  if (!BGM.gain) { BGM.gain = ac.createGain(); BGM.gain.gain.value = 0; BGM.gain.connect(ac.destination); }
+  BGM.gain.gain.cancelScheduledValues(ac.currentTime);
+  BGM.gain.gain.setTargetAtTime(BGM.level, ac.currentTime, .4);
+  BGM.next = ac.currentTime + .1;
+  BGM.timer = setInterval(bgmTick, 100); bgmTick();
+}
+function bgmStop() {
+  clearInterval(BGM.timer); BGM.timer = 0;
+  if (BGM.gain) { BGM.gain.gain.cancelScheduledValues(ac.currentTime); BGM.gain.gain.setTargetAtTime(0, ac.currentTime, .12); }
+}
+function bgmDuck() {   // let the Hakka word be heard over the music
+  if (!BGM.gain || !BGM.timer) return;
+  const t = ac.currentTime;
+  BGM.gain.gain.cancelScheduledValues(t);
+  BGM.gain.gain.setTargetAtTime(BGM.level * .25, t, .04);
+  BGM.gain.gain.setTargetAtTime(BGM.level, t + .9, .25);
+}
+function setBgm(on, start = true) {
+  bgmOn = on; store.set('hauntBgm', on ? '1' : '0');
+  $('bgmBtn').setAttribute('aria-pressed', String(on));
+  $('bgmSeg').setAttribute('aria-pressed', String(on));
+  $('bgmSeg').textContent = on ? '🎵 背景音樂：開' : '🎵 背景音樂：關';
+  if (start) on ? bgmStart() : bgmStop();
+}
+$('bgmBtn').addEventListener('click', () => setBgm(!bgmOn));
+$('bgmSeg').addEventListener('click', () => setBgm(!bgmOn));
+document.addEventListener('pointerdown', () => { if (bgmOn) bgmStart(); });
+document.addEventListener('visibilitychange', () => { document.hidden ? bgmStop() : (bgmOn && bgmStart()); });
+setBgm(bgmOn, false);
+
 /* ---------- accent ---------- */
 let accent = store.get('hauntAccent') || (store.get('whackAccent') === 'hoi' ? 'hoi' : 'xi');
 function setAccent(a, preview) {
@@ -435,7 +484,9 @@ function setAccent(a, preview) {
   store.set('hauntAccent', a);
   if (target) showPrompt(false);
   renderVocab();
-  if (preview) speak(target || KINDS[Math.floor(Math.random() * KINDS.length)]);
+  const learning = !$('learnOv').hidden;
+  if (learning) showCard(li, false);
+  if (preview) speak(learning ? KINDS[li] : target || KINDS[Math.floor(Math.random() * KINDS.length)]);
 }
 document.querySelectorAll('[data-accent]').forEach(b => b.addEventListener('click', () => setAccent(b.dataset.accent, true)));
 let tipT;
@@ -559,8 +610,8 @@ function scatter() {
     b.style.left = x * 100 + '%'; b.style.top = y * 100 + '%';
     b.style.setProperty('--s', size * (0.85 + Math.random() * 0.3) + 'px');
     b.style.setProperty('--r', (Math.random() * 24 - 12) + 'deg');
-    b.innerHTML = iconSVG(kind, kind === 'candy' ? CANDY_COLORS[Math.floor(Math.random() * CANDY_COLORS.length)] : null);
-    b.querySelector('svg').style.animationDelay = -Math.random() * 2 + 's';
+    b.innerHTML = icon(kind);
+    b.querySelector('img').style.animationDelay = -Math.random() * 2 + 's';
     itemsEl.appendChild(b);
     setTimeout(() => b.classList.remove('out'), 30);
   });
@@ -569,7 +620,6 @@ function scatter() {
 function showPrompt(animate) {
   const w = WORDS[target][accent];
   $('pHz').textContent = w.hz;
-  $('pZh').textContent = WORDS[target].zh;
   $('pPy').innerHTML = pyHTML(w.py);
   $('prompt').hidden = false;
   if (animate) { $('prompt').classList.remove('bump'); void $('prompt').offsetWidth; $('prompt').classList.add('bump'); }
@@ -614,7 +664,7 @@ function pick(it) {
     sfx.bad();
     it.classList.remove('wrong'); void it.offsetWidth; it.classList.add('wrong');
     const w = WORDS[kind][accent];
-    fx('tag', cx, cy + ir.height / 2 + 4, `這係「${w.hz}」<span class="zh">${WORDS[kind].zh}</span><br><span class="py">${pyHTML(w.py)}</span>`);
+    fx('tag', cx, cy + ir.height / 2 + 4, `這係「${w.hz}」<br><span class="py">${pyHTML(w.py)}</span>`);
     fx('pop bad', cx, cy - ir.height / 2, '−2秒');
     setHUD(timeLeft());
   }
@@ -625,7 +675,7 @@ function scare() {
   const s = document.createElement('div');
   s.className = 'scare';
   s.style.top = (20 + Math.random() * 40) + '%';
-  s.innerHTML = '<svg viewBox="0 0 200 200"><use href="#big-ghost"/></svg><b>嘩！</b>';
+  s.innerHTML = '<img src="img/items/ghost.webp" alt=""><b>嘩！</b>';
   room.appendChild(s);
   const fl = document.createElement('div'); fl.className = 'flash'; room.appendChild(fl);
   setTimeout(() => fl.remove(), 400); setTimeout(() => s.remove(), 1700);
@@ -666,7 +716,7 @@ function renderVocab() {
     const w = WORDS[k][accent];
     const row = document.createElement('div');
     row.className = 'vrow';
-    row.innerHTML = `${iconSVG(k)}<div><div class="hz">${w.hz}<span class="zh">${WORDS[k].zh}</span></div><div class="py">${pyHTML(w.py)}</div></div><button class="say" type="button" aria-label="聽「${w.hz}」">🔊</button>`;
+    row.innerHTML = `${icon(k)}<div><div class="hz">${w.hz}</div><div class="py">${pyHTML(w.py)}</div><span class="zh">${WORDS[k].zh}</span></div><button class="say" type="button" aria-label="聽「${w.hz}」">🔊</button>`;
     row.querySelector('button').addEventListener('click', () => speak(k));
     v.appendChild(row);
   });
@@ -733,6 +783,56 @@ $('sayBtn').addEventListener('click', e => { e.stopPropagation(); speak(target);
 $('sayBtn').addEventListener('pointerdown', e => e.stopPropagation());
 $('sayBtn').addEventListener('pointerup', e => e.stopPropagation());
 $('startBtn').addEventListener('click', startGame);
+
+/* ---------- word cards ---------- */
+let li = 0, learnFrom = 'startOv';
+KINDS.forEach((k, i) => {
+  const d = document.createElement('button');
+  d.type = 'button'; d.setAttribute('aria-label', `第 ${i + 1} 張`);
+  d.addEventListener('click', () => showCard(i, true));
+  $('lDots').appendChild(d);
+});
+function showCard(i, say) {
+  li = (i + KINDS.length) % KINDS.length;
+  const k = KINDS[li], w = WORDS[k][accent];
+  $('lImg').src = `img/items/${k}.webp`;
+  $('lHz').textContent = w.hz;
+  $('lPy').textContent = w.py;
+  $('lZh').textContent = WORDS[k].zh;
+  $('lCount').textContent = `${li + 1} / ${KINDS.length}`;
+  $('lDots').querySelectorAll('button').forEach((d, j) => d.setAttribute('aria-current', String(j === li)));
+  const c = $('fcard'); c.classList.remove('turn'); void c.offsetWidth; c.classList.add('turn');
+  if (say) speak(k);
+}
+function openLearn(from) {
+  learnFrom = from;
+  $(from).hidden = true; stopCarriage();
+  $('learnOv').hidden = false;
+  audio(); showCard(0, true);
+  $('lNext').focus();
+}
+function closeLearn() { $('learnOv').hidden = true; $(learnFrom).hidden = false; if (learnFrom === 'endOv') playCarriage(); }
+$('learnBtn').addEventListener('click', () => openLearn('startOv'));
+$('reviewBtn').addEventListener('click', () => openLearn('endOv'));
+$('lBack').addEventListener('click', closeLearn);
+$('lStart').addEventListener('click', () => { $('learnOv').hidden = true; startGame(); });
+$('lPrev').addEventListener('click', () => showCard(li - 1, true));
+$('lNext').addEventListener('click', () => showCard(li + 1, true));
+let swipeX = null, swiped = false;
+$('fcard').addEventListener('pointerdown', e => { swipeX = e.clientX; swiped = false; });
+$('fcard').addEventListener('pointerup', e => {
+  if (swipeX === null) return;
+  const dx = e.clientX - swipeX; swipeX = null;
+  if (Math.abs(dx) > 50) { swiped = true; showCard(li + (dx < 0 ? 1 : -1), true); }
+});
+$('fcard').addEventListener('click', () => { if (!swiped) speak(KINDS[li]); swiped = false; });
+$('fcard').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); speak(KINDS[li]); } });
+window.addEventListener('keydown', e => {
+  if ($('learnOv').hidden) return;
+  if (e.key === 'ArrowRight') showCard(li + 1, true);
+  if (e.key === 'ArrowLeft') showCard(li - 1, true);
+  if (e.key === 'Escape') closeLearn();
+});
 $('againBtn').addEventListener('click', startGame);
 
 let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(resize, 80); });
