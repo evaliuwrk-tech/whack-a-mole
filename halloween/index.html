@@ -160,6 +160,22 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 .dots{display:flex;gap:7px}
 .dots button{width:12px;height:12px;padding:0;border-radius:50%;border:2px solid var(--ink);background:#4a3d66;cursor:pointer}
 .dots button[aria-current="true"]{background:var(--moon);transform:scale(1.25)}
+.lv-chip small{white-space:nowrap}
+.lv2-btn{display:block;margin-top:10px;background:var(--slime)}
+.lvcard{max-width:440px}
+.lvbonus{margin:0!important;font-weight:800;color:var(--moon)!important}
+.lvbonus b{color:var(--slime)}
+.lvnext{position:relative;background:rgba(13,10,28,.6);border:3px dashed var(--pumpkin);border-radius:20px;padding:22px 16px 14px}
+.lvnext p{margin:6px 0 0!important}
+.lvbadge{position:absolute;left:50%;top:-16px;transform:translateX(-50%) rotate(-3deg);background:var(--blood);color:#fff;border:3px solid var(--ink);border-radius:12px;padding:2px 14px;font-weight:800;font-size:16px;letter-spacing:.1em}
+.lvicons{position:relative;height:84px}
+.lvicons img{position:absolute;height:64px;width:auto;top:10px}
+.m-ghost{left:4%;animation:mGhost 3s ease-in-out infinite}
+.m-cat{left:38%;animation:mCat 4s linear infinite}
+.m-bat{right:2%;animation:mBat 1.4s ease-in-out infinite}
+@keyframes mGhost{50%{transform:translate(18px,-12px);opacity:.45}}
+@keyframes mCat{0%{transform:translateX(-26px)}45%{transform:translateX(26px)}50%{transform:translateX(26px) scaleX(-1)}95%{transform:translateX(-26px) scaleX(-1)}100%{transform:translateX(-26px)}}
+@keyframes mBat{25%{transform:translate(-14px,-10px) rotate(-8deg)}75%{transform:translate(10px,8px) rotate(8deg)}}
 .final{font-family:var(--spooky);font-size:66px;line-height:1;color:var(--pumpkin);text-shadow:0 4px 0 var(--ink);margin-top:4px}
 .final small{font-family:var(--body);font-size:16px;font-weight:800;margin-left:6px;color:var(--ghost);text-shadow:none}
 .stats{display:flex;gap:14px;font-size:14px;font-weight:800;margin-top:4px;flex-wrap:wrap;color:#d9c9ff}
@@ -199,7 +215,7 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
   <div class="hud">
     <div class="chip"><small>分數</small><b id="score">0</b></div>
     <div class="chip time" id="timeChip"><small>時間</small><b id="time">60</b></div>
-    <div class="chip"><small>連續</small><b id="combo">0</b></div>
+    <div class="chip lv-chip"><small id="lvName">第1關</small><b id="lvProg">0/8</b></div>
     <div class="chip accent-chip" role="group" aria-label="切換腔調">
       <small>腔調<br>切換</small>
       <button class="seg" type="button" data-accent="xi" aria-pressed="true">四縣</button>
@@ -299,6 +315,7 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
           <button class="seg" type="button" data-accent="hoi" aria-pressed="false">海陸腔</button>
         </div>
         <div class="btnrow"><button class="big alt" id="learnBtn" type="button">📖 先學單字卡</button><button class="big" id="startBtn" type="button">打開手電筒！</button></div>
+        <button class="big alt lv2-btn" id="lv2Btn" type="button" hidden>⚡ 直接挑戰進階關</button>
         <button class="seg bgm-seg" id="bgmSeg" type="button" aria-pressed="true">🎵 背景音樂：開</button>
         <p class="credit">客語語音：客家委員會「臺灣客語語音資料庫」語音合成（四縣腔、海陸腔）</p>
       </div>
@@ -328,13 +345,28 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
     </div>
   </div>
 
+  <div class="overlay" id="levelOv" hidden>
+    <div class="card learn lvcard">
+      <h2 class="ltitle">第 1 關過關！</h2>
+      <p class="lvbonus" id="lvBonus"></p>
+      <div class="lvnext">
+        <span class="lvbadge">進階關</span>
+        <div class="lvicons" aria-hidden="true">
+          <img class="m-ghost" src="img/items/ghost.webp" alt=""><img class="m-cat" src="img/items/cat.webp" alt=""><img class="m-bat" src="img/items/bat.webp" alt="">
+        </div>
+        <p>東西開始會動了！<br>鬼仔會飄、貓仔會走來走去、蝠婆會亂飛……<br><b>60 秒內找到 10 個</b>就全部過關！</p>
+      </div>
+      <div class="btnrow"><button class="big alt" id="lvHome" type="button">🏠 回首頁</button><button class="big" id="lvGo" type="button">進入進階關！</button></div>
+    </div>
+  </div>
+
   <div class="overlay" id="endOv" hidden>
     <div class="card">
       <div class="carriage" role="img" aria-label="黑馬拉著閃閃發亮的南瓜馬車從右邊駛來，車上坐著吸血鬼裝扮的男孩和紅髮女孩"><video id="carVid" src="img/carriage.mp4" muted playsinline preload="auto" aria-hidden="true"></video><canvas id="carCv" width="880" height="398"></canvas><img id="carImg" src="img/carriage.webp" alt="" hidden></div>
       <div class="txt">
         <h1 id="endTitle">天光咧！</h1>
         <div class="final"><span id="finalScore">0</span><small>分</small></div>
-        <div class="stats"><span>找到 <b id="stFound">0</b> 個</span><span>最高連續 <b id="stCombo">0</b></span><span>最高分 <b id="stBest">0</b></span></div>
+        <div class="stats"><span>到達 <b id="stLevel">第1關</b></span><span>找到 <b id="stFound">0</b> 個</span><span>最高連續 <b id="stCombo">0</b></span><span>最高分 <b id="stBest">0</b></span></div>
         <div id="newBest" class="badge" hidden>新紀錄！</div>
         <div class="vocab" id="vocab"><h2>今晚學到的客語</h2></div>
         <div class="accent" role="group" aria-label="選擇腔調">
@@ -635,17 +667,22 @@ function sparks(x, y) {
 }
 
 /* ---------- game ---------- */
+const LEVELS = { 1: { goal: 8, moving: false }, 2: { goal: 10, moving: true } };
+let level = 1, levelFound = 0, reachedLevel = 1;
 let running = false, score = 0, combo = 0, maxCombo = 0, found = 0, target = null, roundAt = 0, endAt = 0, raf = 0, lastSec = GAME_TIME, scareT = 0, lock = false;
 const foundKinds = new Set();
 
 function setHUD(t = GAME_TIME) {
-  $('score').textContent = score; $('combo').textContent = combo;
+  $('score').textContent = score;
+  $('lvName').textContent = `第${level}關`;
+  $('lvProg').textContent = `${levelFound}/${LEVELS[level].goal}`;
   $('time').textContent = Math.max(0, Math.ceil(t));
   $('timeChip').classList.toggle('low', running && t <= 10);
 }
 
 function scatter() {
   itemsEl.innerHTML = '';
+  movers = [];
   const narrow = W < 640;
   const cols = narrow ? 3 : 4, rows = narrow ? 4 : 3, n = narrow ? 7 : 9;
   const top = narrow ? 0.07 : 0.22, bottom = narrow ? 0.8 : 0.93;
@@ -674,9 +711,73 @@ function scatter() {
     b.innerHTML = icon(kind);
     b.querySelector('img').style.animationDelay = -Math.random() * 2 + 's';
     itemsEl.appendChild(b);
+    if (LEVELS[level].moving) addMover(b, kind, x, y, top, bottom);
     setTimeout(() => b.classList.remove('out'), 30);
   });
 }
+
+/* ---------- advanced level: things move ---------- */
+let movers = [], moveRaf = 0, moveLast = 0;
+const rnd = (a, b) => a + Math.random() * (b - a);
+function addMover(el, kind, x, y, top, bottom) {
+  const m = { el, img: el.querySelector('img'), kind, x, y, top, bottom, ph: Math.random() * 6.28, t: 0, pause: 0 };
+  el.style.setProperty('--r', '0deg');
+  if (kind === 'ghost') { const a = Math.random() * 6.28; m.vx = Math.cos(a) * .06; m.vy = Math.sin(a) * .045; }
+  if (kind === 'cat') { m.y = bottom - .02; m.vx = (Math.random() < .5 ? -1 : 1) * rnd(.05, .08); }
+  if (kind === 'bat') { m.vx = (Math.random() < .5 ? -1 : 1) * rnd(.12, .17); m.baseY = rnd(top + .05, Math.min(.6, bottom)); }
+  if (kind === 'spider') { m.y0 = top; m.y1 = Math.min(bottom, top + .45); }
+  if (kind === 'broom') { m.cx = Math.min(.8, Math.max(.2, x)); m.cy = Math.min(bottom - .1, Math.max(top + .1, y)); m.ang = Math.random() * 6.28; m.dir = Math.random() < .5 ? -1 : 1; }
+  if (kind === 'candy') { m.x0 = x; }
+  movers.push(m);
+  if (!moveRaf) { moveLast = performance.now(); moveRaf = requestAnimationFrame(moveTick); }
+}
+function moveTick(now) {
+  const dt = Math.min(.25, (now - moveLast) / 1000); moveLast = now;
+  for (const m of movers) {
+    if (m.el.classList.contains('found')) continue;
+    m.t += dt;
+    switch (m.kind) {
+      case 'ghost': {   // drifts, turns lazily, fades in and out
+        const a = Math.atan2(m.vy, m.vx) + (Math.random() - .5) * 1.2 * dt, sp = Math.hypot(m.vx, m.vy);
+        m.vx = Math.cos(a) * sp; m.vy = Math.sin(a) * sp;
+        m.x += m.vx * dt; m.y += m.vy * dt;
+        if (m.x < .08 || m.x > .92) m.vx *= -1;
+        if (m.y < m.top || m.y > m.bottom) m.vy *= -1;
+        m.img.style.opacity = (.3 + .7 * (.5 + .5 * Math.sin(m.t * .9 + m.ph))).toFixed(2);
+        break;
+      }
+      case 'cat': {     // walks the floor, sometimes sits for a moment, turns at the walls
+        if (m.pause > 0) { m.pause -= dt; break; }
+        m.x += m.vx * dt;
+        if (m.x < .07 || m.x > .93) m.vx *= -1;
+        if (Math.random() < dt * .25) { m.pause = rnd(.6, 1.6); if (Math.random() < .4) m.vx *= -1; }
+        m.img.style.scale = m.vx > 0 ? '-1 1' : '1 1';
+        break;
+      }
+      case 'bat':       // fast zig-zag flight across the upper room
+        m.x += m.vx * dt;
+        if (m.x < .06 || m.x > .94) m.vx *= -1;
+        m.y = m.baseY + Math.sin(m.t * 3.2 + m.ph) * .07;
+        m.img.style.scale = m.vx > 0 ? '-1 1' : '1 1';
+        break;
+      case 'spider':    // climbs up and down its thread
+        m.y = m.y0 + (.5 + .5 * Math.sin(m.t * .9 + m.ph)) * (m.y1 - m.y0);
+        break;
+      case 'broom':     // flies slow loops
+        m.ang += m.dir * .55 * dt;
+        m.x = m.cx + Math.cos(m.ang) * .14; m.y = m.cy + Math.sin(m.ang) * .08;
+        m.el.style.setProperty('--r', (Math.cos(m.ang) * 14 * m.dir).toFixed(1) + 'deg');
+        break;
+      case 'candy':     // just wobbles about
+        m.x = m.x0 + Math.sin(m.t * .7 + m.ph) * .03;
+        break;
+    }
+    m.el.style.left = (m.x * 100).toFixed(2) + '%';
+    m.el.style.top = (m.y * 100).toFixed(2) + '%';
+  }
+  moveRaf = movers.length ? requestAnimationFrame(moveTick) : 0;
+}
+function stopMovers() { movers = []; cancelAnimationFrame(moveRaf); moveRaf = 0; }
 
 function showPrompt(animate) {
   const w = WORDS[target][accent];
@@ -704,7 +805,7 @@ function pick(it) {
   if (kind === target) {
     lock = true;
     const fast = performance.now() - roundAt < 3000;
-    combo++; found++; maxCombo = Math.max(maxCombo, combo);
+    combo++; found++; levelFound++; maxCombo = Math.max(maxCombo, combo);
     foundKinds.add(kind);
     const pts = 10 + (fast ? 5 : 0) + (combo >= 5 ? 5 : 0);
     score += pts;
@@ -718,7 +819,8 @@ function pick(it) {
     }
     setHUD(timeLeft());
     itemsEl.querySelectorAll('.item:not(.found)').forEach(b => b.classList.add('out'));
-    setTimeout(() => { if (running) nextRound(); }, 850);
+    if (levelFound >= LEVELS[level].goal) { setTimeout(levelClear, 700); running = false; clearInterval(raf); clearTimeout(scareT); }
+    else setTimeout(() => { if (running) nextRound(); }, 850);
   } else {
     combo = 0;
     endAt -= 2000;   // wrong pick costs two seconds
@@ -756,18 +858,40 @@ function loop() {
   
 }
 
-function startGame() {
+function startGame(lv = 1) {
   audio();
-  $('startOv').hidden = true; $('endOv').hidden = true; stopCarriage();
-  score = 0; combo = 0; maxCombo = 0; found = 0; target = null; lastSec = GAME_TIME;
+  $('startOv').hidden = true; $('endOv').hidden = true; $('levelOv').hidden = true; stopCarriage();
+  score = 0; combo = 0; maxCombo = 0; found = 0; target = null;
   foundKinds.clear();
+  reachedLevel = lv;
+  startLevel(lv);
+  showAccentTip();
+}
+function startLevel(lv) {
+  level = lv; levelFound = 0; reachedLevel = Math.max(reachedLevel, lv); lastSec = GAME_TIME;
+  $('levelOv').hidden = true;
+  stopMovers();
   running = true;
   endAt = performance.now() + GAME_TIME * 1000;
   sfx.start();
-  showAccentTip();
   nextRound();
+  setHUD(GAME_TIME);
   clearTimeout(scareT); scareT = setTimeout(scare, 9000 + Math.random() * 5000);
   clearInterval(raf); raf = setInterval(loop, 100);
+}
+function levelClear() {
+  const left = Math.max(0, Math.ceil(timeLeft())), bonus = left * 2;
+  score += bonus;
+  $('prompt').hidden = true;
+  itemsEl.querySelectorAll('.item').forEach(b => b.classList.add('out'));
+  stopMovers();
+  setHUD(left);
+  if (level >= 2) return endGame(true);
+  store.set('hauntLv2', '1'); $('lv2Btn').hidden = false;
+  [523, 659, 784, 1047].forEach((f, i) => tone(f, f, .18, 'triangle', .14, i * .1));
+  $('lvBonus').innerHTML = `剩下 ${left} 秒 → 時間獎勵 <b>+${bonus}</b> 分`;
+  $('levelOv').hidden = false;
+  $('lvGo').focus();
 }
 
 function renderVocab() {
@@ -821,8 +945,8 @@ function playCarriage() {
 }
 function stopCarriage() { carOn = false; carVid.pause(); }
 
-function endGame() {
-  running = false;
+function endGame(cleared = false) {
+  running = false; stopMovers();
   clearInterval(raf); clearTimeout(scareT);
   setHUD(0);
   sfx.end();
@@ -835,7 +959,8 @@ function endGame() {
   $('stCombo').textContent = maxCombo;
   $('stBest').textContent = best;
   $('newBest').hidden = !isBest || score === 0;
-  $('endTitle').textContent = found >= 15 ? '捉鬼大師！' : found >= 8 ? '膽大的勇者！' : '天光咧！';
+  $('stLevel').textContent = cleared ? '全部過關' : `第${reachedLevel}關`;
+  $('endTitle').textContent = cleared ? '全部過關！捉鬼大師！' : reachedLevel >= 2 ? '膽大的勇者！' : '天光咧！';
   renderVocab();
   clearTimeout(endT);
   endT = setTimeout(() => { $('endOv').hidden = false; playCarriage(); $('againBtn').focus(); }, 500);
@@ -849,8 +974,9 @@ function goHome() {
   $('prompt').hidden = true; $('accentTip').hidden = true;
   itemsEl.querySelectorAll('.item').forEach(b => b.classList.add('out'));
   stopCarriage();
-  $('endOv').hidden = true; $('learnOv').hidden = true;
-  score = 0; combo = 0; setHUD(GAME_TIME);
+  $('endOv').hidden = true; $('learnOv').hidden = true; $('levelOv').hidden = true;
+  stopMovers();
+  score = 0; combo = 0; level = 1; levelFound = 0; setHUD(GAME_TIME);
   $('startOv').hidden = false;
   $('startBtn').focus();
 }
@@ -860,7 +986,11 @@ $('homeEndBtn').addEventListener('click', goHome);
 $('sayBtn').addEventListener('click', e => { e.stopPropagation(); speak(target, true); });
 $('sayBtn').addEventListener('pointerdown', e => e.stopPropagation());
 $('sayBtn').addEventListener('pointerup', e => e.stopPropagation());
-$('startBtn').addEventListener('click', startGame);
+$('startBtn').addEventListener('click', () => startGame(1));
+$('lv2Btn').addEventListener('click', () => startGame(2));
+$('lvGo').addEventListener('click', () => startLevel(2));
+$('lvHome').addEventListener('click', goHome);
+if (store.get('hauntLv2') === '1') $('lv2Btn').hidden = false;
 
 /* ---------- word cards ---------- */
 let li = 0, learnFrom = 'startOv';
@@ -893,7 +1023,7 @@ function closeLearn() { $('learnOv').hidden = true; $(learnFrom).hidden = false;
 $('learnBtn').addEventListener('click', () => openLearn('startOv'));
 $('reviewBtn').addEventListener('click', () => openLearn('endOv'));
 $('lBack').addEventListener('click', closeLearn);
-$('lStart').addEventListener('click', () => { $('learnOv').hidden = true; startGame(); });
+$('lStart').addEventListener('click', () => { $('learnOv').hidden = true; startGame(1); });
 $('lPrev').addEventListener('click', () => showCard(li - 1, true));
 $('lNext').addEventListener('click', () => showCard(li + 1, true));
 let swipeX = null, swiped = false;
@@ -911,7 +1041,7 @@ window.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft') showCard(li - 1, true);
   if (e.key === 'Escape') closeLearn();
 });
-$('againBtn').addEventListener('click', startGame);
+$('againBtn').addEventListener('click', () => startGame(1));
 
 let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(resize, 80); });
 resize();
