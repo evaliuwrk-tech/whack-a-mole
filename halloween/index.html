@@ -420,34 +420,90 @@ $('mute').addEventListener('click', () => {
 });
 
 /* ---------- background music (synthesised, loops) ---------- */
-// A-minor music-box tune over a plucked bass, with a soft clock tick; 8 bars of eighth notes
-const MEL = [69,72,76,72,68,71,76,71, 69,72,76,81,80,76,71,68, 65,69,72,69,64,68,71,68, 69,76,74,72,71,68,69,0,
-             76,0,77,76,74,0,72,71, 72,0,74,72,71,0,68,64, 65,69,72,77,76,72,68,71, 69,0,64,0,69,0,0,0];
-const BASS = [45,40, 45,40, 41,40, 45,40, 45,38, 45,40, 41,40, 45,45];
-const BGM = { gain: null, timer: 0, next: 0, step: 0, level: .5 };
-const EIGHTH = 60 / 104 / 2;
+// Spooky D-minor loop, 8 bars of eighth notes at 84 bpm:
+// Bach's Toccata-style mordent motif on a music box, pipe-organ chords over a chromatic
+// falling bass, a heartbeat thump each bar, a funeral bell, wind, and a ghostly theremin glide.
+const MEL = [81,0,79,81,0,0,0,0,  77,76,74,73,74,0,0,0,  69,0,67,69,0,0,0,0,  65,64,62,61,62,0,0,0,
+             74,0,77,0,82,0,81,0,  79,0,70,0,74,0,79,0,  76,0,73,0,79,0,76,0,  81,0,0,0,80,69,0,0];
+const CHORDS = [[50,53,57],[49,53,57],[48,53,57],[47,53,56],[46,50,53],[43,46,50],[45,49,55],[45,49,52]];
+const BASS = [38, 37, 36, 35, 34, 31, 33, 33];
+const BGM = { gain: null, timer: 0, next: 0, step: 0, level: .6, wind: null };
+const EIGHTH = 60 / 84 / 2;
 let bgmOn = store.get('hauntBgm') !== '0';
 const midiHz = m => 440 * Math.pow(2, (m - 69) / 12);
-function bgmNote(freq, t, dur, type, vol) {
+function bgmNote(freq, t, dur, type, vol, attack = .01) {
   const o = ac.createOscillator(), g = ac.createGain();
   o.type = type; o.frequency.value = freq;
-  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .01); g.gain.exponentialRampToValueAtTime(.0008, t + dur);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + attack); g.gain.exponentialRampToValueAtTime(.0008, t + dur);
   o.connect(g).connect(BGM.gain); o.start(t); o.stop(t + dur + .05);
 }
+function organ(notes, t, dur) {   // two detuned saws per note through a soft low-pass
+  const f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 1100; f.Q.value = .4;
+  const g = ac.createGain();
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.05, t + .35);
+  g.gain.setValueAtTime(.05, t + dur - .3); g.gain.linearRampToValueAtTime(0, t + dur);
+  f.connect(g).connect(BGM.gain);
+  notes.forEach(n => [-6, 6].forEach(c => {
+    const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = midiHz(n); o.detune.value = c;
+    const v = ac.createGain(); v.gain.value = .35; o.connect(v).connect(f); o.start(t); o.stop(t + dur + .05);
+  }));
+}
+function heartbeat(t) {
+  [0, .22].forEach((d, i) => {
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(70, t + d); o.frequency.exponentialRampToValueAtTime(38, t + d + .18);
+    g.gain.setValueAtTime(i ? .22 : .3, t + d); g.gain.exponentialRampToValueAtTime(.001, t + d + .22);
+    o.connect(g).connect(BGM.gain); o.start(t + d); o.stop(t + d + .25);
+  });
+}
+function bell(t) {   // inharmonic partials make it sound like a church bell
+  const f0 = midiHz(50);
+  [[1, .07], [2.76, .035], [5.4, .02], [8.9, .01]].forEach(([r, v]) => bgmNote(f0 * r, t, 4.5, 'sine', v, .005));
+}
+function theremin(t) {
+  const o = ac.createOscillator(), g = ac.createGain(), lfo = ac.createOscillator(), lg = ac.createGain();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(midiHz(74), t);
+  o.frequency.linearRampToValueAtTime(midiHz(82), t + 1.6);
+  o.frequency.linearRampToValueAtTime(midiHz(73), t + 3.6);
+  o.frequency.linearRampToValueAtTime(midiHz(62), t + 5.2);
+  lfo.frequency.value = 5.5; lg.gain.value = 9; lfo.connect(lg).connect(o.frequency);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.035, t + .8);
+  g.gain.setValueAtTime(.035, t + 4.4); g.gain.linearRampToValueAtTime(0, t + 5.4);
+  o.connect(g).connect(BGM.gain); o.start(t); lfo.start(t); o.stop(t + 5.5); lfo.stop(t + 5.5);
+}
+function startWind() {
+  if (BGM.wind) return;
+  const len = ac.sampleRate * 3, buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+  const src = ac.createBufferSource(); src.buffer = buf; src.loop = true;
+  const f = ac.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 450; f.Q.value = 1.2;
+  const lfo = ac.createOscillator(), lg = ac.createGain(); lfo.frequency.value = .09; lg.gain.value = 260;
+  lfo.connect(lg).connect(f.frequency);
+  const g = ac.createGain(); g.gain.value = .045;
+  src.connect(f).connect(g).connect(BGM.gain); src.start(); lfo.start();
+  BGM.wind = src;
+}
 function bgmTick() {
-  while (BGM.next < ac.currentTime + .35) {
-    const i = BGM.step % 64, t = BGM.next;
-    if (MEL[i]) { bgmNote(midiHz(MEL[i]), t, .45, 'sine', .07); bgmNote(midiHz(MEL[i] + 12), t, .25, 'triangle', .025); }
-    if (i % 2 === 0) bgmNote(midiHz(BASS[Math.floor(i / 4)]), t, .32, 'triangle', .11);
-    if (i % 2 === 0) bgmNote(i % 8 === 0 ? 2400 : 3000, t, .03, 'square', .006);
+  while (BGM.next < ac.currentTime + .4) {
+    const i = BGM.step % 64, t = BGM.next, bar = Math.floor(i / 8);
+    if (i % 8 === 0) {
+      organ(CHORDS[bar], t, EIGHTH * 8);
+      bgmNote(midiHz(BASS[bar]), t, EIGHTH * 7.5, 'triangle', .14, .05);
+      heartbeat(t);
+    }
+    if (i === 0 && BGM.step % 128 === 0) bell(t);
+    if (i === 32) theremin(t);
+    if (MEL[i]) { bgmNote(midiHz(MEL[i]), t, .7, 'sine', .06); bgmNote(midiHz(MEL[i] + 12), t, .35, 'triangle', .02); }
     BGM.next += EIGHTH; BGM.step++;
   }
 }
 function bgmStart() {
   if (!bgmOn || document.hidden || !audio() || BGM.timer) return;
   if (!BGM.gain) { BGM.gain = ac.createGain(); BGM.gain.gain.value = 0; BGM.gain.connect(ac.destination); }
+  startWind();
   BGM.gain.gain.cancelScheduledValues(ac.currentTime);
-  BGM.gain.gain.setTargetAtTime(BGM.level, ac.currentTime, .4);
+  BGM.gain.gain.setTargetAtTime(BGM.level, ac.currentTime, .6);
   BGM.next = ac.currentTime + .1;
   BGM.timer = setInterval(bgmTick, 100); bgmTick();
 }
