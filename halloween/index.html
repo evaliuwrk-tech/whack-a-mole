@@ -385,8 +385,9 @@ const voices = { xi: {}, hoi: {} };
 for (const acc of ['xi', 'hoi']) for (const k of KINDS) {
   const a = new Audio(`audio/${acc}_${k}.wav`); a.preload = 'auto'; voices[acc][k] = a;
 }
-function speak(kind) {
-  if (muted) return;
+// asked = the player pressed something to hear this word, so play it even with sound effects off
+function speak(kind, asked = false) {
+  if (muted && !asked) return;
   bgmDuck();
   const a = voices[accent][kind];
   try { a.currentTime = 0; const p = a.play(); if (p) p.catch(() => {}); } catch (e) {}
@@ -546,7 +547,7 @@ function setAccent(a, preview) {
   renderVocab();
   const learning = !$('learnOv').hidden;
   if (learning) showCard(li, false);
-  if (preview) speak(learning ? KINDS[li] : target || KINDS[Math.floor(Math.random() * KINDS.length)]);
+  if (preview) speak(learning ? KINDS[li] : target || KINDS[Math.floor(Math.random() * KINDS.length)], true);
 }
 document.querySelectorAll('[data-accent]').forEach(b => b.addEventListener('click', () => setAccent(b.dataset.accent, true)));
 let tipT;
@@ -777,7 +778,7 @@ function renderVocab() {
     const row = document.createElement('div');
     row.className = 'vrow';
     row.innerHTML = `${icon(k)}<div><div class="hz">${w.hz}</div><div class="py">${pyHTML(w.py)}</div><span class="zh">${WORDS[k].zh}</span></div><button class="say" type="button" aria-label="聽「${w.hz}」">🔊</button>`;
-    row.querySelector('button').addEventListener('click', () => speak(k));
+    row.querySelector('button').addEventListener('click', () => speak(k, true));
     v.appendChild(row);
   });
 }
@@ -856,7 +857,7 @@ function goHome() {
 $('homeBtn').addEventListener('click', goHome);
 $('homeEndBtn').addEventListener('click', goHome);
 
-$('sayBtn').addEventListener('click', e => { e.stopPropagation(); speak(target); });
+$('sayBtn').addEventListener('click', e => { e.stopPropagation(); speak(target, true); });
 $('sayBtn').addEventListener('pointerdown', e => e.stopPropagation());
 $('sayBtn').addEventListener('pointerup', e => e.stopPropagation());
 $('startBtn').addEventListener('click', startGame);
@@ -879,7 +880,7 @@ function showCard(i, say) {
   $('lCount').textContent = `${li + 1} / ${KINDS.length}`;
   $('lDots').querySelectorAll('button').forEach((d, j) => d.setAttribute('aria-current', String(j === li)));
   const c = $('fcard'); c.classList.remove('turn'); void c.offsetWidth; c.classList.add('turn');
-  if (say) speak(k);
+  if (say) speak(k, true);
 }
 function openLearn(from) {
   learnFrom = from;
@@ -902,8 +903,8 @@ $('fcard').addEventListener('pointerup', e => {
   const dx = e.clientX - swipeX; swipeX = null;
   if (Math.abs(dx) > 50) { swiped = true; showCard(li + (dx < 0 ? 1 : -1), true); }
 });
-$('fcard').addEventListener('click', () => { if (!swiped) speak(KINDS[li]); swiped = false; });
-$('fcard').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); speak(KINDS[li]); } });
+$('fcard').addEventListener('click', () => { if (!swiped) speak(KINDS[li], true); swiped = false; });
+$('fcard').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); speak(KINDS[li], true); } });
 window.addEventListener('keydown', e => {
   if ($('learnOv').hidden) return;
   if (e.key === 'ArrowRight') showCard(li + 1, true);
