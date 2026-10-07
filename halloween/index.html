@@ -56,7 +56,6 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 .item.spider img{animation:dangle 2.8s ease-in-out infinite;transform-origin:50% -60%}
 .item.spider::before{content:"";position:absolute;left:50%;bottom:55%;width:2px;height:110%;background:linear-gradient(rgba(217,210,238,0),rgba(217,210,238,.7))}
 @keyframes float{50%{transform:translateY(-10%)}}
-.item.cat img{animation:purr 3s ease-in-out infinite;transform-origin:50% 100%}
 .item.broom img{animation:sweep 2.2s ease-in-out infinite;transform-origin:80% 10%}
 @keyframes purr{50%{transform:scale(1.04,.97)}}
 @keyframes sweep{50%{transform:rotate(-12deg)}}
@@ -158,7 +157,7 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 .navb{width:48px;height:48px;border-radius:50%;border:3px solid var(--ink);background:var(--pumpkin);color:var(--ink);font-size:28px;font-weight:800;line-height:1;cursor:pointer;box-shadow:0 3px 0 var(--ink)}
 .navb:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
 .navb:focus-visible{outline:3px solid var(--slime);outline-offset:2px}
-.dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:150px}
+.dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:200px}
 .dots button{width:12px;height:12px;padding:0;border-radius:50%;border:2px solid var(--ink);background:#4a3d66;cursor:pointer}
 .dots button[aria-current="true"]{background:var(--moon);transform:scale(1.25)}
 .lv-chip small{white-space:nowrap}
@@ -354,7 +353,7 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
       <div class="lvnext">
         <span class="lvbadge">進階關</span>
         <div class="lvicons" aria-hidden="true">
-          <img class="m-ghost" src="img/items/ghost.webp" alt=""><img class="m-cat" src="img/items/cat.webp" alt=""><img class="m-bat" src="img/items/bat.webp" alt="">
+          <img class="m-ghost" src="img/items/ghost.webp" alt=""><img class="m-cat" src="img/items/cat-anim.webp" alt=""><img class="m-bat" src="img/items/bat.webp" alt="">
         </div>
         <p>東西開始會動了！<br>鬼仔會飄、貓仔會走來走去、蝠婆會亂飛……<br>還多了 3 個新單字：<b>目珠仁、帽仔、手指</b><br><b>60 秒內找到 10 個</b>就全部過關！</p>
       </div>
@@ -408,7 +407,9 @@ const GAME_TIME = 60;
 const $ = id => document.getElementById(id);
 const room = $('room'), itemsEl = $('items'), canvas = $('dark'), ctx = canvas.getContext('2d');
 const pyHTML = s => s;
-const icon = kind => `<img src="img/items/${kind}.webp" alt="" draggable="false">`;
+// the cat uses an animated picture (scratching itself); everything else is a still
+const itemSrc = kind => `img/items/${kind === 'cat' ? 'cat-anim' : kind}.webp`;
+const icon = kind => `<img src="${itemSrc(kind)}" alt="" draggable="false">`;
 
 /* ---------- storage ---------- */
 const store = {
@@ -1036,7 +1037,7 @@ KINDS.forEach((k, i) => {
 function showCard(i, say) {
   li = (i + KINDS.length) % KINDS.length;
   const k = KINDS[li], w = WORDS[k][accent];
-  $('lImg').src = `img/items/${k}.webp`;
+  $('lImg').src = itemSrc(k);
   $('lHz').textContent = w.hz;
   $('lPy').textContent = w.py;
   $('lZh').textContent = WORDS[k].zh;
