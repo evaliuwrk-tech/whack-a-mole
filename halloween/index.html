@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="萬聖節小遊戲：拿著手電筒在黑漆漆的鬼屋裡，聽客語找出糖仔、鬼仔、蝠婆、蝲䗁、貓仔、掃把！支援四縣腔、海陸腔。">
+<meta name="description" content="萬聖節小遊戲：拿著手電筒在黑漆漆的鬼屋裡，聽客語找出糖仔、鬼仔、蝠婆、蝲䗁、貓仔、掃把，進階關還有目珠仁、帽仔、手指！支援四縣腔、海陸腔。">
 <title>鬼屋手電筒</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -152,12 +152,13 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 .lhz{margin-top:10px;font-size:clamp(40px,11vw,54px);font-weight:800;color:var(--moon);letter-spacing:.1em;line-height:1.1}
 .lpy{font-size:20px;color:var(--pumpkin);font-weight:800;margin:4px 0 8px}
 .fcard .zh{font-size:16px;padding:3px 10px 4px}
+.newtag{position:absolute;right:12px;top:12px;background:var(--blood);color:#fff;border:2px solid var(--ink);border-radius:10px;padding:2px 8px;font-size:12px;font-weight:800;transform:rotate(4deg)}
 .lsay{display:block;margin-top:10px;font-size:12px;color:#d9c9ff;opacity:.8}
 .lnav{display:flex;align-items:center;justify-content:center;gap:14px}
 .navb{width:48px;height:48px;border-radius:50%;border:3px solid var(--ink);background:var(--pumpkin);color:var(--ink);font-size:28px;font-weight:800;line-height:1;cursor:pointer;box-shadow:0 3px 0 var(--ink)}
 .navb:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
 .navb:focus-visible{outline:3px solid var(--slime);outline-offset:2px}
-.dots{display:flex;gap:7px}
+.dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:150px}
 .dots button{width:12px;height:12px;padding:0;border-radius:50%;border:2px solid var(--ink);background:#4a3d66;cursor:pointer}
 .dots button[aria-current="true"]{background:var(--moon);transform:scale(1.25)}
 .lv-chip small{white-space:nowrap}
@@ -324,9 +325,10 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 
   <div class="overlay" id="learnOv" hidden>
     <div class="card learn">
-      <h2 class="ltitle">單字卡 <small id="lCount">1 / 6</small></h2>
+      <h2 class="ltitle">單字卡 <small id="lCount">1 / 9</small></h2>
       <div class="fcard" id="fcard" role="button" tabindex="0" aria-label="再聽一次">
         <img id="lImg" src="img/items/candy.webp" alt="">
+        <span class="newtag" id="lNew" hidden>進階關新單字</span>
         <div class="lhz" id="lHz"></div>
         <div class="py lpy" id="lPy"></div>
         <div><span class="zh" id="lZh"></span></div>
@@ -354,7 +356,7 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
         <div class="lvicons" aria-hidden="true">
           <img class="m-ghost" src="img/items/ghost.webp" alt=""><img class="m-cat" src="img/items/cat.webp" alt=""><img class="m-bat" src="img/items/bat.webp" alt="">
         </div>
-        <p>東西開始會動了！<br>鬼仔會飄、貓仔會走來走去、蝠婆會亂飛……<br><b>60 秒內找到 10 個</b>就全部過關！</p>
+        <p>東西開始會動了！<br>鬼仔會飄、貓仔會走來走去、蝠婆會亂飛……<br>還多了 3 個新單字：<b>目珠仁、帽仔、手指</b><br><b>60 秒內找到 10 個</b>就全部過關！</p>
       </div>
       <div class="btnrow"><button class="big alt" id="lvHome" type="button">🏠 回首頁</button><button class="big" id="lvGo" type="button">進入進階關！</button></div>
     </div>
@@ -394,8 +396,13 @@ const WORDS = {
   spider: { zh: '蜘蛛', xi: { hz: '蝲䗁',   py: 'laˇ kiaˇ' },    hoi: { hz: '蝲䗁', py: 'la kia' } },
   cat:    { zh: '貓',   xi: { hz: '貓仔',   py: 'meu eˋ' },      hoi: { hz: '貓仔', py: 'ngiauˇ er' } },
   broom:  { zh: '掃把', xi: { hz: '掃把',   py: 'so baˋ' },      hoi: { hz: '掃把', py: 'soˇ baˊ' } },
+  // advanced-level words
+  eye:    { zh: '眼球', lv: 2, xi: { hz: '目珠仁', py: 'mugˋ zuˊ inˇ' }, hoi: { hz: '目珠仁', py: 'mug zhuˋ rhin' } },
+  hat:    { zh: '帽子', lv: 2, xi: { hz: '帽仔',   py: 'mo eˋ' },        hoi: { hz: '帽仔',   py: 'mo+ er' } },
+  finger: { zh: '手指', lv: 2, xi: { hz: '手指',   py: 'suˋ ziiˋ' },     hoi: { hz: '手指',   py: 'shiuˊ zhiˊ' } },
 };
 const KINDS = Object.keys(WORDS);
+const BASIC = KINDS.filter(k => !WORDS[k].lv);
 const GAME_TIME = 60;
 
 const $ = id => document.getElementById(id);
@@ -667,7 +674,7 @@ function sparks(x, y) {
 }
 
 /* ---------- game ---------- */
-const LEVELS = { 1: { goal: 8, moving: false }, 2: { goal: 10, moving: true } };
+const LEVELS = { 1: { goal: 8, moving: false, kinds: BASIC }, 2: { goal: 10, moving: true, kinds: KINDS } };
 let level = 1, levelFound = 0, reachedLevel = 1;
 let running = false, score = 0, combo = 0, maxCombo = 0, found = 0, target = null, roundAt = 0, endAt = 0, raf = 0, lastSec = GAME_TIME, scareT = 0, lock = false;
 const foundKinds = new Set();
@@ -692,7 +699,7 @@ function scatter() {
   // 1–2 of the target, the rest a mix of the other three
   const kinds = [target];
   if (Math.random() < .4) kinds.push(target);
-  const others = KINDS.filter(k => k !== target);
+  const others = LEVELS[level].kinds.filter(k => k !== target).sort(() => Math.random() - .5);
   while (kinds.length < n) kinds.push(others[kinds.length % others.length]);
   kinds.sort(() => Math.random() - .5);
   const size = Math.max(64, Math.min(W, H) * (narrow ? 0.17 : 0.15));
@@ -728,6 +735,9 @@ function addMover(el, kind, x, y, top, bottom) {
   if (kind === 'spider') { m.y0 = top; m.y1 = Math.min(bottom, top + .45); }
   if (kind === 'broom') { m.cx = Math.min(.8, Math.max(.2, x)); m.cy = Math.min(bottom - .1, Math.max(top + .1, y)); m.ang = Math.random() * 6.28; m.dir = Math.random() < .5 ? -1 : 1; }
   if (kind === 'candy') { m.x0 = x; }
+  if (kind === 'eye') { m.vx = (Math.random() < .5 ? -1 : 1) * rnd(.07, .1); m.vy = (Math.random() < .5 ? -1 : 1) * rnd(.05, .08); m.rot = 0; }
+  if (kind === 'hat') { m.vx = (Math.random() < .5 ? -1 : 1) * rnd(.05, .07); m.baseY = rnd(Math.max(top + .15, .4), bottom); }
+  if (kind === 'finger') { m.vx = (Math.random() < .5 ? -1 : 1) * rnd(.08, .11); m.vy = (Math.random() < .5 ? -1 : 1) * rnd(.02, .04); m.base = m.vx > 0 ? 20 : -20; }
   movers.push(m);
   if (!moveRaf) { moveLast = performance.now(); moveRaf = requestAnimationFrame(moveTick); }
 }
@@ -768,6 +778,29 @@ function moveTick(now) {
         m.x = m.cx + Math.cos(m.ang) * .14; m.y = m.cy + Math.sin(m.ang) * .08;
         m.el.style.setProperty('--r', (Math.cos(m.ang) * 14 * m.dir).toFixed(1) + 'deg');
         break;
+      case 'eye': {     // rolls and bounces around like a marble, spinning as it goes
+        m.x += m.vx * dt; m.y += m.vy * dt;
+        if (m.x < .07 || m.x > .93) m.vx *= -1;
+        if (m.y < m.top || m.y > m.bottom) m.vy *= -1;
+        m.rot += m.vx * 900 * dt;
+        m.el.style.setProperty('--r', m.rot.toFixed(0) + 'deg');
+        break;
+      }
+      case 'hat':       // hops along
+        m.x += m.vx * dt;
+        if (m.x < .08 || m.x > .92) m.vx *= -1;
+        m.y = m.baseY - Math.abs(Math.sin(m.t * 2.8 + m.ph)) * .09;
+        m.el.style.setProperty('--r', (Math.sin(m.t * 5.6 + m.ph) * 8).toFixed(1) + 'deg');
+        m.img.style.scale = m.vx > 0 ? '-1 1' : '1 1';
+        break;
+      case 'finger': {  // inches forward in little pulses, wiggling
+        const push = Math.pow(Math.max(0, Math.sin(m.t * 4 + m.ph)), 2);
+        m.x += m.vx * push * dt; m.y += m.vy * push * dt;
+        if (m.x < .08 || m.x > .92) m.vx *= -1;
+        if (m.y < m.top + .15 || m.y > m.bottom) m.vy *= -1;
+        m.el.style.setProperty('--r', (m.base + Math.sin(m.t * 7) * 10).toFixed(1) + 'deg');
+        break;
+      }
       case 'candy':     // just wobbles about
         m.x = m.x0 + Math.sin(m.t * .7 + m.ph) * .03;
         break;
@@ -788,7 +821,7 @@ function showPrompt(animate) {
 }
 
 function nextRound() {
-  const choices = KINDS.filter(k => k !== target);
+  const choices = LEVELS[level].kinds.filter(k => k !== target);
   target = choices[Math.floor(Math.random() * choices.length)];
   scatter();
   showPrompt(true);
@@ -897,7 +930,7 @@ function levelClear() {
 function renderVocab() {
   const v = $('vocab');
   v.querySelectorAll('.vrow').forEach(r => r.remove());
-  KINDS.forEach(k => {
+  (reachedLevel >= 2 ? KINDS : BASIC).forEach(k => {
     const w = WORDS[k][accent];
     const row = document.createElement('div');
     row.className = 'vrow';
@@ -1007,6 +1040,7 @@ function showCard(i, say) {
   $('lHz').textContent = w.hz;
   $('lPy').textContent = w.py;
   $('lZh').textContent = WORDS[k].zh;
+  $('lNew').hidden = WORDS[k].lv !== 2;
   $('lCount').textContent = `${li + 1} / ${KINDS.length}`;
   $('lDots').querySelectorAll('button').forEach((d, j) => d.setAttribute('aria-current', String(j === li)));
   const c = $('fcard'); c.classList.remove('turn'); void c.offsetWidth; c.classList.add('turn');
