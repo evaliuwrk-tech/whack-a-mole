@@ -103,6 +103,8 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 @keyframes cardIn{from{transform:scale(.6) translateY(40px);opacity:0}}
 .hero-box{position:relative;width:36%;flex:none}
 .hero-box img{display:block;width:100%;filter:drop-shadow(0 0 18px rgba(255,138,31,.35))}
+.hero-box .beam{position:absolute;left:20.6%;top:38.7%;width:110%;height:46%;transform-origin:0 50%;transform:translateY(-50%) rotate(-134deg);mix-blend-mode:screen;pointer-events:none;animation:beamFlick 3s steps(1) infinite}
+@keyframes beamFlick{0%,100%{opacity:1}47%{opacity:.35}49%{opacity:1}51%{opacity:.5}53%{opacity:1}}
 .hero-box svg.hat{position:absolute;left:22%;top:-15%;width:56%;transform:rotate(-10deg);overflow:visible}
 .card .txt{flex:1;min-width:0}
 #endOv .card{flex-direction:column;align-items:stretch;text-align:center;gap:6px;padding-top:12px}
@@ -244,7 +246,7 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 
   <div class="overlay" id="startOv">
     <div class="card">
-      <div class="hero-box"><img src="img/hero-idle.webp" alt="拿著大槌子的金髮小勇者"><svg class="hat" viewBox="0 0 100 80" aria-hidden="true"><use href="#hat"/></svg></div>
+      <div class="hero-box"><svg class="beam" viewBox="0 0 200 100" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="beamG"><stop offset="0" stop-color="#fff3c4" stop-opacity=".85"/><stop offset="1" stop-color="#fff3c4" stop-opacity="0"/></linearGradient></defs><polygon points="0,42 200,0 200,100 0,58" fill="url(#beamG)"/></svg><img src="img/hero-flashlight.webp" alt="戴巫師帽、拿著手電筒的金髮小勇者"><svg class="hat" viewBox="0 0 100 80" aria-hidden="true"><use href="#hat"/></svg></div>
       <div class="txt">
         <h1>鬼屋<span>手電筒</span></h1>
         <p>停電了！鬼屋裡黑漆漆，只剩你的手電筒。仔細聽<b>客語</b>，用光照出牠，點下去就抓到了。60 秒看你能找到幾個！</p>
