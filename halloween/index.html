@@ -48,7 +48,8 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 .room > svg.bg{position:absolute;inset:0;width:100%;height:100%;z-index:0}
 .items{position:absolute;inset:0;z-index:1}
 #dark{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
-.item{position:absolute;width:var(--s);height:var(--s);margin:calc(var(--s) / -2) 0 0 calc(var(--s) / -2);padding:0;border:0;background:none;cursor:none;transition:opacity .3s,transform .3s;transform:rotate(var(--r)) scale(1)}
+.item{position:absolute;width:var(--s);height:var(--s);margin:calc(var(--s) / -2) 0 0 calc(var(--s) / -2);padding:0;border:0;background:none;cursor:none;transition:opacity .3s,transform .3s;transform:translateY(var(--bob,0px)) rotate(var(--r)) scale(1)}
+.item.moving{transition:opacity .3s}
 .item img{width:100%;height:100%;display:block;object-fit:contain;pointer-events:none;-webkit-user-drag:none}
 .item.out{opacity:0;transform:rotate(var(--r)) scale(.4)}
 .item.ghost img{animation:float 2.4s ease-in-out infinite}
@@ -174,7 +175,7 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 .m-cat{left:38%;animation:mCat 4s linear infinite}
 .m-bat{right:2%;animation:mBat 1.4s ease-in-out infinite}
 @keyframes mGhost{50%{transform:translate(18px,-12px);opacity:.45}}
-@keyframes mCat{0%{transform:translateX(-26px)}45%{transform:translateX(26px)}50%{transform:translateX(26px) scaleX(-1)}95%{transform:translateX(-26px) scaleX(-1)}100%{transform:translateX(-26px)}}
+@keyframes mCat{0%{transform:translateX(-26px) scaleX(-1)}45%{transform:translateX(26px) scaleX(-1)}50%{transform:translateX(26px)}95%{transform:translateX(-26px)}100%{transform:translateX(-26px) scaleX(-1)}}
 @keyframes mBat{25%{transform:translate(-14px,-10px) rotate(-8deg)}75%{transform:translate(10px,8px) rotate(8deg)}}
 .final{font-family:var(--spooky);font-size:66px;line-height:1;color:var(--pumpkin);text-shadow:0 4px 0 var(--ink);margin-top:4px}
 .final small{font-family:var(--body);font-size:16px;font-weight:800;margin-left:6px;color:var(--ghost);text-shadow:none}
@@ -353,7 +354,7 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
       <div class="lvnext">
         <span class="lvbadge">進階關</span>
         <div class="lvicons" aria-hidden="true">
-          <img class="m-ghost" src="img/items/ghost.webp" alt=""><img class="m-cat" src="img/items/cat-anim.webp" alt=""><img class="m-bat" src="img/items/bat.webp" alt="">
+          <img class="m-ghost" src="img/items/ghost.webp" alt=""><img class="m-cat" src="img/items/cat-walk.webp" alt=""><img class="m-bat" src="img/items/bat.webp" alt="">
         </div>
         <p>東西開始會動了！<br>鬼仔會飄、貓仔會走來走去、蝠婆會亂飛……<br>還多了 3 個新單字：<b>目珠仁、帽仔、手指</b><br><b>60 秒內找到 10 個</b>就全部過關！</p>
       </div>
@@ -407,8 +408,8 @@ const GAME_TIME = 60;
 const $ = id => document.getElementById(id);
 const room = $('room'), itemsEl = $('items'), canvas = $('dark'), ctx = canvas.getContext('2d');
 const pyHTML = s => s;
-// the cat uses an animated picture (scratching itself); everything else is a still
-const itemSrc = kind => `img/items/${kind === 'cat' ? 'cat-anim' : kind}.webp`;
+// the cat is animated: sitting and blinking here, walking (cat-walk) while it moves on the advanced level
+const itemSrc = kind => `img/items/${kind === 'cat' ? 'cat-sit' : kind}.webp`;
 const icon = kind => `<img src="${itemSrc(kind)}" alt="" draggable="false">`;
 
 /* ---------- storage ---------- */
@@ -725,89 +726,122 @@ function scatter() {
 }
 
 /* ---------- advanced level: things move ---------- */
+// Every mover has a position and a velocity (fractions of the room per second).
+// Each kind steers in its own way, then a separation pass pushes overlapping
+// things apart and bounces them off each other, so two items never sit on top of one another.
 let movers = [], moveRaf = 0, moveLast = 0;
 const rnd = (a, b) => a + Math.random() * (b - a);
+const sgn = () => (Math.random() < .5 ? -1 : 1);
 function addMover(el, kind, x, y, top, bottom) {
-  const m = { el, img: el.querySelector('img'), kind, x, y, top, bottom, ph: Math.random() * 6.28, t: 0, pause: 0 };
+  const m = { el, img: el.querySelector('img'), kind, x, y, vx: 0, vy: 0, t: 0, pause: 0, ph: Math.random() * 6.28,
+              minX: .07, maxX: .93, minY: top, maxY: bottom, lockX: false, lockY: false, bob: 0, rot: 0,
+              s: parseFloat(el.style.getPropertyValue('--s')) || 80 };
+  el.classList.add('moving');
   el.style.setProperty('--r', '0deg');
-  if (kind === 'ghost') { const a = Math.random() * 6.28; m.vx = Math.cos(a) * .06; m.vy = Math.sin(a) * .045; }
-  if (kind === 'cat') { m.y = bottom - .02; m.vx = (Math.random() < .5 ? -1 : 1) * rnd(.05, .08); }
-  if (kind === 'bat') { m.vx = (Math.random() < .5 ? -1 : 1) * rnd(.12, .17); m.baseY = rnd(top + .05, Math.min(.6, bottom)); }
-  if (kind === 'spider') { m.y0 = top; m.y1 = Math.min(bottom, top + .45); }
-  if (kind === 'broom') { m.cx = Math.min(.8, Math.max(.2, x)); m.cy = Math.min(bottom - .1, Math.max(top + .1, y)); m.ang = Math.random() * 6.28; m.dir = Math.random() < .5 ? -1 : 1; }
-  if (kind === 'candy') { m.x0 = x; }
-  if (kind === 'eye') { m.vx = (Math.random() < .5 ? -1 : 1) * rnd(.07, .1); m.vy = (Math.random() < .5 ? -1 : 1) * rnd(.05, .08); m.rot = 0; }
-  if (kind === 'hat') { m.vx = (Math.random() < .5 ? -1 : 1) * rnd(.05, .07); m.baseY = rnd(Math.max(top + .15, .4), bottom); }
-  if (kind === 'finger') { m.vx = (Math.random() < .5 ? -1 : 1) * rnd(.08, .11); m.vy = (Math.random() < .5 ? -1 : 1) * rnd(.02, .04); m.base = m.vx > 0 ? 20 : -20; }
+  switch (kind) {
+    case 'ghost':  { const a = Math.random() * 6.28; m.vx = Math.cos(a) * .06; m.vy = Math.sin(a) * .045; break; }
+    case 'cat':    m.y = bottom - .02; m.lockY = true; m.vx = sgn() * rnd(.05, .07); m.img.src = 'img/items/cat-walk.webp'; break;
+    case 'bat':    m.vx = sgn() * rnd(.12, .16); m.vy = sgn() * .03; m.maxY = Math.min(.62, bottom); break;
+    case 'spider': m.lockX = true; m.maxY = Math.min(bottom, top + .5); m.vy = sgn() * rnd(.07, .1); break;
+    case 'broom':  m.ang = Math.random() * 6.28; m.dir = sgn(); m.sp = rnd(.07, .09); break;
+    case 'candy':  m.vx = sgn() * .02; break;
+    case 'eye':    m.vx = sgn() * rnd(.07, .1); m.vy = sgn() * rnd(.05, .08); break;
+    case 'hat':    m.vx = sgn() * rnd(.05, .07); m.minY = Math.max(top + .15, .4); m.y = Math.max(m.y, m.minY); break;
+    case 'finger': m.vx = sgn() * rnd(.08, .11); m.vy = sgn() * rnd(.02, .04); m.minY = top + .15; m.y = Math.max(m.y, m.minY); break;
+  }
+  m.x = Math.min(m.maxX, Math.max(m.minX, m.x)); m.y = Math.min(m.maxY, Math.max(m.minY, m.y));
   movers.push(m);
   if (!moveRaf) { moveLast = performance.now(); moveRaf = requestAnimationFrame(moveTick); }
 }
+function steer(m, dt) {
+  switch (m.kind) {
+    case 'ghost': {   // drifts and turns lazily, fading in and out
+      const a = Math.atan2(m.vy, m.vx) + (Math.random() - .5) * 1.2 * dt, sp = Math.hypot(m.vx, m.vy) || .06;
+      m.vx = Math.cos(a) * sp; m.vy = Math.sin(a) * sp;
+      m.img.style.opacity = (.3 + .7 * (.5 + .5 * Math.sin(m.t * .9 + m.ph))).toFixed(2);
+      break;
+    }
+    case 'cat':       // walks the floor; now and then sits down for a moment
+      if (m.pause > 0) {
+        m.pause -= dt;
+        if (m.pause <= 0) { m.vx = m.saved; m.img.src = 'img/items/cat-walk.webp'; }
+      } else if (Math.random() < dt * .2) {
+        m.saved = Math.random() < .4 ? -m.vx : m.vx; m.vx = 0; m.pause = rnd(1.2, 2.4);
+        m.img.src = itemSrc('cat');
+      }
+      if (m.vx) m.img.style.scale = m.vx > 0 ? '-1 1' : '1 1';
+      break;
+    case 'bat':       // fast zig-zag flight in the upper room
+      m.vy += Math.sin(m.t * 3.2 + m.ph) * .25 * dt;
+      m.vy = Math.max(-.08, Math.min(.08, m.vy));
+      m.img.style.scale = m.vx > 0 ? '-1 1' : '1 1';
+      break;
+    case 'broom':     // flies in slow loops
+      m.ang += m.dir * .6 * dt;
+      m.vx = -Math.sin(m.ang) * m.sp * m.dir; m.vy = Math.cos(m.ang) * m.sp * .6 * m.dir;
+      m.rot = Math.cos(m.ang) * 14 * m.dir;
+      break;
+    case 'candy':     // wobbles back and forth
+      m.vx = Math.cos(m.t * .7 + m.ph) * .025;
+      break;
+    case 'eye':       // rolls like a marble, spinning as it goes
+      m.rot += m.vx * 900 * dt;
+      break;
+    case 'hat':       // hops along
+      m.bob = -Math.abs(Math.sin(m.t * 2.8 + m.ph)) * .09 * H;
+      m.rot = Math.sin(m.t * 5.6 + m.ph) * 8;
+      m.img.style.scale = m.vx > 0 ? '-1 1' : '1 1';
+      break;
+    case 'finger': {  // inches forward in little pulses, wiggling
+      m.push = Math.pow(Math.max(0, Math.sin(m.t * 4 + m.ph)), 2);
+      m.rot = (m.vx > 0 ? 20 : -20) + Math.sin(m.t * 7) * 10;
+      break;
+    }
+  }
+}
 function moveTick(now) {
   const dt = Math.min(.25, (now - moveLast) / 1000); moveLast = now;
-  for (const m of movers) {
-    if (m.el.classList.contains('found')) continue;
+  const live = movers.filter(m => !m.el.classList.contains('found'));
+  for (const m of live) {
     m.t += dt;
-    switch (m.kind) {
-      case 'ghost': {   // drifts, turns lazily, fades in and out
-        const a = Math.atan2(m.vy, m.vx) + (Math.random() - .5) * 1.2 * dt, sp = Math.hypot(m.vx, m.vy);
-        m.vx = Math.cos(a) * sp; m.vy = Math.sin(a) * sp;
-        m.x += m.vx * dt; m.y += m.vy * dt;
-        if (m.x < .08 || m.x > .92) m.vx *= -1;
-        if (m.y < m.top || m.y > m.bottom) m.vy *= -1;
-        m.img.style.opacity = (.3 + .7 * (.5 + .5 * Math.sin(m.t * .9 + m.ph))).toFixed(2);
-        break;
-      }
-      case 'cat': {     // walks the floor, sometimes sits for a moment, turns at the walls
-        if (m.pause > 0) { m.pause -= dt; break; }
-        m.x += m.vx * dt;
-        if (m.x < .07 || m.x > .93) m.vx *= -1;
-        if (Math.random() < dt * .25) { m.pause = rnd(.6, 1.6); if (Math.random() < .4) m.vx *= -1; }
-        m.img.style.scale = m.vx > 0 ? '-1 1' : '1 1';
-        break;
-      }
-      case 'bat':       // fast zig-zag flight across the upper room
-        m.x += m.vx * dt;
-        if (m.x < .06 || m.x > .94) m.vx *= -1;
-        m.y = m.baseY + Math.sin(m.t * 3.2 + m.ph) * .07;
-        m.img.style.scale = m.vx > 0 ? '-1 1' : '1 1';
-        break;
-      case 'spider':    // climbs up and down its thread
-        m.y = m.y0 + (.5 + .5 * Math.sin(m.t * .9 + m.ph)) * (m.y1 - m.y0);
-        break;
-      case 'broom':     // flies slow loops
-        m.ang += m.dir * .55 * dt;
-        m.x = m.cx + Math.cos(m.ang) * .14; m.y = m.cy + Math.sin(m.ang) * .08;
-        m.el.style.setProperty('--r', (Math.cos(m.ang) * 14 * m.dir).toFixed(1) + 'deg');
-        break;
-      case 'eye': {     // rolls and bounces around like a marble, spinning as it goes
-        m.x += m.vx * dt; m.y += m.vy * dt;
-        if (m.x < .07 || m.x > .93) m.vx *= -1;
-        if (m.y < m.top || m.y > m.bottom) m.vy *= -1;
-        m.rot += m.vx * 900 * dt;
-        m.el.style.setProperty('--r', m.rot.toFixed(0) + 'deg');
-        break;
-      }
-      case 'hat':       // hops along
-        m.x += m.vx * dt;
-        if (m.x < .08 || m.x > .92) m.vx *= -1;
-        m.y = m.baseY - Math.abs(Math.sin(m.t * 2.8 + m.ph)) * .09;
-        m.el.style.setProperty('--r', (Math.sin(m.t * 5.6 + m.ph) * 8).toFixed(1) + 'deg');
-        m.img.style.scale = m.vx > 0 ? '-1 1' : '1 1';
-        break;
-      case 'finger': {  // inches forward in little pulses, wiggling
-        const push = Math.pow(Math.max(0, Math.sin(m.t * 4 + m.ph)), 2);
-        m.x += m.vx * push * dt; m.y += m.vy * push * dt;
-        if (m.x < .08 || m.x > .92) m.vx *= -1;
-        if (m.y < m.top + .15 || m.y > m.bottom) m.vy *= -1;
-        m.el.style.setProperty('--r', (m.base + Math.sin(m.t * 7) * 10).toFixed(1) + 'deg');
-        break;
-      }
-      case 'candy':     // just wobbles about
-        m.x = m.x0 + Math.sin(m.t * .7 + m.ph) * .03;
-        break;
+    steer(m, dt);
+    const k = m.kind === 'finger' ? m.push : 1;
+    if (!m.lockX) m.x += m.vx * k * dt;
+    if (!m.lockY) m.y += m.vy * k * dt;
+    // bounce off the room edges
+    if (m.x < m.minX) { m.x = m.minX; m.vx = Math.abs(m.vx); if (m.saved) m.saved = Math.abs(m.saved); }
+    if (m.x > m.maxX) { m.x = m.maxX; m.vx = -Math.abs(m.vx); if (m.saved) m.saved = -Math.abs(m.saved); }
+    if (m.y < m.minY) { m.y = m.minY; m.vy = Math.abs(m.vy); }
+    if (m.y > m.maxY) { m.y = m.maxY; m.vy = -Math.abs(m.vy); }
+  }
+  // keep things from overlapping: push apart and bounce off each other
+  for (let i = 0; i < live.length; i++) for (let j = i + 1; j < live.length; j++) {
+    const a = live[i], b = live[j];
+    let dx = (b.x - a.x) * W, dy = (b.y - a.y) * H;
+    const need = (a.s + b.s) / 2 * .9;
+    let d = Math.hypot(dx, dy);
+    if (d >= need) continue;
+    if (d < .01) { dx = Math.random() - .5; dy = Math.random() - .5; d = Math.hypot(dx, dy); }
+    const nx = dx / d, ny = dy / d, over = need - d;
+    // share the push; a mover locked on one axis can only give way on the other
+    const ax = a.lockX ? 0 : 1, ay = a.lockY ? 0 : 1, bx = b.lockX ? 0 : 1, by = b.lockY ? 0 : 1;
+    const wx = ax + bx || 1, wy = ay + by || 1;
+    a.x -= nx * over * (ax / wx) / W; a.y -= ny * over * (ay / wy) / H;
+    b.x += nx * over * (bx / wx) / W; b.y += ny * over * (by / wy) / H;
+    // bounce: reverse the velocity components heading into each other
+    const rel = (b.vx - a.vx) * nx * W + (b.vy - a.vy) * ny * H;
+    if (rel < 0) {
+      if (nx * a.vx > 0) a.vx = -a.vx; if (ny * a.vy > 0) a.vy = -a.vy;
+      if (nx * b.vx < 0) b.vx = -b.vx; if (ny * b.vy < 0) b.vy = -b.vy;
+      if (a.kind === 'broom') a.dir = -a.dir; if (b.kind === 'broom') b.dir = -b.dir;
     }
+    for (const m of [a, b]) { m.x = Math.min(m.maxX, Math.max(m.minX, m.x)); m.y = Math.min(m.maxY, Math.max(m.minY, m.y)); }
+  }
+  for (const m of live) {
     m.el.style.left = (m.x * 100).toFixed(2) + '%';
     m.el.style.top = (m.y * 100).toFixed(2) + '%';
+    m.el.style.setProperty('--r', m.rot.toFixed(1) + 'deg');
+    m.el.style.setProperty('--bob', m.bob.toFixed(1) + 'px');
   }
   moveRaf = movers.length ? requestAnimationFrame(moveTick) : 0;
 }
