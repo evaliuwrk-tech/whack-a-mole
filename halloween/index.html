@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="萬聖節小遊戲：拿著手電筒在黑漆漆的鬼屋裡，聽客語找出糖仔、鬼仔、蝠婆、蝲䗁！支援四縣腔、海陸腔。">
+<meta name="description" content="萬聖節小遊戲：拿著手電筒在黑漆漆的鬼屋裡，聽客語找出糖仔、鬼仔、蝠婆、蝲䗁、貓仔、掃把！支援四縣腔、海陸腔。">
 <title>鬼屋手電筒</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -54,6 +54,10 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 .item.bat .wing{transform-origin:50% 55%;animation:flap .22s ease-in-out infinite alternate}
 .item.spider svg{animation:dangle 2.8s ease-in-out infinite;transform-origin:50% -60%}
 @keyframes float{50%{transform:translateY(-10%)}}
+.item.cat svg{animation:purr 3s ease-in-out infinite;transform-origin:50% 100%}
+.item.broom svg{animation:sweep 2.2s ease-in-out infinite;transform-origin:78% 6%}
+@keyframes purr{50%{transform:scale(1.04,.97)}}
+@keyframes sweep{50%{transform:rotate(-12deg)}}
 @keyframes flutter{25%{transform:translate(6%,-6%)}75%{transform:translate(-6%,4%)}}
 @keyframes flap{to{transform:scaleY(.35)}}
 @keyframes dangle{50%{transform:rotate(6deg)}}
@@ -69,7 +73,6 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 .prompt .word{display:flex;flex-direction:column;line-height:1.1;min-width:0}
 .prompt .hz{font-size:clamp(26px,5vw,38px);font-weight:800;color:var(--moon);letter-spacing:.06em}
 .prompt .py{white-space:nowrap;font-size:15px;color:var(--pumpkin);font-weight:800;letter-spacing:.04em}
-.py sup{font-size:.62em;margin-left:1px}
 .say{flex:none;width:44px;height:44px;border-radius:50%;border:3px solid var(--ink);background:var(--pumpkin);font-size:20px;cursor:pointer;box-shadow:0 3px 0 var(--ink)}
 .say:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
 .prompt.bump{animation:promptIn .35s cubic-bezier(.3,1.6,.6,1)}
@@ -102,6 +105,12 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 .hero-box img{display:block;width:100%;filter:drop-shadow(0 0 18px rgba(255,138,31,.35))}
 .hero-box svg.hat{position:absolute;left:22%;top:-15%;width:56%;transform:rotate(-10deg);overflow:visible}
 .card .txt{flex:1;min-width:0}
+#endOv .card{flex-direction:column;align-items:stretch;text-align:center;gap:6px;padding-top:12px}
+#endOv .stats,#endOv .accent{justify-content:center}
+.carriage{margin:0 -8px;overflow:hidden}
+.carriage img{display:block;width:100%;height:auto;max-height:30vh;object-fit:contain;filter:drop-shadow(0 0 24px rgba(255,138,31,.45));animation:rollIn 1.6s cubic-bezier(.2,.8,.3,1) both,bob .5s ease-in-out 1.6s infinite alternate}
+@keyframes rollIn{from{transform:translateX(85%)}to{transform:translateX(0)}}
+@keyframes bob{to{transform:translateY(-2.5%)}}
 .card h1{margin:0;font-size:clamp(34px,8vw,48px);font-weight:800;line-height:1.05;color:var(--pumpkin);text-shadow:0 3px 0 var(--ink),0 0 18px rgba(255,138,31,.5);letter-spacing:.04em;text-wrap:balance}
 .card h1 span{color:var(--moon)}
 .card p{margin:10px 0 0;font-size:15px;line-height:1.65;color:#ece4ff}
@@ -253,7 +262,7 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 
   <div class="overlay" id="endOv" hidden>
     <div class="card">
-      <div class="hero-box"><img src="img/hero-win.webp" alt="雙手叉腰得意笑的小勇者"><svg class="hat" viewBox="0 0 100 80" aria-hidden="true"><use href="#hat"/></svg></div>
+      <div class="carriage"><img src="img/carriage.webp" alt="黑馬拉著閃閃發亮的南瓜馬車，車上坐著吸血鬼裝扮的男孩和紅髮女孩"></div>
       <div class="txt">
         <h1 id="endTitle">天光咧！</h1>
         <div class="final"><span id="finalScore">0</span><small>分</small></div>
@@ -311,6 +320,26 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
       <circle cx="46" cy="43.5" r="1.6" fill="#120b22"/><circle cx="54" cy="43.5" r="1.6" fill="#120b22"/>
       <path d="M44 62 h12 M46 68 h8" stroke="#9be564" stroke-width="3" stroke-linecap="round"/>
     </symbol>
+    <symbol id="i-cat" viewBox="0 0 100 100">
+      <path d="M70 84 Q96 84 92 60 Q90 48 82 52" fill="none" stroke="#120b22" stroke-width="9" stroke-linecap="round"/>
+      <path d="M70 84 Q96 84 92 60 Q90 48 82 52" fill="none" stroke="#2a2338" stroke-width="5" stroke-linecap="round"/>
+      <path d="M28 92 Q22 60 36 46 L64 46 Q78 60 72 92Z" fill="#2a2338" stroke="#120b22" stroke-width="3.5" stroke-linejoin="round"/>
+      <path d="M26 30 L28 6 L42 20 Q50 17 58 20 L72 6 L74 30 Q78 52 50 54 Q22 52 26 30Z" fill="#2a2338" stroke="#120b22" stroke-width="3.5" stroke-linejoin="round"/>
+      <path d="M31 14 L33 24 L39 20Z M69 14 L67 24 L61 20Z" fill="#ff8fb0"/>
+      <ellipse cx="40" cy="33" rx="6" ry="7" fill="#ffe36e"/><ellipse cx="60" cy="33" rx="6" ry="7" fill="#ffe36e"/>
+      <ellipse cx="40" cy="33" rx="2" ry="5.5" fill="#120b22"/><ellipse cx="60" cy="33" rx="2" ry="5.5" fill="#120b22"/>
+      <path d="M47 41 h6 l-3 3z" fill="#ff8fb0"/>
+      <path d="M50 44 q-4 4 -8 2 M50 44 q4 4 8 2" stroke="#e4d8ff" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M34 42 L18 39 M34 45 L18 47 M66 42 L82 39 M66 45 L82 47" stroke="#e4d8ff" stroke-width="1.5" stroke-linecap="round" opacity=".8"/>
+      <path d="M38 92 v-10 M62 92 v-10" stroke="#120b22" stroke-width="3" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-broom" viewBox="0 0 100 100">
+      <path d="M78 6 L44 58" stroke="#120b22" stroke-width="9" stroke-linecap="round"/>
+      <path d="M78 6 L44 58" stroke="#8a5530" stroke-width="5" stroke-linecap="round"/>
+      <path d="M46 52 Q34 56 14 92 Q30 90 34 96 Q42 84 46 96 Q52 82 60 88 Q58 70 56 60Z" fill="#e8b84a" stroke="#120b22" stroke-width="3.5" stroke-linejoin="round"/>
+      <path d="M40 66 L26 88 M46 66 L38 92 M51 66 L50 88" stroke="#b9862a" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M41 54 Q50 52 57 60 L54 65 Q47 58 38 59Z" fill="#7b5aa8" stroke="#120b22" stroke-width="2.5" stroke-linejoin="round"/>
+    </symbol>
     <symbol id="big-ghost" viewBox="0 0 200 200">
       <path d="M30 190 V90 Q30 14 100 14 Q170 14 170 90 V190 L150 170 L130 190 L110 170 L90 190 L70 170 L50 190Z" fill="#f4f1ff" stroke="#120b22" stroke-width="6" stroke-linejoin="round"/>
       <ellipse cx="74" cy="88" rx="14" ry="20" fill="#120b22"/><ellipse cx="126" cy="88" rx="14" ry="20" fill="#120b22"/>
@@ -322,11 +351,14 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 
 <script>
 (() => {
+// 臺灣客家語拼音，以調號標示聲調
 const WORDS = {
-  candy:  { zh: '糖果', xi: { hz: '糖仔',   py: 'tong11 e31' },    hoi: { hz: '糖仔', py: 'tong55 er55' } },
-  ghost:  { zh: '鬼',   xi: { hz: '鬼仔',   py: 'gui31 e31' },     hoi: { hz: '鬼仔', py: 'gui24 er55' } },
-  bat:    { zh: '蝙蝠', xi: { hz: '蝠婆仔', py: 'pid5 po11 e31' }, hoi: { hz: '蝠婆', py: 'pid2 po55' } },
-  spider: { zh: '蜘蛛', xi: { hz: '蝲䗁',   py: 'la11 kia11' },    hoi: { hz: '蝲䗁', py: 'la55 kia55' } },
+  candy:  { zh: '糖果', xi: { hz: '糖仔',   py: 'tongˇ eˋ' },    hoi: { hz: '糖仔', py: 'tong er' } },
+  ghost:  { zh: '鬼',   xi: { hz: '鬼仔',   py: 'guiˋ eˋ' },     hoi: { hz: '鬼仔', py: 'guiˊ er' } },
+  bat:    { zh: '蝙蝠', xi: { hz: '蝠婆仔', py: 'pid poˇ eˋ' },  hoi: { hz: '蝠婆', py: 'pidˋ po' } },
+  spider: { zh: '蜘蛛', xi: { hz: '蝲䗁',   py: 'laˇ kiaˇ' },    hoi: { hz: '蝲䗁', py: 'la kia' } },
+  cat:    { zh: '貓',   xi: { hz: '貓仔',   py: 'meu eˋ' },      hoi: { hz: '貓仔', py: 'ngiauˇ er' } },
+  broom:  { zh: '掃把', xi: { hz: '掃把',   py: 'so baˋ' },      hoi: { hz: '掃把', py: 'soˇ baˊ' } },
 };
 const KINDS = Object.keys(WORDS);
 const CANDY_COLORS = [['#ff8a1f', '#ffd36b'], ['#9be564', '#c9f7a4'], ['#b07cff', '#e2ccff'], ['#ff5470', '#ffb3c4']];
@@ -334,7 +366,7 @@ const GAME_TIME = 60;
 
 const $ = id => document.getElementById(id);
 const room = $('room'), itemsEl = $('items'), canvas = $('dark'), ctx = canvas.getContext('2d');
-const pyHTML = s => s.replace(/(\d+)/g, '<sup>$1</sup>');
+const pyHTML = s => s;
 const iconSVG = (kind, colors) => `<svg viewBox="0 0 100 100" style="${colors ? `--c1:${colors[0]};--c2:${colors[1]}` : '--c1:#ff8a1f;--c2:#ffd36b'}"><use href="#i-${kind}"/></svg>`;
 
 /* ---------- storage ---------- */
@@ -507,7 +539,7 @@ function scatter() {
   const others = KINDS.filter(k => k !== target);
   while (kinds.length < n) kinds.push(others[kinds.length % others.length]);
   kinds.sort(() => Math.random() - .5);
-  const size = Math.max(56, Math.min(W, H) * (narrow ? 0.15 : 0.12));
+  const size = Math.max(64, Math.min(W, H) * (narrow ? 0.17 : 0.15));
   kinds.forEach((kind, i) => {
     const [c, r] = cells[i];
     const x = (c + 0.2 + Math.random() * 0.6) / cols;
@@ -523,7 +555,7 @@ function scatter() {
     b.innerHTML = iconSVG(kind, kind === 'candy' ? CANDY_COLORS[Math.floor(Math.random() * CANDY_COLORS.length)] : null);
     b.querySelector('svg').style.animationDelay = -Math.random() * 2 + 's';
     itemsEl.appendChild(b);
-    requestAnimationFrame(() => requestAnimationFrame(() => b.classList.remove('out')));
+    setTimeout(() => b.classList.remove('out'), 30);
   });
 }
 
@@ -602,7 +634,7 @@ function loop() {
   if (s !== lastSec) { lastSec = s; if (s <= 5 && s > 0) sfx.tick(); }
   setHUD(t);
   if (t <= 0) return endGame();
-  raf = requestAnimationFrame(loop);
+  
 }
 
 function startGame() {
@@ -616,7 +648,7 @@ function startGame() {
   showAccentTip();
   nextRound();
   clearTimeout(scareT); scareT = setTimeout(scare, 9000 + Math.random() * 5000);
-  raf = requestAnimationFrame(loop);
+  clearInterval(raf); raf = setInterval(loop, 100);
 }
 
 function renderVocab() {
@@ -634,7 +666,7 @@ function renderVocab() {
 
 function endGame() {
   running = false;
-  cancelAnimationFrame(raf); clearTimeout(scareT);
+  clearInterval(raf); clearTimeout(scareT);
   setHUD(0);
   sfx.end();
   $('prompt').hidden = true;
