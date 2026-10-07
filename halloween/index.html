@@ -71,6 +71,12 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 .prompt{position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:20;display:flex;align-items:center;gap:12px;background:rgba(18,11,34,.9);border:3px solid var(--pumpkin);border-radius:20px;padding:8px 12px 8px 18px;box-shadow:0 0 24px rgba(255,138,31,.35);max-width:calc(100% - 32px);box-sizing:border-box}
 .prompt .lbl{font-size:14px;font-weight:800;color:#d9c9ff;letter-spacing:.1em;white-space:nowrap}
 .prompt .word{display:flex;flex-direction:column;line-height:1.1;min-width:0}
+.prompt .hzline{display:flex;align-items:baseline;gap:8px;flex-wrap:nowrap}
+.zh{display:inline-block;font-size:13px;font-weight:800;color:var(--ink);background:#d9c9ff;border-radius:8px;padding:1px 7px 2px;letter-spacing:.04em;white-space:nowrap;vertical-align:middle}
+.zh::before{content:"華語 ";opacity:.6;font-size:.85em}
+.prompt .zh{font-size:15px}
+.vrow .zh{margin-left:6px;font-size:11px}
+.tag .zh{margin-left:4px;font-size:12px}
 .prompt .hz{font-size:clamp(26px,5vw,38px);font-weight:800;color:var(--moon);letter-spacing:.06em}
 .prompt .py{white-space:nowrap;font-size:15px;color:var(--pumpkin);font-weight:800;letter-spacing:.04em}
 .say{flex:none;width:44px;height:44px;border-radius:50%;border:3px solid var(--ink);background:var(--pumpkin);font-size:20px;cursor:pointer;box-shadow:0 3px 0 var(--ink)}
@@ -244,7 +250,7 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
     <canvas id="dark"></canvas>
     <div class="prompt" id="prompt" hidden>
       <span class="lbl">找出</span>
-      <span class="word"><span class="hz" id="pHz"></span><span class="py" id="pPy"></span></span>
+      <span class="word"><span class="hzline"><span class="hz" id="pHz"></span><span class="zh" id="pZh"></span></span><span class="py" id="pPy"></span></span>
       <button class="say" id="sayBtn" type="button" aria-label="再聽一次">🔊</button>
     </div>
   </div>
@@ -563,6 +569,7 @@ function scatter() {
 function showPrompt(animate) {
   const w = WORDS[target][accent];
   $('pHz').textContent = w.hz;
+  $('pZh').textContent = WORDS[target].zh;
   $('pPy').innerHTML = pyHTML(w.py);
   $('prompt').hidden = false;
   if (animate) { $('prompt').classList.remove('bump'); void $('prompt').offsetWidth; $('prompt').classList.add('bump'); }
@@ -607,7 +614,7 @@ function pick(it) {
     sfx.bad();
     it.classList.remove('wrong'); void it.offsetWidth; it.classList.add('wrong');
     const w = WORDS[kind][accent];
-    fx('tag', cx, cy + ir.height / 2 + 4, `這係「${w.hz}」<br><span class="py">${pyHTML(w.py)}</span>`);
+    fx('tag', cx, cy + ir.height / 2 + 4, `這係「${w.hz}」<span class="zh">${WORDS[kind].zh}</span><br><span class="py">${pyHTML(w.py)}</span>`);
     fx('pop bad', cx, cy - ir.height / 2, '−2秒');
     setHUD(timeLeft());
   }
@@ -659,7 +666,7 @@ function renderVocab() {
     const w = WORDS[k][accent];
     const row = document.createElement('div');
     row.className = 'vrow';
-    row.innerHTML = `${iconSVG(k)}<div><div class="hz">${w.hz}</div><div class="py">${pyHTML(w.py)}</div></div><button class="say" type="button" aria-label="聽「${w.hz}」">🔊</button>`;
+    row.innerHTML = `${iconSVG(k)}<div><div class="hz">${w.hz}<span class="zh">${WORDS[k].zh}</span></div><div class="py">${pyHTML(w.py)}</div></div><button class="say" type="button" aria-label="聽「${w.hz}」">🔊</button>`;
     row.querySelector('button').addEventListener('click', () => speak(k));
     v.appendChild(row);
   });
