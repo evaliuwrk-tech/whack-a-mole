@@ -112,9 +112,10 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 #endOv .card{flex-direction:column;align-items:stretch;text-align:center;gap:6px;padding-top:12px}
 #endOv .stats,#endOv .accent{justify-content:center}
 .carriage{margin:0 -8px;overflow:hidden}
-.carriage img{display:block;width:100%;height:auto;max-height:30vh;object-fit:contain;filter:drop-shadow(0 0 24px rgba(255,138,31,.45));animation:rollIn 1.6s cubic-bezier(.2,.8,.3,1) both,bob .5s ease-in-out 1.6s infinite alternate}
-@keyframes rollIn{from{transform:translateX(85%)}to{transform:translateX(0)}}
-@keyframes bob{to{transform:translateY(-2.5%)}}
+.carriage{position:relative}
+.carriage video{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.carriage::before{content:"";position:absolute;inset:10% 8%;border-radius:50%;background:radial-gradient(closest-side,rgba(255,138,31,.32),rgba(255,138,31,0));pointer-events:none}
+.carriage canvas,.carriage img{position:relative;display:block;width:100%;height:auto;aspect-ratio:880/398;max-height:30vh;object-fit:contain}
 .card h1{margin:0;font-size:clamp(34px,8vw,48px);font-weight:800;line-height:1.05;color:var(--pumpkin);text-shadow:0 3px 0 var(--ink),0 0 18px rgba(255,138,31,.5);letter-spacing:.04em;text-wrap:balance}
 .card h1 span{color:var(--moon)}
 .card p{margin:10px 0 0;font-size:15px;line-height:1.65;color:#ece4ff}
@@ -268,7 +269,7 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 
   <div class="overlay" id="endOv" hidden>
     <div class="card">
-      <div class="carriage"><img src="img/carriage.webp" alt="黑馬拉著閃閃發亮的南瓜馬車，車上坐著吸血鬼裝扮的男孩和紅髮女孩"></div>
+      <div class="carriage" role="img" aria-label="黑馬拉著閃閃發亮的南瓜馬車從右邊駛來，車上坐著吸血鬼裝扮的男孩和紅髮女孩"><video id="carVid" src="img/carriage.mp4" muted playsinline preload="auto" aria-hidden="true"></video><canvas id="carCv" width="880" height="398"></canvas><img id="carImg" src="img/carriage.webp" alt="" hidden></div>
       <div class="txt">
         <h1 id="endTitle">天光咧！</h1>
         <div class="final"><span id="finalScore">0</span><small>分</small></div>
@@ -639,7 +640,7 @@ function loop() {
 
 function startGame() {
   audio();
-  $('startOv').hidden = true; $('endOv').hidden = true;
+  $('startOv').hidden = true; $('endOv').hidden = true; stopCarriage();
   score = 0; combo = 0; maxCombo = 0; found = 0; target = null; lastSec = GAME_TIME;
   foundKinds.clear();
   running = true;
@@ -664,6 +665,44 @@ function renderVocab() {
   });
 }
 
+/* end screen: pumpkin carriage video, green screen removed on the fly */
+const carVid = $('carVid'), carCv = $('carCv'), carCtx = carCv.getContext('2d', { willReadFrequently: true });
+const CAR_LOOP_FROM = 2.6;   // the carriage has pulled in by here; loop the idle part after it
+let carOn = false, carOk = true;
+function keyFrame() {
+  if (!carOn) return;
+  if (carVid.readyState >= 2) {
+    try {
+      carCtx.drawImage(carVid, 0, 0, carCv.width, carCv.height);
+      const img = carCtx.getImageData(0, 0, carCv.width, carCv.height), d = img.data;
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i], g = d[i + 1], b = d[i + 2], m = r > b ? r : b, k = g - m;
+        if (k > 70) d[i + 3] = 0;
+        else if (k > 22) { d[i + 3] = 255 * (70 - k) / 48; d[i + 1] = m; }
+        else if (k > 0) d[i + 1] = m + k * .3;
+      }
+      carCtx.putImageData(img, 0, 0);
+    } catch (e) { carFallback(); return; }   // e.g. opened from a local file
+  }
+  requestAnimationFrame(keyFrame);
+}
+function showStill(on) { carCv.hidden = on; $('carImg').hidden = !on; }
+function carFallback() { carOk = false; carOn = false; showStill(true); }
+carVid.addEventListener('ended', () => { carVid.currentTime = CAR_LOOP_FROM; carVid.play().catch(() => {}); });
+carVid.addEventListener('error', carFallback);
+function startKeying() { showStill(false); if (!carOn) { carOn = true; requestAnimationFrame(keyFrame); } }
+function playCarriage() {
+  if (!carOk) return;
+  carCtx.clearRect(0, 0, carCv.width, carCv.height);
+  carVid.currentTime = 0;
+  Promise.resolve(carVid.play()).then(startKeying).catch(() => {
+    // autoplay refused: show the still carriage until the player touches the screen
+    showStill(true);
+    $('endOv').addEventListener('pointerdown', () => { carVid.play().then(startKeying).catch(() => {}); }, { once: true });
+  });
+}
+function stopCarriage() { carOn = false; carVid.pause(); }
+
 function endGame() {
   running = false;
   clearInterval(raf); clearTimeout(scareT);
@@ -680,7 +719,7 @@ function endGame() {
   $('newBest').hidden = !isBest || score === 0;
   $('endTitle').textContent = found >= 15 ? '捉鬼大師！' : found >= 8 ? '膽大的勇者！' : '天光咧！';
   renderVocab();
-  setTimeout(() => { $('endOv').hidden = false; $('againBtn').focus(); }, 500);
+  setTimeout(() => { $('endOv').hidden = false; playCarriage(); $('againBtn').focus(); }, 500);
 }
 
 $('sayBtn').addEventListener('click', e => { e.stopPropagation(); speak(target); });
