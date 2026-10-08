@@ -215,7 +215,10 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 @media (hover:none){.room,.item{cursor:auto}}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important}
+  /* the big ghost is part of the game: with reduced motion it fades in and out in place instead of swooping */
+  .room .scare{left:var(--gx,30%)!important;transform:none!important;animation:ghostFade 2.8s ease-in-out forwards!important}
 }
+@keyframes ghostFade{0%{opacity:0}12%{opacity:1}85%{opacity:1}100%{opacity:0}}
 </style>
 </head>
 <body>
@@ -916,6 +919,7 @@ function scare() {
   s.className = 'scare';
   s.setAttribute('role', 'button'); s.setAttribute('aria-label', '抓大鬼');
   s.style.top = (18 + Math.random() * 40) + '%';
+  s.style.setProperty('--gx', (5 + Math.random() * 50) + '%');
   s.innerHTML = '<img src="img/items/ghost.webp" alt=""><b>嘩！</b>';
   room.appendChild(s);
   const fl = document.createElement('div'); fl.className = 'flash'; room.appendChild(fl);
