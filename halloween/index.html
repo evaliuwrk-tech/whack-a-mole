@@ -98,12 +98,19 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
 @keyframes spark{to{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
 .combo{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);z-index:30;font-family:var(--spooky);font-size:clamp(40px,8vw,72px);color:var(--pumpkin);text-shadow:0 5px 0 var(--ink),0 0 20px rgba(255,138,31,.6);pointer-events:none;white-space:nowrap;animation:comboIn 1s ease-out forwards}
 @keyframes comboIn{0%{transform:translate(-50%,-50%) scale(.2) rotate(-10deg);opacity:0}25%{transform:translate(-50%,-50%) scale(1.15) rotate(3deg);opacity:1}75%{opacity:1}100%{transform:translate(-50%,-70%);opacity:0}}
-.scare{position:absolute;z-index:25;width:min(46vw,300px);top:30%;left:-50%;pointer-events:none;animation:swoop 1.6s ease-in-out forwards}
+.scare{position:absolute;z-index:25;width:min(40vw,260px);top:30%;left:-50%;cursor:pointer;touch-action:none;animation:swoop 2.8s ease-in-out forwards}
+.scare::after{content:"";position:absolute;inset:8% 12%;border-radius:50%;box-shadow:0 0 0 4px rgba(155,229,100,.7),0 0 30px 8px rgba(155,229,100,.45);animation:ring .6s ease-in-out infinite alternate;pointer-events:none}
+@keyframes ring{to{transform:scale(1.08);opacity:.5}}
+.scare.caught{animation-play-state:paused;pointer-events:none}
+.scare.caught img,.scare.caught b{transition:transform .45s ease-in,opacity .45s;transform:scale(.2) rotate(300deg);opacity:0}
+.scare.caught::after{display:none}
 .scare img{width:100%;height:auto;display:block;filter:drop-shadow(0 0 30px rgba(244,241,255,.6))}
 .scare b{position:absolute;left:60%;top:-6%;font-family:var(--spooky);font-weight:400;font-size:clamp(40px,8vw,70px);color:var(--ghost);text-shadow:0 4px 0 var(--ink)}
 @keyframes swoop{0%{left:-50%;transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-30%) rotate(6deg)}100%{left:120%;transform:translateY(10%) rotate(-4deg)}}
 .flash{position:absolute;inset:0;z-index:24;background:rgba(244,241,255,.25);pointer-events:none;animation:flash .35s forwards}
 @keyframes flash{to{opacity:0}}
+.item.moving.blown{transition:left .8s cubic-bezier(.2,.8,.3,1),top .8s cubic-bezier(.2,.8,.3,1),opacity .3s}
+.wind{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);z-index:30;pointer-events:none;font-weight:800;font-size:clamp(22px,4.5vw,34px);color:var(--ghost);text-shadow:0 3px 0 var(--ink),0 0 16px rgba(244,241,255,.6);white-space:nowrap;animation:comboIn 1.4s ease-out forwards}
 
 /* overlays */
 .overlay{position:absolute;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(8,5,18,.72);backdrop-filter:blur(3px);overflow-x:hidden;overflow-y:auto}
@@ -308,7 +315,7 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
       <div class="hero-box witch"><svg class="beam" viewBox="0 0 200 100" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="beamG"><stop offset="0" stop-color="#fff6c8" stop-opacity=".9"/><stop offset=".55" stop-color="#ffe98a" stop-opacity=".35"/><stop offset="1" stop-color="#ffe98a" stop-opacity="0"/></linearGradient></defs><polygon points="0,44 200,0 200,100 0,56" fill="url(#beamG)"/></svg><img src="img/hero-witch.webp" alt="戴著南瓜巫師帽、拿手電筒探路的金髮小勇者"><span class="lens" aria-hidden="true"></span></div>
       <div class="txt">
         <h1>鬼屋<span>手電筒</span></h1>
-        <p>停電了！鬼屋裡黑漆漆，只剩你的手電筒。仔細聽<b>客語</b>，用光照出牠，點下去就抓到了。60 秒看你能找到幾個！</p>
+        <p>停電了！鬼屋裡黑漆漆，只剩你的手電筒。仔細聽<b>客語</b>，用光照出牠，點下去就抓到了。60 秒看你能找到幾個！<br>看到<b>大鬼飛過</b>，趕快點牠：<b>+20 分、+3 秒</b>！</p>
         <p style="font-size:13px;margin-top:6px">電腦：移動滑鼠照亮　手機：手指滑動照亮、點一下抓</p>
         <div class="accent" role="group" aria-label="選擇腔調">
           <span>選腔調（遊戲中右上角也能換）</span>
@@ -356,7 +363,7 @@ body{margin:0;font-family:var(--body);color:var(--ghost);background:var(--night)
         <div class="lvicons" aria-hidden="true">
           <img class="m-ghost" src="img/items/ghost.webp" alt=""><img class="m-cat" src="img/items/cat-walk.webp" alt=""><img class="m-bat" src="img/items/bat.webp" alt="">
         </div>
-        <p>東西開始會動了！<br>鬼仔會飄、貓仔會走來走去、蝠婆會亂飛……<br>還多了 3 個新單字：<b>目珠仁、帽仔、手指</b><br><b>60 秒內找到 10 個</b>就全部過關！</p>
+        <p>東西開始會動了！<br>鬼仔會飄、貓仔會走來走去、蝠婆會亂飛……<br>還多了 3 個新單字：<b>目珠仁、帽仔、手指</b><br><b>60 秒內找到 10 個</b>就全部過關！<br>小心：沒抓到大鬼，牠會把東西<b>吹亂</b>！</p>
       </div>
       <div class="btnrow"><button class="big alt" id="lvHome" type="button">🏠 回首頁</button><button class="big" id="lvGo" type="button">進入進階關！</button></div>
     </div>
@@ -901,18 +908,63 @@ function pick(it) {
   }
 }
 
+// The big ghost swoops across now and then.
+// Catch it (tap it) for a bonus; on the advanced level, if it gets away it blows everything into new places.
 function scare() {
   if (!running) return;
   const s = document.createElement('div');
   s.className = 'scare';
-  s.style.top = (20 + Math.random() * 40) + '%';
+  s.setAttribute('role', 'button'); s.setAttribute('aria-label', '抓大鬼');
+  s.style.top = (18 + Math.random() * 40) + '%';
   s.innerHTML = '<img src="img/items/ghost.webp" alt=""><b>嘩！</b>';
   room.appendChild(s);
   const fl = document.createElement('div'); fl.className = 'flash'; room.appendChild(fl);
-  setTimeout(() => fl.remove(), 400); setTimeout(() => s.remove(), 1700);
-  dim = 40;
+  setTimeout(() => fl.remove(), 400);
+  dim = 22;
   sfx.boo();
+  let caught = false;
+  const stop = e => e.stopPropagation();
+  s.addEventListener('pointerup', stop);
+  s.addEventListener('pointerdown', e => {
+    e.stopPropagation();
+    if (caught || !running) return;
+    caught = true;
+    const rr = room.getBoundingClientRect(), r = s.getBoundingClientRect();
+    const cx = r.left - rr.left + r.width / 2, cy = r.top - rr.top + r.height / 2;
+    score += 20; endAt += 3000;
+    s.classList.add('caught');
+    [784, 1047, 1319, 1568].forEach((f, i) => tone(f, f, .12, 'triangle', .12, i * .05));
+    sparks(cx, cy);
+    fx('pop', cx, cy - 20, '抓到鬼！+20 +3秒');
+    setHUD(timeLeft());
+    setTimeout(() => s.remove(), 500);
+  });
+  if (LEVELS[level].moving) setTimeout(() => { if (!caught && running && s.isConnected) blowAway(); }, 1500);
+  setTimeout(() => s.remove(), 2900);
   scareT = setTimeout(scare, 13000 + Math.random() * 9000);
+}
+// the ghost got away: everything still in the room flies to a new spot (no overlaps)
+function blowAway() {
+  const live = movers.filter(m => !m.el.classList.contains('found'));
+  const placed = [];
+  for (const m of live) {
+    let best = null, bestGap = -1;
+    for (let k = 0; k < 40; k++) {
+      const x = rnd(m.minX, m.maxX), y = m.lockY ? m.y : rnd(m.minY, m.maxY);
+      let gap = Infinity;
+      for (const q of placed) gap = Math.min(gap, Math.hypot((x - q.x) * W, (y - q.y) * H) - (m.s + q.s) / 2);
+      if (gap > bestGap) { bestGap = gap; best = { x, y }; }
+      if (gap > 10) break;
+    }
+    m.x = best.x; m.y = best.y; placed.push({ x: m.x, y: m.y, s: m.s });
+    if (m.vx) m.vx *= Math.random() < .5 ? -1 : 1;
+    if (m.vy) m.vy *= Math.random() < .5 ? -1 : 1;
+    m.el.classList.add('blown');
+    setTimeout(() => m.el.classList.remove('blown'), 900);
+  }
+  noise(.9, .25, 600); tone(300, 120, .8, 'sine', .08);
+  const w = document.createElement('div'); w.className = 'wind'; w.textContent = '呼～東西被吹亂了！';
+  room.appendChild(w); setTimeout(() => w.remove(), 1500);
 }
 
 const timeLeft = () => (endAt - performance.now()) / 1000;
