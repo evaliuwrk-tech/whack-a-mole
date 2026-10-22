@@ -1,0 +1,969 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="叮噹接禮趣：聖誕老人從天上丟禮物，聽客語接住對的東西，最後布置靚靚个聖誕樹！支援四縣腔、海陸腔。">
+<title>叮噹接禮趣</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@500;800&family=Mountains+of+Christmas:wght@700&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --night:#0d1a36; --night2:#16284f; --snow:#f4f8ff; --berry:#d62f3a; --berry-dk:#a3202a;
+  --pine:#1f7a4a; --pine-lt:#43a86d; --gold:#f2c14e; --gold-dk:#c9922a; --ink:#1a1020; --cream:#fff6e6;
+  --body:"Chiron GoRound TC","Microsoft JhengHei","PingFang TC",system-ui,sans-serif;
+  --fest:"Mountains of Christmas","Chiron GoRound TC",cursive,system-ui;
+}
+html,body{height:100%}
+[hidden]{display:none!important}
+body{margin:0;font-family:var(--body);color:var(--snow);background:var(--night);overflow:hidden;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+#app{position:relative;height:100%;display:flex;flex-direction:column}
+#snow{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:60}
+
+/* HUD */
+.hud{position:relative;z-index:50;display:flex;gap:8px;justify-content:center;align-items:stretch;flex-wrap:wrap;padding:10px 16px;background:linear-gradient(var(--night),rgba(13,26,54,.85))}
+.chip{background:var(--cream);color:var(--ink);border:3px solid var(--ink);border-radius:16px;padding:4px 14px 6px;box-shadow:0 4px 0 var(--ink);display:flex;align-items:center;gap:8px;min-width:76px;justify-content:center}
+.chip small{font-size:13px;font-weight:800;letter-spacing:.06em;white-space:nowrap}
+.chip b{font-family:var(--fest);font-weight:700;font-size:28px;line-height:1;color:var(--berry);font-variant-numeric:tabular-nums}
+.chip.time.low b{animation:pulse .5s ease-in-out infinite alternate}
+@keyframes pulse{to{transform:scale(1.2)}}
+.icon-btn{background:var(--cream);color:var(--ink);border:3px solid var(--ink);border-radius:14px;box-shadow:0 4px 0 var(--ink);font-size:20px;min-width:46px;cursor:pointer;font-family:var(--body)}
+.icon-btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.home-btn{display:flex;align-items:center;gap:4px;padding:0 10px;font-size:18px}
+.home-btn span{font-size:14px;font-weight:800}
+#bgmBtn[aria-pressed="false"]{opacity:.45;text-decoration:line-through}
+.accent-chip{position:relative;padding:4px 6px 4px 10px;gap:6px}
+.accent-chip small{line-height:1.15;text-align:center;font-size:12px}
+.seg{font-family:var(--body);font-weight:800;font-size:15px;padding:4px 10px 5px;border:2.5px solid var(--ink);border-radius:10px;background:#fff;color:var(--ink);cursor:pointer}
+.seg[aria-pressed="true"]{background:var(--berry);color:#fff}
+.seg:focus-visible,.icon-btn:focus-visible,.big:focus-visible,.say:focus-visible,.navb:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.accent-tip{position:absolute;left:50%;top:calc(100% + 12px);transform:translateX(-50%);background:var(--gold);color:var(--ink);border:3px solid var(--ink);border-radius:14px;padding:5px 12px;font-size:14px;font-weight:800;white-space:nowrap;box-shadow:0 3px 0 var(--ink);pointer-events:none;animation:tipBob 1s ease-in-out infinite;z-index:60}
+.accent-tip::before{content:"";position:absolute;left:50%;top:-11px;margin-left:-9px;border:9px solid transparent;border-top:0;border-bottom:10px solid var(--ink)}
+.accent-tip::after{content:"";position:absolute;left:50%;top:-6px;margin-left:-6px;border:6px solid transparent;border-top:0;border-bottom:7px solid var(--gold)}
+@keyframes tipBob{50%{transform:translateX(-50%) translateY(4px)}}
+
+/* stage */
+.stage{position:relative;flex:1;min-height:0;overflow:hidden;background:var(--night2) url(img/village-bg.webp) center bottom/cover no-repeat;touch-action:none}
+.sleigh{position:absolute;left:0;top:3%;width:clamp(150px,26vw,300px);z-index:3;pointer-events:none;will-change:transform}
+.sleigh img{display:block;width:100%;height:auto;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35))}
+.drop{position:absolute;left:0;top:0;width:var(--s);height:var(--s);margin:calc(var(--s) / -2) 0 0 calc(var(--s) / -2);z-index:4;pointer-events:none;will-change:transform}
+.drop img{width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 4px 6px rgba(0,0,0,.4))}
+.hero{position:absolute;bottom:2%;left:0;width:clamp(86px,15vh,150px);z-index:5;pointer-events:none;will-change:transform}
+.hero img{display:block;width:100%;height:auto;filter:drop-shadow(0 8px 8px rgba(0,0,0,.35))}
+.hero.catch img{animation:hop .25s ease-out}
+@keyframes hop{40%{transform:translateY(-6%) scale(1.04,.96)}}
+.hero.frozen img{animation:shiver .12s linear infinite}
+@keyframes shiver{25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+
+.prompt{position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:20;display:flex;align-items:center;gap:12px;background:rgba(255,246,230,.95);color:var(--ink);border:3px solid var(--ink);border-radius:20px;padding:6px 10px 6px 16px;box-shadow:0 5px 0 var(--ink);max-width:calc(100% - 32px);box-sizing:border-box;pointer-events:auto}
+.prompt .lbl{font-size:15px;font-weight:800;color:var(--berry);letter-spacing:.1em;white-space:nowrap}
+.prompt .word{display:flex;flex-direction:column;line-height:1.1;min-width:0}
+.prompt .hz{font-size:clamp(24px,5vw,36px);font-weight:800;letter-spacing:.06em}
+.prompt .py{font-size:15px;font-weight:800;color:var(--pine);white-space:nowrap}
+.prompt.bump{animation:promptIn .35s cubic-bezier(.3,1.6,.6,1)}
+@keyframes promptIn{from{transform:translateX(-50%) scale(.6)}}
+.say{flex:none;width:44px;height:44px;border-radius:50%;border:3px solid var(--ink);background:var(--gold);font-size:20px;cursor:pointer;box-shadow:0 3px 0 var(--ink)}
+.say:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+
+/* fx */
+.fx{position:absolute;pointer-events:none;z-index:30}
+.pop{font-family:var(--fest);font-weight:700;font-size:38px;color:var(--gold);text-shadow:0 3px 0 var(--ink);animation:rise .9s ease-out forwards;white-space:nowrap}
+.pop.bad{color:#9fd7ff}
+.pop.small{font-family:var(--body);font-size:20px;font-weight:800}
+@keyframes rise{0%{transform:translate(-50%,0) scale(.5);opacity:0}20%{transform:translate(-50%,-14px) scale(1.15);opacity:1}100%{transform:translate(-50%,-80px) scale(1);opacity:0}}
+.tag{transform:translate(-50%,0);background:var(--cream);color:var(--ink);border:3px solid var(--ink);border-radius:14px;padding:4px 10px;font-weight:800;font-size:15px;white-space:nowrap;text-align:center;line-height:1.25;animation:tagIn 1.6s ease-out forwards}
+.tag .py{color:var(--pine);font-size:13px}
+@keyframes tagIn{0%{opacity:0;transform:translate(-50%,8px)}12%{opacity:1;transform:translate(-50%,0)}80%{opacity:1}100%{opacity:0}}
+.spark{width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:radial-gradient(#fff,var(--gold) 60%,transparent 70%);animation:spark .7s ease-out forwards}
+@keyframes spark{to{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
+.banner{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);z-index:30;font-weight:800;font-size:clamp(26px,6vw,46px);color:var(--snow);text-shadow:0 4px 0 var(--ink),0 0 18px rgba(255,255,255,.5);pointer-events:none;white-space:nowrap;animation:comboIn 1.2s ease-out forwards}
+@keyframes comboIn{0%{transform:translate(-50%,-50%) scale(.2);opacity:0}25%{transform:translate(-50%,-50%) scale(1.12);opacity:1}75%{opacity:1}100%{transform:translate(-50%,-70%);opacity:0}}
+
+/* overlays */
+.overlay{position:absolute;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(8,14,32,.72);backdrop-filter:blur(3px);overflow-x:hidden;overflow-y:auto}
+.card{position:relative;background:var(--cream);color:var(--ink);border:4px solid var(--ink);border-radius:28px;box-shadow:0 8px 0 var(--ink),0 0 40px rgba(242,193,78,.35);padding:22px 24px;max-width:560px;width:100%;display:flex;gap:18px;align-items:center;animation:cardIn .45s cubic-bezier(.3,1.5,.6,1);box-sizing:border-box;margin:auto}
+@keyframes cardIn{from{transform:scale(.6) translateY(40px);opacity:0}}
+.card .txt{flex:1;min-width:0}
+.card p{margin:10px 0 0;font-size:15px;line-height:1.65}
+.card p b{color:var(--berry)}
+.ad-mark{position:absolute;right:14px;top:12px;width:34px;height:auto;opacity:.9}
+.card h1{margin:0;font-size:clamp(36px,8.5vw,54px);font-weight:800;line-height:1.05;color:var(--berry);letter-spacing:.06em;-webkit-text-stroke:1.5px var(--ink);paint-order:stroke;text-shadow:0 4px 0 var(--gold-dk);text-wrap:balance}
+.subtitle{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:clamp(17px,4vw,22px);font-weight:800;color:var(--pine)}
+.subtitle .say{width:36px;height:36px;font-size:16px}
+#startOv .card{max-width:760px}
+.start-art{position:relative;width:36%;flex:none;align-self:stretch;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px}
+.start-art .s-sleigh{width:118%;max-width:none;margin-left:-10%;animation:float 3s ease-in-out infinite}
+.start-art .s-hero{width:70%}
+@keyframes float{50%{transform:translateY(-8px)}}
+.accent{display:flex;align-items:center;gap:6px;margin-top:12px;flex-wrap:wrap}
+.accent span{flex-basis:100%;font-size:13px;font-weight:800;color:#5a4a4a}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.big{font-family:var(--body);font-weight:800;font-size:21px;letter-spacing:.08em;padding:10px 22px 12px;border:4px solid var(--ink);border-radius:18px;background:var(--berry);color:#fff;box-shadow:0 6px 0 var(--ink);cursor:pointer;transition:transform .08s}
+.big:hover{transform:translateY(-2px) rotate(-1.5deg)}
+.big:active{transform:translateY(5px);box-shadow:0 1px 0 var(--ink)}
+.big.alt{background:#fff;color:var(--ink);font-size:17px;letter-spacing:.04em}
+.big.green{background:var(--pine);color:#fff}
+.bgm-seg{display:block;margin-top:12px}
+.bgm-seg[aria-pressed="false"]{background:#ddd;color:#666}
+.logos{display:flex;align-items:center;gap:14px;margin-top:14px;flex-wrap:wrap}
+.logos img{height:30px;width:auto}
+.credit{font-size:11px!important;line-height:1.4!important;color:#6a5a5a;margin-top:8px!important}
+
+/* word cards */
+.learn{flex-direction:column;text-align:center;max-width:430px;gap:12px}
+.learn .accent{justify-content:center;margin-top:0}
+.learn .btnrow{justify-content:center;margin-top:0}
+.ltitle{margin:0;font-size:26px;color:var(--berry);letter-spacing:.1em}
+.ltitle small{font-size:14px;color:#6a5a5a;margin-left:6px}
+.fcard{position:relative;width:100%;box-sizing:border-box;background:radial-gradient(circle at 50% 30%,#fff,#ffe9c7 80%);border:3px solid var(--gold-dk);border-radius:24px;padding:18px 16px 14px;cursor:pointer;box-shadow:inset 0 0 30px rgba(201,146,42,.25);touch-action:pan-y}
+.fcard.turn{animation:turn .35s ease-out}
+@keyframes turn{from{transform:perspective(600px) rotateY(70deg);opacity:.2}}
+.fcard img{display:block;margin:0 auto;height:clamp(110px,24vh,180px);width:auto;max-width:80%;object-fit:contain;-webkit-user-drag:none}
+.newtag{position:absolute;right:12px;top:12px;background:var(--pine);color:#fff;border:2px solid var(--ink);border-radius:10px;padding:2px 8px;font-size:12px;font-weight:800;transform:rotate(4deg)}
+.lhz{margin-top:10px;font-size:clamp(38px,10vw,52px);font-weight:800;letter-spacing:.1em;line-height:1.1}
+.lpy{font-size:20px;color:var(--pine);font-weight:800;margin:4px 0 8px}
+.zh{display:inline-block;font-size:13px;font-weight:800;color:var(--ink);background:#ffe1a6;border-radius:8px;padding:1px 7px 2px;white-space:nowrap}
+.zh::before{content:"華語 ";opacity:.6;font-size:.85em}
+.fcard .zh{font-size:16px;padding:3px 10px 4px}
+.lsay{display:block;margin-top:10px;font-size:12px;color:#6a5a5a}
+.lnav{display:flex;align-items:center;justify-content:center;gap:14px}
+.navb{width:48px;height:48px;border-radius:50%;border:3px solid var(--ink);background:var(--gold);color:var(--ink);font-size:28px;font-weight:800;line-height:1;cursor:pointer;box-shadow:0 3px 0 var(--ink)}
+.dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:210px}
+.dots button{width:12px;height:12px;padding:0;border-radius:50%;border:2px solid var(--ink);background:#ddd;cursor:pointer}
+.dots button[aria-current="true"]{background:var(--berry);transform:scale(1.25)}
+
+/* level / time-up card */
+.mid{flex-direction:column;text-align:center;max-width:460px;gap:10px}
+.mid h2{margin:0;font-size:30px;color:var(--berry)}
+.mid .bonus{font-weight:800}
+.mid .bonus b{color:var(--pine)}
+.newwords{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:4px}
+.newwords div{display:flex;flex-direction:column;align-items:center;font-size:14px;font-weight:800;gap:2px}
+.newwords img{width:56px;height:56px;object-fit:contain}
+.mid .btnrow{justify-content:center}
+
+/* decorate */
+.decor{position:absolute;inset:0;z-index:90;display:flex;flex-direction:column;background:#3a2414 url(img/room-bg.webp) center/cover no-repeat}
+.dbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 16px;background:linear-gradient(rgba(20,10,4,.75),rgba(20,10,4,0))}
+.dbar h2{margin:0;font-size:clamp(20px,4.5vw,30px);color:var(--gold);text-shadow:0 3px 0 var(--ink)}
+.dbar p{margin:2px 0 0;font-size:14px;font-weight:800;color:var(--cream)}
+.dbar .btnrow{margin:0}
+.dbar .big{font-size:17px;padding:8px 16px 10px}
+.treewrap{flex:1;min-height:0;display:flex;align-items:flex-end;justify-content:center;padding:0 16px}
+.treebox{position:relative;height:100%;max-height:100%;aspect-ratio:801/1200;max-width:100%}
+.treebox > img.tree{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 10px 20px rgba(0,0,0,.4))}
+.orn{position:absolute;width:var(--w);margin-left:calc(var(--w) / -2);transform:translateY(-50%);cursor:grab;touch-action:none;z-index:2}
+.orn img{display:block;width:100%;height:auto;pointer-events:none;filter:drop-shadow(0 4px 4px rgba(0,0,0,.35))}
+.orn.just-hung img{animation:ornIn .4s cubic-bezier(.3,1.6,.6,1)}
+@keyframes ornIn{from{transform:scale(.3)}}
+.twinkle{position:absolute;width:8px;height:8px;margin:-4px;border-radius:50%;background:radial-gradient(#fff,var(--c) 45%,transparent 70%);animation:tw 1.6s ease-in-out infinite;pointer-events:none;z-index:1}
+@keyframes tw{50%{opacity:.15;transform:scale(.5)}}
+.tray{display:flex;gap:10px;overflow-x:auto;padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(rgba(20,10,4,0),rgba(20,10,4,.8) 30%)}
+.tray:empty::after{content:"東西都掛上去囉！按「完成」看看你的聖誕樹";color:var(--cream);font-weight:800;padding:14px 4px}
+.chipi{position:relative;flex:none;width:72px;height:72px;border-radius:18px;border:3px solid var(--ink);background:var(--cream);box-shadow:0 4px 0 var(--ink);cursor:grab;touch-action:none;padding:6px;box-sizing:border-box}
+.chipi img{width:100%;height:100%;object-fit:contain;pointer-events:none}
+.chipi b{position:absolute;right:-6px;top:-8px;min-width:24px;height:24px;border-radius:12px;background:var(--berry);color:#fff;border:2px solid var(--ink);font-size:13px;display:flex;align-items:center;justify-content:center;padding:0 4px;box-sizing:border-box}
+.ghost-drag{position:fixed;z-index:200;width:70px;height:70px;margin:-35px 0 0 -35px;pointer-events:none;filter:drop-shadow(0 8px 8px rgba(0,0,0,.4))}
+.ghost-drag img{width:100%;height:100%;object-fit:contain}
+.wordtip{position:absolute;z-index:5;transform:translate(-50%,-100%);background:var(--cream);color:var(--ink);border:3px solid var(--ink);border-radius:14px;padding:4px 10px;font-weight:800;text-align:center;line-height:1.25;white-space:nowrap;pointer-events:none;animation:tagIn 2s ease-out forwards}
+.wordtip .py{display:block;color:var(--pine);font-size:13px}
+
+/* result */
+.result{max-width:820px;align-items:stretch;gap:20px}
+.rtree{flex:none;width:44%;display:flex;flex-direction:column;gap:8px}
+.rtree img{width:100%;border-radius:18px;border:3px solid var(--ink);box-shadow:0 5px 0 var(--ink)}
+.rtree .big{font-size:17px;padding:8px 12px 10px}
+.rtree small{text-align:center;font-size:12px;color:#6a5a5a}
+.rinfo{flex:1;min-width:0;display:flex;flex-direction:column}
+.rhead{display:flex;align-items:flex-end;gap:8px}
+.rhead img{width:96px;height:auto;flex:none}
+.rhead h1{font-size:clamp(30px,6vw,44px)}
+.final{font-family:var(--fest);font-weight:700;font-size:56px;line-height:1;color:var(--berry)}
+.final small{font-family:var(--body);font-size:16px;font-weight:800;margin-left:6px;color:var(--ink)}
+.stats{display:flex;gap:14px;font-size:14px;font-weight:800;flex-wrap:wrap}
+.stats b{color:var(--berry)}
+.badge{display:inline-block;background:var(--pine);color:#fff;border:3px solid var(--ink);border-radius:12px;padding:2px 10px;font-weight:800;font-size:14px;transform:rotate(-3deg);width:max-content}
+.vocab{margin-top:10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px;max-height:34vh;overflow-y:auto;padding-right:2px}
+.vocab h3{grid-column:1/-1;margin:0;font-size:14px;letter-spacing:.1em}
+.vrow{display:flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--gold-dk);border-radius:12px;padding:4px 6px}
+.vrow img{width:34px;height:34px;object-fit:contain;flex:none}
+.vrow div{flex:1;min-width:0;line-height:1.15}
+.vrow .hz{font-weight:800;font-size:16px;white-space:nowrap}
+.vrow .py{font-size:12px;color:var(--pine);font-weight:800;white-space:nowrap}
+.vrow .zh{font-size:11px;margin-top:2px}
+.vrow .say{width:30px;height:30px;font-size:13px;border-width:2px}
+.result .btnrow{margin-top:12px}
+
+@media (max-width:700px){
+  .hud{gap:6px;padding:8px 10px}
+  .chip{min-width:58px;padding:3px 8px 5px;gap:5px}
+  .chip small{font-size:12px}
+  .chip b{font-size:23px}
+  .card{flex-direction:column;text-align:center;padding:18px 16px}
+  .start-art{width:70%;order:-1}
+  .start-art .s-sleigh{width:100%;margin:0}
+  .start-art .s-hero{display:none}
+  .subtitle,.accent,.btnrow,.logos,.stats{justify-content:center}
+  .prompt{top:auto;bottom:calc(8px + env(safe-area-inset-bottom,0px));gap:8px;padding:5px 8px 5px 12px}
+  .hero{bottom:calc(74px + env(safe-area-inset-bottom,0px))}
+  .home-btn span{display:none}
+  .prompt .lbl{font-size:13px}
+  .rtree{width:100%}
+  .rhead{justify-content:center}
+  .rhead img{width:72px}
+  .vocab{max-height:none}
+  .dbar{justify-content:center;text-align:center}
+}
+@media (hover:none){.stage{cursor:auto}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="hud">
+    <div class="chip"><small>分數</small><b id="score">0</b></div>
+    <div class="chip time" id="timeChip"><small>時間</small><b id="time">40</b></div>
+    <div class="chip"><small id="lvName">第1關</small><b id="lvProg">0/6</b></div>
+    <div class="chip accent-chip" role="group" aria-label="切換腔調">
+      <small>腔調<br>切換</small>
+      <button class="seg" type="button" data-accent="xi" aria-pressed="true">四縣</button>
+      <button class="seg" type="button" data-accent="hoi" aria-pressed="false">海陸</button>
+      <div class="accent-tip" id="accentTip" hidden>👆 點這裡可以換腔調喔！</div>
+    </div>
+    <button class="icon-btn home-btn" id="homeBtn" type="button" aria-label="回首頁" title="回首頁">🏠<span>首頁</span></button>
+    <button class="icon-btn" id="bgmBtn" type="button" aria-label="背景音樂開關" aria-pressed="true" title="背景音樂">🎵</button>
+    <button class="icon-btn" id="mute" type="button" aria-label="音效開關" title="音效">🔊</button>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="sleigh" id="sleigh"><img src="img/sleigh.webp" alt=""></div>
+    <div class="hero" id="hero"><img id="heroImg" src="img/hero-basket.webp" alt="舉著籃子的小勇者"></div>
+    <div class="prompt" id="prompt" hidden>
+      <span class="lbl">接</span>
+      <span class="word"><span class="hz" id="pHz"></span><span class="py" id="pPy"></span></span>
+      <button class="say" id="sayBtn" type="button" aria-label="再聽一次">🔊</button>
+    </div>
+  </div>
+
+  <!-- start -->
+  <div class="overlay" id="startOv">
+    <div class="card">
+      <img class="ad-mark" src="img/ad-mark.webp" alt="廣告">
+      <div class="start-art" aria-hidden="true">
+        <img class="s-sleigh" src="img/sleigh.webp" alt="">
+        <img class="s-hero" src="img/hero-basket.webp" alt="">
+      </div>
+      <div class="txt">
+        <h1>叮噹接禮趣</h1>
+        <div class="subtitle">布置靚靚个聖誕樹 <button class="say" id="subSay" type="button" aria-label="聽客語">🔊</button></div>
+        <p>聖誕老人駕著雪橇在天上丟東西！左右移動籃子，<b>聽客語</b>接住對的東西。接到的禮物和裝飾品，最後拿來<b>布置你自己的聖誕樹</b>。小心雪球，接到會被凍住喔！</p>
+        <p style="font-size:13px;margin-top:6px">電腦：滑鼠或 ← → 鍵移動　手機：手指左右滑動</p>
+        <div class="accent" role="group" aria-label="選擇腔調">
+          <span>選腔調（遊戲中右上角也能換）</span>
+          <button class="seg" type="button" data-accent="xi" aria-pressed="true">四縣腔</button>
+          <button class="seg" type="button" data-accent="hoi" aria-pressed="false">海陸腔</button>
+        </div>
+        <div class="btnrow"><button class="big alt" id="learnBtn" type="button">📖 先學單字卡</button><button class="big" id="startBtn" type="button">開始接禮物！</button></div>
+        <button class="seg bgm-seg" id="bgmSeg" type="button" aria-pressed="true">🎵 背景音樂：開</button>
+        <div class="logos"><img src="img/logo-hakka.webp" alt="哈客網路學院"><img src="img/logo-hac.webp" alt="客家委員會"></div>
+        <p class="credit">客語語音：客家委員會「臺灣客語語音資料庫」語音合成（四縣腔、海陸腔）｜背景音樂：Jingle Bells（公共領域）</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- word cards -->
+  <div class="overlay" id="learnOv" hidden>
+    <div class="card learn">
+      <h2 class="ltitle">單字卡 <small id="lCount">1 / 10</small></h2>
+      <div class="fcard" id="fcard" role="button" tabindex="0" aria-label="再聽一次">
+        <img id="lImg" src="img/items/gift.webp" alt="">
+        <span class="newtag" id="lLv">第1關</span>
+        <div class="lhz" id="lHz"></div>
+        <div class="lpy" id="lPy"></div>
+        <div><span class="zh" id="lZh"></span></div>
+        <span class="lsay">🔊 點卡片再聽一次・左右滑動換卡</span>
+      </div>
+      <div class="lnav">
+        <button class="navb" id="lPrev" type="button" aria-label="上一張">‹</button>
+        <div class="dots" id="lDots"></div>
+        <button class="navb" id="lNext" type="button" aria-label="下一張">›</button>
+      </div>
+      <div class="accent" role="group" aria-label="選擇腔調">
+        <button class="seg" type="button" data-accent="xi" aria-pressed="true">四縣腔</button>
+        <button class="seg" type="button" data-accent="hoi" aria-pressed="false">海陸腔</button>
+      </div>
+      <div class="btnrow"><button class="big alt" id="lBack" type="button">返回</button><button class="big" id="lStart" type="button">學會了，開始！</button></div>
+    </div>
+  </div>
+
+  <!-- between levels / time up -->
+  <div class="overlay" id="midOv" hidden>
+    <div class="card mid">
+      <h2 id="midTitle">第 1 關過關！</h2>
+      <div class="bonus" id="midBonus"></div>
+      <p id="midText"></p>
+      <div class="newwords" id="midWords"></div>
+      <div class="btnrow" id="midBtns"></div>
+    </div>
+  </div>
+
+  <!-- decorate -->
+  <div class="decor" id="decorOv" hidden>
+    <div class="dbar">
+      <div><h2>布置靚靚个聖誕樹</h2><p>把下面接到的東西拖到樹上，或點一下自動掛上去</p></div>
+      <div class="btnrow"><button class="big alt" id="autoBtn" type="button">✨ 一鍵布置</button><button class="big green" id="doneBtn" type="button">完成！</button></div>
+    </div>
+    <div class="treewrap"><div class="treebox" id="treebox"><img class="tree" src="img/tree.webp" alt="聖誕樹"></div></div>
+    <div class="tray" id="tray"></div>
+  </div>
+
+  <!-- result -->
+  <div class="overlay" id="endOv" hidden>
+    <div class="card result">
+      <img class="ad-mark" src="img/ad-mark.webp" alt="廣告">
+      <div class="rtree">
+        <img id="rTreeImg" alt="我布置好的聖誕樹">
+        <button class="big green" id="saveBtn" type="button">💾 儲存我的聖誕樹</button>
+        <small>存下來分享給朋友吧！</small>
+      </div>
+      <div class="rinfo">
+        <div class="rhead"><img src="img/hero-wave.webp" alt="抱著禮物揮手的小勇者"><div><h1 id="endTitle">當慶！</h1><span class="badge" id="endBadge">聖誕快樂</span></div></div>
+        <div class="final"><span id="finalScore">0</span><small>分</small></div>
+        <div class="stats"><span>到達 <b id="stLevel">第1關</b></span><span>接到 <b id="stCaught">0</b> 個</span><span>最高連續 <b id="stCombo">0</b></span></div>
+        <div class="vocab" id="vocab"><h3>今晡日學到个客語</h3></div>
+        <div class="accent" role="group" aria-label="選擇腔調">
+          <button class="seg" type="button" data-accent="xi" aria-pressed="true">四縣腔</button>
+          <button class="seg" type="button" data-accent="hoi" aria-pressed="false">海陸腔</button>
+        </div>
+        <div class="btnrow"><button class="big alt" id="homeEndBtn" type="button">🏠 回首頁</button><button class="big alt" id="reviewBtn" type="button">📖 單字卡</button><button class="big" id="againBtn" type="button">再玩一次</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+<canvas id="snow" aria-hidden="true"></canvas>
+
+<script>
+(() => {
+// 臺灣客家語拼音（調號），依提供的詞彙表
+const WORDS = {
+  gift:      { zh: '禮物', lv: 1, xi: { hz: '等路',   py: 'denˋ lu' },     hoi: { hz: '等路',   py: 'denˊ lu+' } },
+  star:      { zh: '星星', lv: 2, xi: { hz: '星仔',   py: 'senˊ eˋ' },     hoi: { hz: '星仔',   py: 'siangˋ er' } },
+  sock:      { zh: '襪子', lv: 2, xi: { hz: '襪仔',   py: 'madˋ eˇ' },     hoi: { hz: '襪',     py: 'mad' } },
+  snowflake: { zh: '雪花', lv: 2, xi: { hz: '雪花',   py: 'xiedˋ faˊ' },   hoi: { hz: '雪花',   py: 'sied faˋ' } },
+  candy:     { zh: '糖果', lv: 2, xi: { hz: '糖仔',   py: 'tongˇ eˋ' },    hoi: { hz: '糖仔',   py: 'tong er' } },
+  bell:      { zh: '鈴鐺', lv: 3, xi: { hz: '玲琅仔', py: 'lin long eˋ' }, hoi: { hz: '玲琅仔', py: 'lin long er' } },
+  snowman:   { zh: '雪人', lv: 3, xi: { hz: '雪人',   py: 'xiedˋ nginˇ' }, hoi: { hz: '雪人',   py: 'sied ngin' } },
+  pinecone:  { zh: '松果', lv: 3, xi: { hz: '松果',   py: 'qiungˇ goˋ' },  hoi: { hz: '松果',   py: 'ciung goˊ' } },
+  candle:    { zh: '蠟燭', lv: 3, xi: { hz: '蠟燭',   py: 'lab zugˋ' },    hoi: { hz: '蠟燭',   py: 'labˋ zhug' } },
+  cookie:    { zh: '餅乾', lv: 3, xi: { hz: '餅仔',   py: 'biangˋ eˇ' },   hoi: { hz: '餅',     py: 'biangˊ' } },
+};
+const KINDS = Object.keys(WORDS);
+const LEVELS = {
+  1: { goal: 6,  time: 40, kinds: KINDS.filter(k => WORDS[k].lv <= 1), fall: [.16, .22], every: [.85, 1.25], snow: .18 },
+  2: { goal: 8,  time: 45, kinds: KINDS.filter(k => WORDS[k].lv <= 2), fall: [.2, .28],  every: [.7, 1.0],   snow: .16 },
+  3: { goal: 10, time: 50, kinds: KINDS,                                fall: [.26, .36], every: [.55, .85],  snow: .2 },
+};
+
+const $ = id => document.getElementById(id);
+const stage = $('stage'), sleighEl = $('sleigh'), heroEl = $('hero'), heroImg = $('heroImg');
+const itemSrc = k => `img/items/${k}.webp`;
+const rnd = (a, b) => a + Math.random() * (b - a);
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+};
+
+/* ---------- audio ---------- */
+let muted = store.get('xmasMute') === '1';
+$('mute').textContent = muted ? '🔇' : '🔊';
+const VOICE_KEYS = [...KINDS, 'merry', 'great', 'subtitle'];
+const voices = { xi: {}, hoi: {} };
+for (const acc of ['xi', 'hoi']) for (const k of VOICE_KEYS) { const a = new Audio(`audio/${acc}_${k}.wav`); a.preload = 'auto'; voices[acc][k] = a; }
+// asked = the player pressed something to hear it, so play even with sound effects off
+function speak(key, asked = false) {
+  if (muted && !asked) return;
+  bgmDuck(voices[accent][key].duration || 1);
+  const a = voices[accent][key];
+  try { a.currentTime = 0; const p = a.play(); if (p) p.catch(() => {}); } catch (e) {}
+}
+let ac = null;
+function audio() { if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } if (ac && ac.state === 'suspended') ac.resume(); return ac; }
+function tone(f1, f2, dur, type = 'sine', vol = .15, delay = 0) {
+  if (muted || !audio()) return;
+  const t = ac.currentTime + delay, o = ac.createOscillator(), g = ac.createGain();
+  o.type = type; o.frequency.setValueAtTime(f1, t); o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur);
+  o.connect(g).connect(ac.destination); o.start(t); o.stop(t + dur + .02);
+}
+function noise(dur, vol = .2, freq = 4000, type = 'highpass') {
+  if (muted || !audio()) return;
+  const len = ac.sampleRate * dur, buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+  const s = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
+  f.type = type; f.frequency.value = freq; g.gain.value = vol;
+  s.buffer = buf; s.connect(f).connect(g).connect(ac.destination); s.start();
+}
+const sfx = {
+  catch: () => { [1047, 1319, 1568].forEach((f, i) => tone(f, f, .12, 'triangle', .1, i * .05)); noise(.15, .08, 6000); },
+  bad: () => tone(330, 160, .25, 'sawtooth', .1),
+  freeze: () => { noise(.5, .25, 2500, 'bandpass'); tone(900, 300, .5, 'sine', .08); },
+  tick: () => tone(1200, 1200, .04, 'sine', .07),
+  start: () => [784, 988, 1175, 1568].forEach((f, i) => tone(f, f, .16, 'triangle', .12, i * .1)),
+  clear: () => [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, f, .2, 'triangle', .13, i * .09)),
+  place: () => { tone(1568, 1568, .15, 'sine', .09); tone(2093, 2093, .2, 'sine', .06, .05); },
+};
+$('mute').addEventListener('click', () => { muted = !muted; $('mute').textContent = muted ? '🔇' : '🔊'; store.set('xmasMute', muted ? '1' : '0'); });
+
+/* ---------- background music: Jingle Bells (James Lord Pierpont, 1857 – public domain) ---------- */
+// melody as [midi, beats]; 16 bars in C, with oom-pah bass and sleigh bells
+const JB = [
+  [76,1],[76,1],[76,2], [76,1],[76,1],[76,2], [76,1],[79,1],[72,1.5],[74,.5], [76,4],
+  [77,1],[77,1],[77,1.5],[77,.5], [77,1],[76,1],[76,1],[76,.5],[76,.5], [76,1],[74,1],[74,1],[76,1], [74,2],[79,2],
+  [76,1],[76,1],[76,2], [76,1],[76,1],[76,2], [76,1],[79,1],[72,1.5],[74,.5], [76,4],
+  [77,1],[77,1],[77,1.5],[77,.5], [77,1],[76,1],[76,1],[76,.5],[76,.5], [79,1],[79,1],[77,1],[74,1], [72,4],
+];
+const CHORD = ['C','C','C','C','F','C','D7','G7','C','C','C','C','F','C','G7','C'];
+const CH = { C: [48, 52, 55], F: [53, 57, 60], D7: [50, 54, 57, 60], G7: [43, 47, 50, 53] };
+const BEAT = 60 / 128;
+const BGM = { gain: null, timer: 0, next: 0, idx: 0, beat: 0, level: .45 };
+let bgmOn = store.get('xmasBgm') !== '0';
+const midiHz = m => 440 * Math.pow(2, (m - 69) / 12);
+function bnote(f, t, dur, type, vol, attack = .008) {
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.type = type; o.frequency.value = f;
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + attack); g.gain.exponentialRampToValueAtTime(.0008, t + dur);
+  o.connect(g).connect(BGM.gain); o.start(t); o.stop(t + dur + .05);
+}
+let bellBuf = null;
+function jingle(t, vol) {   // sleigh bells: a short bright noise burst
+  if (!bellBuf) { const len = ac.sampleRate * .12; bellBuf = ac.createBuffer(1, len, ac.sampleRate); const d = bellBuf.getChannelData(0); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); }
+  const s = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
+  f.type = 'highpass'; f.frequency.value = 7000; g.gain.value = vol;
+  s.buffer = bellBuf; s.connect(f).connect(g).connect(BGM.gain); s.start(t);
+}
+function bgmTick() {
+  while (BGM.next < ac.currentTime + .4) {
+    const t = BGM.next, [m, beats] = JB[BGM.idx];
+    // melody: celesta-like (sine + quiet octave)
+    bnote(midiHz(m), t, Math.max(.35, beats * BEAT * .9), 'sine', .07);
+    bnote(midiHz(m + 12), t, .25, 'triangle', .02);
+    BGM.next += beats * BEAT; BGM.idx = (BGM.idx + 1) % JB.length;
+  }
+  // accompaniment is scheduled on a separate beat clock
+  while (BGM.beatT < ac.currentTime + .4) {
+    const b = BGM.beat % 64, bar = Math.floor(b / 4), ch = CH[CHORD[bar]], t = BGM.beatT;
+    if (b % 2 === 0) bnote(midiHz(ch[0] - 12), t, .3, 'triangle', .12);            // oom
+    else ch.forEach(n => bnote(midiHz(n + 12), t, .18, 'triangle', .016));          // pah
+    jingle(t, .05); jingle(t + BEAT / 2, .025);
+    BGM.beatT += BEAT; BGM.beat++;
+  }
+}
+function bgmStart() {
+  if (!bgmOn || document.hidden || !audio() || BGM.timer) return;
+  if (!BGM.gain) { BGM.gain = ac.createGain(); BGM.gain.gain.value = 0; BGM.gain.connect(ac.destination); }
+  BGM.gain.gain.cancelScheduledValues(ac.currentTime);
+  BGM.gain.gain.setTargetAtTime(BGM.level, ac.currentTime, .5);
+  BGM.next = BGM.beatT = ac.currentTime + .1; BGM.idx = 0; BGM.beat = 0;
+  BGM.timer = setInterval(bgmTick, 100); bgmTick();
+}
+function bgmStop() {
+  clearInterval(BGM.timer); BGM.timer = 0;
+  if (BGM.gain) { BGM.gain.gain.cancelScheduledValues(ac.currentTime); BGM.gain.gain.setTargetAtTime(0, ac.currentTime, .12); }
+}
+function bgmDuck(len) {
+  if (!BGM.gain || !BGM.timer) return;
+  const t = ac.currentTime;
+  BGM.gain.gain.cancelScheduledValues(t);
+  BGM.gain.gain.setTargetAtTime(BGM.level * .25, t, .04);
+  BGM.gain.gain.setTargetAtTime(BGM.level, t + Math.min(3, len + .3), .25);
+}
+function setBgm(on, start = true) {
+  bgmOn = on; store.set('xmasBgm', on ? '1' : '0');
+  $('bgmBtn').setAttribute('aria-pressed', String(on));
+  $('bgmSeg').setAttribute('aria-pressed', String(on));
+  $('bgmSeg').textContent = on ? '🎵 背景音樂：開' : '🎵 背景音樂：關';
+  if (start) on ? bgmStart() : bgmStop();
+}
+$('bgmBtn').addEventListener('click', () => setBgm(!bgmOn));
+$('bgmSeg').addEventListener('click', () => setBgm(!bgmOn));
+document.addEventListener('pointerdown', () => { if (bgmOn) bgmStart(); });
+document.addEventListener('visibilitychange', () => { document.hidden ? bgmStop() : (bgmOn && bgmStart()); });
+setBgm(bgmOn, false);
+
+/* ---------- accent ---------- */
+let accent = store.get('xmasAccent') || store.get('hauntAccent') || 'xi';
+if (accent !== 'hoi') accent = 'xi';
+function setAccent(a, preview) {
+  accent = a;
+  document.querySelectorAll('[data-accent]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.accent === a)));
+  $('accentTip').hidden = true;
+  store.set('xmasAccent', a);
+  if (target) showPrompt(false);
+  renderVocab(); renderTray();
+  const learning = !$('learnOv').hidden;
+  if (learning) showCard(li, false);
+  if (preview) speak(learning ? KINDS[li] : target || 'gift', true);
+}
+document.querySelectorAll('[data-accent]').forEach(b => b.addEventListener('click', () => setAccent(b.dataset.accent, true)));
+let tipT;
+function showAccentTip() { $('accentTip').hidden = false; clearTimeout(tipT); tipT = setTimeout(() => { $('accentTip').hidden = true; }, 5000); }
+$('subSay').addEventListener('click', () => { audio(); speak('subtitle', true); });
+
+/* ---------- falling snow ---------- */
+const snowCv = $('snow'), sctx = snowCv.getContext('2d');
+let flakes = [];
+function snowResize() {
+  snowCv.width = innerWidth; snowCv.height = innerHeight;
+  flakes = Array.from({ length: Math.round(innerWidth * innerHeight / 14000) }, () => ({ x: Math.random() * innerWidth, y: Math.random() * innerHeight, r: rnd(1, 3.2), v: rnd(18, 50), p: Math.random() * 6 }));
+}
+let snowLast = performance.now();
+function snowTick(now) {
+  const dt = Math.min(.1, (now - snowLast) / 1000); snowLast = now;
+  sctx.clearRect(0, 0, snowCv.width, snowCv.height);
+  sctx.fillStyle = 'rgba(255,255,255,.75)';
+  for (const f of flakes) {
+    f.y += f.v * dt; f.x += Math.sin(now / 1000 + f.p) * 12 * dt;
+    if (f.y > snowCv.height + 4) { f.y = -4; f.x = Math.random() * snowCv.width; }
+    sctx.beginPath(); sctx.arc(f.x, f.y, f.r, 0, 6.29); sctx.fill();
+  }
+  requestAnimationFrame(snowTick);
+}
+
+/* ---------- fx ---------- */
+function fx(cls, x, y, html = '', vars = {}) {
+  const el = document.createElement('div');
+  el.className = 'fx ' + cls; el.style.left = x + 'px'; el.style.top = y + 'px'; el.innerHTML = html;
+  for (const k in vars) el.style.setProperty(k, vars[k]);
+  stage.appendChild(el); setTimeout(() => el.remove(), 1800);
+}
+function sparks(x, y) {
+  for (let i = 0; i < 10; i++) { const a = Math.PI * 2 * i / 10, r = 36 + Math.random() * 36; fx('spark', x, y, '', { '--dx': Math.cos(a) * r + 'px', '--dy': Math.sin(a) * r + 'px' }); }
+}
+function banner(text) { const b = document.createElement('div'); b.className = 'banner'; b.textContent = text; stage.appendChild(b); setTimeout(() => b.remove(), 1300); }
+
+/* ---------- game state ---------- */
+let W = 0, H = 0;
+let running = false, level = 1, reached = 1, levelCaught = 0, score = 0, combo = 0, maxCombo = 0, caughtTotal = 0;
+let target = null, endAt = 0, timer = 0, lastSec = 0, frozenUntil = 0, raf = 0, last = 0, spawnIn = 0, sinceTarget = 0;
+let inventory = {};
+let drops = [];
+const sleigh = { x: -400, dir: 1, w: 0, sp: 0 };
+const hero = { x: 0, tx: 0, w: 0 };
+
+function measure() {
+  W = stage.clientWidth; H = stage.clientHeight;
+  sleigh.w = sleighEl.offsetWidth || 260; hero.w = heroEl.offsetWidth || 120;
+  if (!hero.x) hero.x = hero.tx = W / 2;
+}
+const timeLeft = () => (endAt - performance.now()) / 1000;
+function setHUD(t = LEVELS[level].time) {
+  $('score').textContent = score;
+  $('time').textContent = Math.max(0, Math.ceil(t));
+  $('timeChip').classList.toggle('low', running && t <= 8);
+  $('lvName').textContent = `第${level}關`;
+  $('lvProg').textContent = `${levelCaught}/${LEVELS[level].goal}`;
+}
+function showPrompt(animate) {
+  const w = WORDS[target][accent];
+  $('pHz').textContent = w.hz; $('pPy').textContent = w.py;
+  $('prompt').hidden = false;
+  if (animate) { $('prompt').classList.remove('bump'); void $('prompt').offsetWidth; $('prompt').classList.add('bump'); }
+}
+function newTarget(sayIt) {
+  const ks = LEVELS[level].kinds;
+  target = ks.length === 1 ? ks[0] : ks.filter(k => k !== target)[Math.floor(Math.random() * (ks.length - 1))];
+  showPrompt(true);
+  if (sayIt) setTimeout(() => { if (running) speak(target); }, sayIt);
+  sinceTarget = 0;
+}
+
+/* ---------- player ---------- */
+function setHeroTarget(clientX) { const r = stage.getBoundingClientRect(); hero.tx = Math.min(W - hero.w * .4, Math.max(hero.w * .4, clientX - r.left)); }
+stage.addEventListener('pointerdown', e => { audio(); setHeroTarget(e.clientX); });
+stage.addEventListener('pointermove', e => { if (e.pointerType === 'mouse' || e.buttons) setHeroTarget(e.clientX); });
+const keys = {};
+window.addEventListener('keydown', e => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { keys[e.key] = true; if (running) e.preventDefault(); } });
+window.addEventListener('keyup', e => { keys[e.key] = false; });
+
+/* ---------- dropping things ---------- */
+function spawn() {
+  const L = LEVELS[level];
+  // only drop while the sleigh is over the room
+  const bagX = sleigh.x + (sleigh.dir > 0 ? .2 : .8) * sleigh.w;
+  if (bagX < W * .05 || bagX > W * .95) return;
+  let kind;
+  if (Math.random() < L.snow) kind = 'snowball';
+  else if (L.kinds.length === 1) kind = L.kinds[0];
+  else if (Math.random() < .42 || sinceTarget >= 2) kind = target;
+  else { const others = L.kinds.filter(k => k !== target); kind = others[Math.floor(Math.random() * others.length)]; }
+  sinceTarget = kind === target ? 0 : sinceTarget + 1;
+  const s = Math.max(46, Math.min(78, Math.min(W, H) * .11));
+  const el = document.createElement('div');
+  el.className = 'drop';
+  el.style.setProperty('--s', s + 'px');
+  el.innerHTML = `<img src="${itemSrc(kind)}" alt="">`;
+  stage.appendChild(el);
+  drops.push({ el, kind, x: bagX, y: sleigh.y + sleighEl.offsetHeight * .55, vy: rnd(...L.fall) * H, ph: Math.random() * 6.28, rot: rnd(-20, 20), vr: rnd(-60, 60), s, t: 0 });
+}
+
+function tick(now) {
+  const dt = Math.min(.1, (now - last) / 1000); last = now;
+  if (!running) { raf = 0; return; }
+  // sleigh flies back and forth across the sky
+  sleigh.x += sleigh.dir * sleigh.sp * dt;
+  if (sleigh.dir > 0 && sleigh.x > W + 40) { sleigh.dir = -1; }
+  if (sleigh.dir < 0 && sleigh.x < -sleigh.w - 40) { sleigh.dir = 1; }
+  sleigh.y = H * .03 + Math.sin(now / 600) * 6;
+  sleighEl.style.transform = `translate(${sleigh.x}px,${Math.sin(now / 600) * 6}px) scaleX(${sleigh.dir})`;
+  // drops
+  spawnIn -= dt;
+  if (spawnIn <= 0) { spawn(); spawnIn = rnd(...LEVELS[level].every); }
+  // player
+  const frozen = now < frozenUntil;
+  if (!frozen) {
+    if (keys.ArrowLeft) hero.tx = Math.max(hero.w * .4, hero.tx - W * .9 * dt);
+    if (keys.ArrowRight) hero.tx = Math.min(W - hero.w * .4, hero.tx + W * .9 * dt);
+    hero.x += (hero.tx - hero.x) * Math.min(1, dt * 12);
+  } else hero.tx = hero.x;
+  heroEl.style.transform = `translateX(${hero.x - hero.w / 2}px)`;
+  if (!frozen && heroEl.classList.contains('frozen')) { heroEl.classList.remove('frozen'); heroImg.src = 'img/hero-basket.webp'; }
+  // basket zone (top part of the hero image)
+  const hr = heroEl.getBoundingClientRect(), sr = stage.getBoundingClientRect();
+  const bx0 = hero.x - hero.w * .42, bx1 = hero.x + hero.w * .42, by0 = hr.top - sr.top, by1 = by0 + hr.height * .3;
+  for (let i = drops.length - 1; i >= 0; i--) {
+    const d = drops[i];
+    d.t += dt; d.y += d.vy * dt; d.rot += d.vr * dt;
+    const x = d.x + Math.sin(d.t * 2 + d.ph) * 10;
+    d.el.style.transform = `translate(${x}px,${d.y}px) rotate(${d.rot}deg)`;
+    if (x > bx0 && x < bx1 && d.y + d.s * .3 > by0 && d.y < by1) {
+      drops.splice(i, 1); catchDrop(d, x);
+      if (!running) break;   // the catch finished the level and cleared the sky
+      continue;
+    }
+    if (d.y > H + d.s) { d.el.remove(); drops.splice(i, 1); }
+  }
+  if (!running) { raf = 0; return; }
+  raf = requestAnimationFrame(tick);
+}
+
+function catchDrop(d, x) {
+  d.el.remove();
+  const y = (heroEl.getBoundingClientRect().top - stage.getBoundingClientRect().top);
+  if (d.kind === 'snowball') {
+    frozenUntil = performance.now() + 1300; combo = 0;
+    heroImg.src = 'img/hero-frozen.webp'; heroEl.classList.add('frozen');
+    sfx.freeze(); fx('pop bad small', x, y - 10, '凍著了！');
+    setHUD(timeLeft()); return;
+  }
+  if (d.kind === target) {
+    combo++; maxCombo = Math.max(maxCombo, combo); levelCaught++; caughtTotal++;
+    inventory[d.kind] = (inventory[d.kind] || 0) + 1;
+    const pts = 10 + (combo >= 3 ? 5 : 0); score += pts;
+    sfx.catch(); speak(d.kind);
+    sparks(x, y); fx('pop', x, y - 10, '+' + pts);
+    heroEl.classList.remove('catch'); void heroEl.offsetWidth; heroEl.classList.add('catch');
+    if (combo > 0 && combo % 5 === 0) banner(`${combo} 連續！`);
+    if (levelCaught >= LEVELS[level].goal) { setHUD(timeLeft()); return levelClear(); }
+    if (LEVELS[level].kinds.length > 1) newTarget(900);
+  } else {
+    combo = 0; endAt -= 2000;
+    sfx.bad();
+    const w = WORDS[d.kind][accent];
+    fx('tag', x, y - 70, `這係「${w.hz}」<br><span class="py">${w.py}</span>`);
+    fx('pop bad', x, y - 10, '−2秒');
+  }
+  setHUD(timeLeft());
+}
+
+function clearDrops() { drops.forEach(d => d.el.remove()); drops = []; }
+function startLevel(lv) {
+  level = lv; reached = Math.max(reached, lv); levelCaught = 0;
+  $('midOv').hidden = true;
+  clearDrops(); measure();
+  sleigh.x = -sleigh.w; sleigh.dir = 1; sleigh.sp = W * (lv === 3 ? .2 : lv === 2 ? .17 : .14) + 40;
+  frozenUntil = 0; heroEl.classList.remove('frozen'); heroImg.src = 'img/hero-basket.webp';
+  target = null; newTarget(500);
+  running = true; endAt = performance.now() + LEVELS[lv].time * 1000; lastSec = 0; spawnIn = 1.2;
+  sfx.start(); setHUD(LEVELS[lv].time);
+  banner(lv === 1 ? '第 1 關：接等路！' : `第 ${lv} 關`);
+  clearInterval(timer); timer = setInterval(clock, 100);
+  last = performance.now(); if (!raf) raf = requestAnimationFrame(tick);
+}
+function clock() {
+  if (!running) return;
+  const t = timeLeft(), s = Math.ceil(t);
+  if (s !== lastSec) { lastSec = s; if (s <= 5 && s > 0) sfx.tick(); }
+  setHUD(t);
+  if (t <= 0) timeUp();
+}
+function stopPlay() { running = false; clearInterval(timer); clearDrops(); $('prompt').hidden = true; }
+function startGame(lv = 1) {
+  audio();
+  ['startOv', 'endOv', 'learnOv', 'midOv', 'decorOv'].forEach(id => { $(id).hidden = true; });
+  score = 0; combo = 0; maxCombo = 0; caughtTotal = 0; inventory = {}; reached = lv;
+  startLevel(lv); showAccentTip();
+}
+function levelClear() {
+  const left = Math.max(0, Math.ceil(timeLeft())), bonus = left * 2;
+  score += bonus; stopPlay(); setHUD(left); sfx.clear();
+  if (level >= 3) return midCard('全部過關！', `剩下 ${left} 秒 → 時間獎勵 <b>+${bonus}</b> 分`, '聖誕老人的東西全部接到了！現在把它們掛到聖誕樹上吧。', [], [['🎄 去布置聖誕樹', 'big green', openDecor]]);
+  const next = level + 1, newKinds = KINDS.filter(k => WORDS[k].lv === next);
+  midCard(`第 ${level} 關過關！`, `剩下 ${left} 秒 → 時間獎勵 <b>+${bonus}</b> 分`,
+    `第 ${next} 關會掉得更快，還有 ${newKinds.length} 個新單字：`, newKinds,
+    [['🎄 先去布置聖誕樹', 'big alt', openDecor], [`進入第 ${next} 關！`, 'big', () => startLevel(next)]]);
+}
+function timeUp() {
+  stopPlay(); setHUD(0);
+  if (!caughtTotal) { inventory = { gift: 1, star: 1, bell: 1 }; }
+  midCard('時間到！', caughtTotal ? `這次接到 <b>${caughtTotal}</b> 個東西` : '這次沒接到東西，聖誕老人送你 3 個裝飾！',
+    '帶著接到的東西，去布置你的聖誕樹吧！', [], [['🎄 去布置聖誕樹', 'big green', openDecor]]);
+}
+function midCard(title, bonus, text, kinds, buttons) {
+  $('midTitle').textContent = title; $('midBonus').innerHTML = bonus; $('midText').textContent = text;
+  $('midWords').innerHTML = kinds.map(k => `<div><img src="${itemSrc(k)}" alt="">${WORDS[k][accent].hz}</div>`).join('');
+  const row = $('midBtns'); row.innerHTML = '';
+  buttons.forEach(([label, cls, fn]) => { const b = document.createElement('button'); b.type = 'button'; b.className = cls; b.textContent = label; b.addEventListener('click', fn); row.appendChild(b); });
+  $('midOv').hidden = false; row.lastChild.focus();
+}
+
+/* ---------- decorate the tree ---------- */
+const treebox = $('treebox'), tray = $('tray');
+let placed = [];   // {kind, x, y} in % of the tree box
+// is (x,y)% on the tree? a cone from the tip down to the lowest branches, presents allowed under it
+function onTree(x, y) {
+  if (y < 4 || y > 97) return false;
+  if (y >= 86) return Math.abs(x - 50) <= 46;
+  const half = 4 + (y - 4) / (86 - 4) * 40;
+  return Math.abs(x - 50) <= half;
+}
+function nudgeOnTree(x, y) {
+  y = Math.min(96, Math.max(6, y));
+  if (onTree(x, y)) return [x, y];
+  const half = y >= 86 ? 46 : 4 + (y - 4) / (86 - 4) * 40;
+  return [50 + Math.sign(x - 50) * (half - 2), y];
+}
+function freeSpot(kind) {
+  if (kind === 'star' && !placed.some(p => p.kind === 'star' && p.y < 10)) return [50, 6];
+  if (kind === 'gift') return [rnd(18, 82), rnd(90, 95)];
+  let best = null, bestD = -1;
+  for (let i = 0; i < 40; i++) {
+    const y = rnd(16, 82), half = 4 + (y - 4) / 82 * 40, x = 50 + rnd(-half, half) * .85;
+    let d = Infinity; for (const p of placed) d = Math.min(d, Math.hypot(p.x - x, (p.y - y) * .67));
+    if (d > bestD) { bestD = d; best = [x, y]; }
+  }
+  return best;
+}
+function ornWidth(kind, y) { return kind === 'star' && y < 10 ? 20 : kind === 'gift' && y >= 86 ? 17 : 12.5; }
+function renderTree() {
+  treebox.querySelectorAll('.orn,.twinkle').forEach(n => n.remove());
+  placed.forEach((p, i) => {
+    const o = document.createElement('div');
+    o.className = 'orn'; o.dataset.i = i;
+    o.style.left = p.x + '%'; o.style.top = p.y + '%'; o.style.setProperty('--w', ornWidth(p.kind, p.y) + '%');
+    o.style.zIndex = Math.round(p.y);
+    o.innerHTML = `<img src="${itemSrc(p.kind)}" alt="${WORDS[p.kind].zh}">`;
+    if (p.fresh) { o.classList.add('just-hung'); p.fresh = false; }
+    o.addEventListener('pointerdown', e => startDrag(e, p.kind, i));
+    treebox.appendChild(o);
+  });
+  // fairy lights
+  const cols = ['#ffe36e', '#ff6b6b', '#7fd3ff', '#9cff8a'];
+  for (let i = 0; i < 22; i++) {
+    const y = 12 + (i / 22) * 72, half = 4 + (y - 4) / 82 * 40, x = 50 + Math.sin(i * 2.4) * half * .8;
+    const t = document.createElement('i'); t.className = 'twinkle';
+    t.style.left = x + '%'; t.style.top = y + '%'; t.style.setProperty('--c', cols[i % 4]); t.style.animationDelay = (-i * .37) + 's';
+    treebox.appendChild(t);
+  }
+}
+function renderTray() {
+  tray.innerHTML = '';
+  KINDS.forEach(k => {
+    const n = inventory[k] || 0; if (!n) return;
+    const c = document.createElement('button'); c.type = 'button'; c.className = 'chipi';
+    c.setAttribute('aria-label', `${WORDS[k][accent].hz}，還有 ${n} 個`);
+    c.innerHTML = `<img src="${itemSrc(k)}" alt=""><b>${n}</b>`;
+    c.addEventListener('pointerdown', e => startDrag(e, k, -1));
+    tray.appendChild(c);
+  });
+}
+function sayOnTree(kind, x, y) {
+  speak(kind, true); sfx.place();
+  const w = WORDS[kind][accent], r = treebox.getBoundingClientRect(), dr = $('decorOv').getBoundingClientRect();
+  const tip = document.createElement('div'); tip.className = 'wordtip';
+  tip.style.left = (r.left - dr.left + r.width * x / 100) + 'px'; tip.style.top = (r.top - dr.top + r.height * y / 100 - 24) + 'px';
+  tip.innerHTML = `${w.hz} <span class="zh">${WORDS[kind].zh}</span><span class="py">${w.py}</span>`;
+  $('decorOv').appendChild(tip); setTimeout(() => tip.remove(), 2000);
+}
+function placeAt(kind, x, y, from) {
+  [x, y] = nudgeOnTree(x, y);
+  if (kind === 'star' && y < 20 && Math.abs(x - 50) < 18) { x = 50; y = 6; }   // a star snaps to the top
+  if (from >= 0) { placed[from].x = x; placed[from].y = y; }
+  else { placed.push({ kind, x, y, fresh: true }); inventory[kind]--; }
+  renderTree(); renderTray(); sayOnTree(kind, x, y);
+}
+let drag = null;
+function startDrag(e, kind, from) {
+  e.preventDefault(); audio();
+  const g = document.createElement('div'); g.className = 'ghost-drag'; g.innerHTML = `<img src="${itemSrc(kind)}" alt="">`;
+  g.style.left = e.clientX + 'px'; g.style.top = e.clientY + 'px';
+  document.body.appendChild(g);
+  drag = { kind, from, g, x0: e.clientX, y0: e.clientY, moved: false };
+  if (from >= 0) treebox.querySelector(`.orn[data-i="${from}"]`).style.opacity = '.3';
+}
+window.addEventListener('pointermove', e => {
+  if (!drag) return;
+  drag.g.style.left = e.clientX + 'px'; drag.g.style.top = e.clientY + 'px';
+  if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) > 8) drag.moved = true;
+});
+window.addEventListener('pointerup', e => {
+  if (!drag) return;
+  const d = drag; drag = null; d.g.remove();
+  const r = treebox.getBoundingClientRect();
+  const x = (e.clientX - r.left) / r.width * 100, y = (e.clientY - r.top) / r.height * 100;
+  if (!d.moved) {   // a tap: tray item goes to a free spot; a placed item just says its word
+    if (d.from < 0) { const [fx_, fy_] = freeSpot(d.kind); placeAt(d.kind, fx_, fy_, -1); }
+    else { renderTree(); sayOnTree(d.kind, placed[d.from].x, placed[d.from].y); }
+    return;
+  }
+  if (x >= -5 && x <= 105 && y >= -5 && y <= 105) placeAt(d.kind, x, y, d.from);
+  else if (d.from >= 0) { inventory[d.kind]++; placed.splice(d.from, 1); renderTree(); renderTray(); }   // dragged off: back to the tray
+  else renderTree();
+});
+$('autoBtn').addEventListener('click', () => {
+  const left = KINDS.flatMap(k => Array(inventory[k] || 0).fill(k));
+  if (!left.length) return;
+  left.forEach(k => { const [x, y] = freeSpot(k); placed.push({ kind: k, x, y, fresh: true }); inventory[k]--; });
+  renderTree(); renderTray(); sfx.clear();
+});
+function openDecor() {
+  stopPlay();
+  ['midOv', 'endOv'].forEach(id => { $(id).hidden = true; });
+  placed = []; renderTree(); renderTray();
+  $('decorOv').hidden = false;
+}
+$('doneBtn').addEventListener('click', showResult);
+
+/* ---------- result: picture of the tree ---------- */
+const imgCache = {};
+function loadImg(src) {
+  return imgCache[src] || (imgCache[src] = new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }));
+}
+async function drawTree() {
+  const cw = 900, ch = 1200, cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
+  const g = cv.getContext('2d');
+  const [bg, tree, logo, hac] = await Promise.all(['img/room-bg.webp', 'img/tree.webp', 'img/logo-hakka.webp', 'img/logo-hac.webp'].map(loadImg));
+  // background, cover-cropped
+  const s = Math.max(cw / bg.width, ch / bg.height); g.drawImage(bg, (cw - bg.width * s) / 2, (ch - bg.height * s) / 2, bg.width * s, bg.height * s);
+  g.fillStyle = 'rgba(10,6,2,.18)'; g.fillRect(0, 0, cw, ch);
+  // tree box: same proportions as on screen
+  const th = 900, tw = th * 801 / 1200, tx = (cw - tw) / 2, ty = 200;
+  g.drawImage(tree, tx, ty, tw, th);
+  const items = await Promise.all(placed.map(p => loadImg(itemSrc(p.kind))));
+  [...placed.map((p, i) => [p, items[i]])].sort((a, b) => a[0].y - b[0].y).forEach(([p, im]) => {
+    const w = tw * ornWidth(p.kind, p.y) / 100, h = w * im.height / im.width;
+    g.drawImage(im, tx + tw * p.x / 100 - w / 2, ty + th * p.y / 100 - h / 2, w, h);
+  });
+  // title
+  g.textAlign = 'center';
+  g.font = '800 76px "Chiron GoRound TC", "Microsoft JhengHei", sans-serif';
+  g.lineWidth = 10; g.strokeStyle = '#1a1020'; g.strokeText('聖誕快樂！', cw / 2, 110); g.fillStyle = '#f2c14e'; g.fillText('聖誕快樂！', cw / 2, 110);
+  g.font = '800 34px "Chiron GoRound TC", "Microsoft JhengHei", sans-serif';
+  g.lineWidth = 7; g.strokeText('叮噹接禮趣・布置靚靚个聖誕樹', cw / 2, 165); g.fillStyle = '#fff6e6'; g.fillText('叮噹接禮趣・布置靚靚个聖誕樹', cw / 2, 165);
+  // logos on a soft strip
+  g.fillStyle = 'rgba(255,246,230,.85)'; g.fillRect(0, ch - 86, cw, 86);
+  const lh = 50, lw = logo.width * lh / logo.height, hh = 40, hw = hac.width * hh / hac.height;
+  g.drawImage(logo, cw / 2 - lw - 20, ch - 68, lw, lh); g.drawImage(hac, cw / 2 + 20, ch - 63, hw, hh);
+  return cv;
+}
+async function showResult() {
+  $('decorOv').hidden = true;
+  $('finalScore').textContent = score;
+  $('stLevel').textContent = reached >= 3 && levelCaught >= LEVELS[3].goal ? '全部過關' : `第${reached}關`;
+  $('stCaught').textContent = caughtTotal; $('stCombo').textContent = maxCombo;
+  $('endTitle').textContent = '當慶！';
+  renderVocab();
+  $('endOv').hidden = false; $('againBtn').focus();
+  speak('great'); setTimeout(() => speak('merry'), 1100);
+  try {
+    const cv = await drawTree();
+    $('rTreeImg').src = cv.toDataURL('image/png');
+    $('saveBtn').hidden = false;
+  } catch (e) {   // e.g. opened from a local file: the canvas can't be exported
+    $('rTreeImg').src = 'img/tree.webp'; $('saveBtn').hidden = true;
+  }
+}
+$('saveBtn').addEventListener('click', () => {
+  const a = document.createElement('a'); a.href = $('rTreeImg').src; a.download = '我个聖誕樹.png';
+  document.body.appendChild(a); a.click(); a.remove();
+});
+function renderVocab() {
+  const v = $('vocab'); v.querySelectorAll('.vrow').forEach(r => r.remove());
+  KINDS.filter(k => WORDS[k].lv <= reached).forEach(k => {
+    const w = WORDS[k][accent], row = document.createElement('div'); row.className = 'vrow';
+    row.innerHTML = `<img src="${itemSrc(k)}" alt=""><div><div class="hz">${w.hz}</div><div class="py">${w.py}</div><span class="zh">${WORDS[k].zh}</span></div><button class="say" type="button" aria-label="聽「${w.hz}」">🔊</button>`;
+    row.querySelector('button').addEventListener('click', () => speak(k, true));
+    v.appendChild(row);
+  });
+}
+
+/* ---------- word cards ---------- */
+let li = 0, learnFrom = 'startOv';
+KINDS.forEach((k, i) => { const d = document.createElement('button'); d.type = 'button'; d.setAttribute('aria-label', `第 ${i + 1} 張`); d.addEventListener('click', () => showCard(i, true)); $('lDots').appendChild(d); });
+function showCard(i, say) {
+  li = (i + KINDS.length) % KINDS.length;
+  const k = KINDS[li], w = WORDS[k][accent];
+  $('lImg').src = itemSrc(k); $('lHz').textContent = w.hz; $('lPy').textContent = w.py; $('lZh').textContent = WORDS[k].zh;
+  $('lLv').textContent = `第${WORDS[k].lv}關`;
+  $('lCount').textContent = `${li + 1} / ${KINDS.length}`;
+  $('lDots').querySelectorAll('button').forEach((d, j) => d.setAttribute('aria-current', String(j === li)));
+  const c = $('fcard'); c.classList.remove('turn'); void c.offsetWidth; c.classList.add('turn');
+  if (say) speak(k, true);
+}
+function openLearn(from) { learnFrom = from; $(from).hidden = true; $('learnOv').hidden = false; audio(); showCard(0, true); $('lNext').focus(); }
+function closeLearn() { $('learnOv').hidden = true; $(learnFrom).hidden = false; }
+$('learnBtn').addEventListener('click', () => openLearn('startOv'));
+$('reviewBtn').addEventListener('click', () => openLearn('endOv'));
+$('lBack').addEventListener('click', closeLearn);
+$('lStart').addEventListener('click', () => startGame(1));
+$('lPrev').addEventListener('click', () => showCard(li - 1, true));
+$('lNext').addEventListener('click', () => showCard(li + 1, true));
+let swipeX = null, swiped = false;
+$('fcard').addEventListener('pointerdown', e => { swipeX = e.clientX; swiped = false; });
+$('fcard').addEventListener('pointerup', e => { if (swipeX === null) return; const dx = e.clientX - swipeX; swipeX = null; if (Math.abs(dx) > 50) { swiped = true; showCard(li + (dx < 0 ? 1 : -1), true); } });
+$('fcard').addEventListener('click', () => { if (!swiped) speak(KINDS[li], true); swiped = false; });
+$('fcard').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); speak(KINDS[li], true); } });
+window.addEventListener('keydown', e => {
+  if ($('learnOv').hidden) return;
+  if (e.key === 'ArrowRight') showCard(li + 1, true);
+  if (e.key === 'ArrowLeft') showCard(li - 1, true);
+  if (e.key === 'Escape') closeLearn();
+});
+
+/* ---------- navigation ---------- */
+function goHome() {
+  stopPlay();
+  ['endOv', 'learnOv', 'midOv', 'decorOv'].forEach(id => { $(id).hidden = true; });
+  score = 0; level = 1; levelCaught = 0; setHUD(LEVELS[1].time);
+  $('startOv').hidden = false; $('startBtn').focus();
+}
+$('homeBtn').addEventListener('click', goHome);
+$('homeEndBtn').addEventListener('click', goHome);
+$('startBtn').addEventListener('click', () => startGame(1));
+$('againBtn').addEventListener('click', () => startGame(1));
+$('sayBtn').addEventListener('click', e => { e.stopPropagation(); speak(target, true); });
+$('sayBtn').addEventListener('pointerdown', e => e.stopPropagation());
+
+let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(() => { measure(); snowResize(); }, 80); });
+measure(); snowResize(); requestAnimationFrame(snowTick);
+heroEl.style.transform = `translateX(${hero.x - hero.w / 2}px)`;
+sleighEl.style.transform = `translate(${W * .3}px,0)`;
+setAccent(accent, false);
+setHUD(LEVELS[1].time);
+})();
+</script>
+</body>
+</html>
