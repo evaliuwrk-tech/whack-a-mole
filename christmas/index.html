@@ -168,6 +168,21 @@ body{margin:0;font-family:var(--body);color:var(--snow);background:var(--night);
 .chipi b{position:absolute;right:-6px;top:-8px;min-width:24px;height:24px;border-radius:12px;background:var(--berry);color:#fff;border:2px solid var(--ink);font-size:13px;display:flex;align-items:center;justify-content:center;padding:0 4px;box-sizing:border-box}
 .ghost-drag{position:fixed;z-index:200;width:70px;height:70px;margin:-35px 0 0 -35px;pointer-events:none;filter:drop-shadow(0 8px 8px rgba(0,0,0,.4))}
 .ghost-drag img{width:100%;height:100%;object-fit:contain}
+/* IP characters walk out and wish everyone a merry Christmas */
+.cast{position:absolute;inset:0;z-index:20;overflow:hidden;background:radial-gradient(ellipse at 50% 60%,rgba(0,0,0,0) 40%,rgba(10,5,0,.45))}
+.walker{position:absolute;bottom:2%;left:0;width:clamp(56px,min(19vh,21vw),180px);transition:transform 1.6s cubic-bezier(.3,.7,.4,1);will-change:transform}
+.walker img{display:block;width:100%;height:auto;transform-origin:50% 100%;animation:hopwalk .36s ease-in-out infinite;filter:drop-shadow(0 8px 8px rgba(0,0,0,.35))}
+.walker.arrived img{animation:sway 1.2s ease-in-out infinite}
+@keyframes hopwalk{50%{transform:translateY(-12%) rotate(4deg)}}
+@keyframes sway{25%{transform:rotate(-7deg)}75%{transform:rotate(7deg)}}
+.castbubble{position:absolute;left:50%;top:14%;transform:translate(-50%,-50%) scale(.2);opacity:0;background:var(--cream);color:var(--ink);border:4px solid var(--ink);border-radius:26px;padding:10px 26px 12px;text-align:center;box-shadow:0 6px 0 var(--ink);transition:transform .45s cubic-bezier(.3,1.6,.6,1),opacity .3s;white-space:nowrap}
+.castbubble.show{transform:translate(-50%,-50%) scale(1);opacity:1}
+.castbubble b{display:block;font-size:clamp(32px,7vw,56px);color:var(--berry);letter-spacing:.08em;-webkit-text-stroke:1px var(--ink);paint-order:stroke}
+.castbubble .py{display:block;font-size:16px;font-weight:800;color:var(--pine)}
+.castbubble::after{content:"";position:absolute;left:50%;bottom:-18px;margin-left:-14px;border:14px solid transparent;border-bottom:0;border-top:18px solid var(--ink)}
+.castgo{position:absolute;left:50%;bottom:calc(4% + clamp(56px,min(19vh,21vw),180px) + 14px);transform:translateX(-50%);pointer-events:auto;white-space:nowrap;animation:cardIn .4s cubic-bezier(.3,1.5,.6,1)}
+.confetti{position:absolute;top:-20px;width:10px;height:14px;border-radius:2px;animation:fall var(--d) linear forwards;pointer-events:none}
+@keyframes fall{to{transform:translate(var(--dx),110vh) rotate(720deg)}}
 .wordtip{position:absolute;z-index:5;transform:translate(-50%,-100%);background:var(--cream);color:var(--ink);border:3px solid var(--ink);border-radius:14px;padding:4px 10px;font-weight:800;text-align:center;line-height:1.25;white-space:nowrap;pointer-events:none;animation:tagIn 2s ease-out forwards}
 .wordtip .py{display:block;color:var(--pine);font-size:13px}
 
@@ -317,6 +332,10 @@ body{margin:0;font-family:var(--body);color:var(--snow);background:var(--night);
     </div>
     <div class="treewrap"><div class="treebox" id="treebox"><img class="tree" src="img/tree.webp" alt="聖誕樹"></div></div>
     <div class="tray" id="tray"></div>
+    <div class="cast" id="cast" hidden>
+      <div class="castbubble" id="castBubble"><b>聖誕快樂！</b><span class="py" id="castPy"></span></div>
+      <button class="big green castgo" id="castGo" type="button" hidden>看看我的聖誕樹 ▶</button>
+    </div>
   </div>
 
   <!-- result -->
@@ -854,10 +873,63 @@ function openDecor() {
   stopPlay();
   if (!Object.values(inventory).some(n => n > 0)) inventory = { gift: 1, star: 1, bell: 1 };   // nothing caught: a little gift from Santa
   ['midOv', 'endOv'].forEach(id => { $(id).hidden = true; });
-  placed = []; renderTree(); renderTray();
+  placed = []; renderTree(); renderTray(); endCelebrate();
   $('decorOv').hidden = false;
 }
-$('doneBtn').addEventListener('click', showResult);
+// characters that walk out once the tree is done: swap these pictures for the Christmas-costume versions later
+const CAST = [
+  { src: 'img/cast/cast-1.webp', from: 'left',  at: .1 },
+  { src: 'img/cast/cast-2.webp', from: 'left',  at: .26 },
+  { src: 'img/cast/cast-3.webp', from: 'right', at: .66 },
+  { src: 'img/cast/cast-4.webp', from: 'right', at: .79 },
+  { src: 'img/cast/cast-5.webp', from: 'right', at: .91 },
+];
+let castT = [];
+function celebrate() {
+  const dec = $('decorOv'), cast = $('cast');
+  dec.querySelector('.dbar').style.visibility = 'hidden'; tray.style.visibility = 'hidden';
+  cast.querySelectorAll('.walker,.confetti').forEach(n => n.remove());
+  $('castBubble').classList.remove('show'); $('castGo').hidden = true;
+  $('castPy').textContent = accent === 'hoi' ? 'shinˇ danˇ kuaiˇ logˋ' : 'siin dan kuai log';
+  cast.hidden = false;
+  const W = cast.clientWidth;
+  const walkers = CAST.map((c, i) => {
+    const w = document.createElement('div'); w.className = 'walker';   // the characters face the viewer, so no mirroring (it would flip the lettering)
+    w.innerHTML = `<img src="${c.src}" alt="">`;
+    w.style.transitionDelay = (i * .15) + 's';
+    w.style.transform = `translateX(${c.from === 'left' ? -W * .35 : W * 1.15}px)`;
+    cast.appendChild(w);
+    return [w, c];
+  });
+  sfx.start();
+  requestAnimationFrame(() => requestAnimationFrame(() => walkers.forEach(([w, c]) => {
+    w.style.transform = `translateX(${W * c.at - w.offsetWidth / 2}px)`;
+  })));
+  castT.forEach(clearTimeout);
+  castT = [
+    setTimeout(() => {
+      walkers.forEach(([w]) => w.classList.add('arrived'));
+      $('castBubble').classList.add('show');
+      speak('merry', true); sfx.clear();
+      const cols = ['#d62f3a', '#f2c14e', '#1f7a4a', '#fff6e6', '#7fd3ff'];
+      for (let i = 0; i < 60; i++) {
+        const c = document.createElement('i'); c.className = 'confetti';
+        c.style.left = Math.random() * 100 + '%'; c.style.background = cols[i % cols.length];
+        c.style.setProperty('--d', (2.2 + Math.random() * 2) + 's'); c.style.setProperty('--dx', (Math.random() - .5) * 120 + 'px');
+        c.style.animationDelay = Math.random() * .6 + 's';
+        cast.appendChild(c);
+      }
+    }, 2300),
+    setTimeout(() => { $('castGo').hidden = false; $('castGo').focus(); }, 3600),
+  ];
+}
+function endCelebrate() {
+  castT.forEach(clearTimeout); castT = [];
+  $('cast').hidden = true;
+  $('decorOv').querySelector('.dbar').style.visibility = ''; tray.style.visibility = '';
+}
+$('doneBtn').addEventListener('click', celebrate);
+$('castGo').addEventListener('click', () => { endCelebrate(); showResult(); });
 
 /* ---------- result: picture of the tree ---------- */
 const imgCache = {};
@@ -992,7 +1064,7 @@ window.addEventListener('keydown', e => {
 
 /* ---------- navigation ---------- */
 function goHome() {
-  stopPlay(); stopEnd();
+  stopPlay(); stopEnd(); endCelebrate();
   ['endOv', 'learnOv', 'midOv', 'decorOv'].forEach(id => { $(id).hidden = true; });
   score = 0; level = 1; levelCaught = 0; setHUD(LEVELS[1].time);
   $('startOv').hidden = false; $('startBtn').focus();
