@@ -106,6 +106,7 @@ body{margin:0;font-family:var(--body);color:var(--snow);background:var(--night);
 .big.alt{background:#fff;color:var(--ink);font-size:17px;letter-spacing:.04em}
 .big.green{background:var(--pine);color:#fff}
 .bgm-seg{display:block;margin-top:12px}
+.lv2-btn{display:block;margin-top:10px;font-size:17px}
 .bgm-seg[aria-pressed="false"]{background:#ddd;color:#666}
 .logos{display:flex;align-items:center;gap:14px;margin-top:14px;flex-wrap:wrap}
 .logos img{height:30px;width:auto}
@@ -226,7 +227,7 @@ body{margin:0;font-family:var(--body);color:var(--snow);background:var(--night);
 <div id="app">
   <div class="hud">
     <div class="chip"><small>分數</small><b id="score">0</b></div>
-    <div class="chip time" id="timeChip"><small>時間</small><b id="time">45</b></div>
+    <div class="chip time" id="timeChip"><small>時間</small><b id="time">50</b></div>
     <div class="chip"><small id="lvName">第1關</small><b id="lvProg">0/8</b></div>
     <div class="chip accent-chip" role="group" aria-label="切換腔調">
       <small>腔調<br>切換</small>
@@ -264,6 +265,7 @@ body{margin:0;font-family:var(--body);color:var(--snow);background:var(--night);
           <button class="seg" type="button" data-accent="hoi" aria-pressed="false">海陸腔</button>
         </div>
         <div class="btnrow"><button class="big alt" id="learnBtn" type="button">📖 先學單字卡</button><button class="big" id="startBtn" type="button">開始接禮物！</button></div>
+        <button class="big green lv2-btn" id="lv2Btn" type="button" hidden>⚡ 直接挑戰第 2 關</button>
         <button class="seg bgm-seg" id="bgmSeg" type="button" aria-pressed="true">🎵 背景音樂：開</button>
         <p class="credit">客語語音：客家委員會「臺灣客語語音資料庫」語音合成（四縣腔、海陸腔）｜背景音樂：Jingle Bells（公共領域）</p>
       </div>
@@ -360,8 +362,8 @@ const WORDS = {
 };
 const KINDS = Object.keys(WORDS);
 const LEVELS = {
-  1: { goal: 8,  time: 45, kinds: KINDS.filter(k => WORDS[k].lv <= 1), fall: [.17, .23], every: [.8, 1.15], snow: .16 },
-  2: { goal: 10, time: 50, kinds: KINDS,                                fall: [.24, .33], every: [.6, .9],   snow: .2 },
+  1: { goal: 8,  time: 50, kinds: KINDS.filter(k => WORDS[k].lv <= 1), fall: [.16, .21], every: [.7, 1.0],  snow: .12, share: .55 },
+  2: { goal: 10, time: 55, kinds: KINDS,                                fall: [.22, .3],  every: [.6, .9],   snow: .18, share: .45 },
 };
 
 const $ = id => document.getElementById(id);
@@ -595,11 +597,11 @@ function spawn() {
   const L = LEVELS[level];
   // only drop while the sleigh is over the room
   const bagX = sleigh.x + (sleigh.dir > 0 ? .2 : .8) * sleigh.w;
-  if (bagX < W * .05 || bagX > W * .95) return;
+  if (bagX < W * .04 || bagX > W * .96) return;
   let kind;
   if (Math.random() < L.snow) kind = 'snowball';
   else if (L.kinds.length === 1) kind = L.kinds[0];
-  else if (Math.random() < .42 || sinceTarget >= 2) kind = target;
+  else if (Math.random() < L.share || sinceTarget >= 2) kind = target;
   else { const others = L.kinds.filter(k => k !== target); kind = others[Math.floor(Math.random() * others.length)]; }
   sinceTarget = kind === target ? 0 : sinceTarget + 1;
   const s = Math.max(46, Math.min(78, Math.min(W, H) * .11));
@@ -616,8 +618,8 @@ function tick(now) {
   if (!running) { raf = 0; return; }
   // sleigh flies back and forth across the sky
   sleigh.x += sleigh.dir * sleigh.sp * dt;
-  if (sleigh.dir > 0 && sleigh.x > W + 40) { sleigh.dir = -1; }
-  if (sleigh.dir < 0 && sleigh.x < -sleigh.w - 40) { sleigh.dir = 1; }
+  if (sleigh.dir > 0 && sleigh.x > W - sleigh.w * .75) { sleigh.dir = -1; }
+  if (sleigh.dir < 0 && sleigh.x < -sleigh.w * .25) { sleigh.dir = 1; }
   sleigh.y = H * .03 + Math.sin(now / 600) * 6;
   sleighEl.style.transform = `translate(${sleigh.x}px,${Math.sin(now / 600) * 6}px) scaleX(${sleigh.dir})`;
   // drops
@@ -634,7 +636,7 @@ function tick(now) {
   if (!frozen && heroEl.classList.contains('frozen')) { heroEl.classList.remove('frozen'); heroImg.src = 'img/hero-basket.webp'; }
   // basket zone (top part of the hero image)
   const hr = heroEl.getBoundingClientRect(), sr = stage.getBoundingClientRect();
-  const bx0 = hero.x - hero.w * .42, bx1 = hero.x + hero.w * .42, by0 = hr.top - sr.top, by1 = by0 + hr.height * .3;
+  const bx0 = hero.x - hero.w * .5, bx1 = hero.x + hero.w * .5, by0 = hr.top - sr.top, by1 = by0 + hr.height * .35;
   for (let i = drops.length - 1; i >= 0; i--) {
     const d = drops[i];
     d.t += dt; d.y += d.vy * dt; d.rot += d.vr * dt;
@@ -687,7 +689,7 @@ function startLevel(lv) {
   level = lv; reached = Math.max(reached, lv); levelCaught = 0;
   $('midOv').hidden = true;
   clearDrops(); measure();
-  sleigh.x = -sleigh.w; sleigh.dir = 1; sleigh.sp = W * (lv === 2 ? .19 : .14) + 40;
+  sleigh.x = -sleigh.w * .25; sleigh.dir = 1; sleigh.sp = W * (lv === 2 ? .19 : .14) + 40;
   frozenUntil = 0; heroEl.classList.remove('frozen'); heroImg.src = 'img/hero-basket.webp';
   target = null; newTarget(500);
   running = true; endAt = performance.now() + LEVELS[lv].time * 1000; lastSec = 0; spawnIn = 1.2;
@@ -715,6 +717,7 @@ function levelClear() {
   const left = Math.max(0, Math.ceil(timeLeft())), bonus = left * 2;
   score += bonus; stopPlay(); setHUD(left); sfx.clear();
   if (level >= 2) return midCard('全部過關！', `剩下 ${left} 秒 → 時間獎勵 <b>+${bonus}</b> 分`, '聖誕老人的東西全部接到了！現在把它們掛到聖誕樹上吧。', [], [['🎄 去布置聖誕樹', 'big green', openDecor]]);
+  store.set('xmasLv2', '1'); $('lv2Btn').hidden = false;
   const next = level + 1, newKinds = KINDS.filter(k => WORDS[k].lv === next);
   midCard(`第 ${level} 關過關！`, `剩下 ${left} 秒 → 時間獎勵 <b>+${bonus}</b> 分`,
     `第 ${next} 關會掉得更快，還有 ${newKinds.length} 個新單字：`, newKinds,
@@ -722,9 +725,10 @@ function levelClear() {
 }
 function timeUp() {
   stopPlay(); setHUD(0);
-  if (!caughtTotal) { inventory = { gift: 1, star: 1, bell: 1 }; }
-  midCard('時間到！', caughtTotal ? `這次接到 <b>${caughtTotal}</b> 個東西` : '這次沒接到東西，聖誕老人送你 3 個裝飾！',
-    '帶著接到的東西，去布置你的聖誕樹吧！', [], [['🎄 去布置聖誕樹', 'big green', openDecor]]);
+  const short = LEVELS[level].goal - levelCaught;
+  midCard('時間到！', `第 ${level} 關接到 <b>${levelCaught}</b> / ${LEVELS[level].goal} 個${short <= 2 ? '，差一點點！' : ''}`,
+    '可以再挑戰一次這一關（已經接到的東西會留著），或是帶著接到的東西去布置聖誕樹。', [],
+    [['🎄 去布置聖誕樹', 'big alt', openDecor], [`🔁 再挑戰第 ${level} 關`, 'big', () => startLevel(level)]]);
 }
 function midCard(title, bonus, text, kinds, buttons) {
   $('midTitle').textContent = title; $('midBonus').innerHTML = bonus; $('midText').textContent = text;
@@ -848,6 +852,7 @@ $('autoBtn').addEventListener('click', () => {
 });
 function openDecor() {
   stopPlay();
+  if (!Object.values(inventory).some(n => n > 0)) inventory = { gift: 1, star: 1, bell: 1 };   // nothing caught: a little gift from Santa
   ['midOv', 'endOv'].forEach(id => { $(id).hidden = true; });
   placed = []; renderTree(); renderTray();
   $('decorOv').hidden = false;
@@ -995,6 +1000,8 @@ function goHome() {
 $('homeBtn').addEventListener('click', goHome);
 $('homeEndBtn').addEventListener('click', goHome);
 $('startBtn').addEventListener('click', () => startGame(1));
+$('lv2Btn').addEventListener('click', () => startGame(2));
+if (store.get('xmasLv2') === '1') $('lv2Btn').hidden = false;
 $('againBtn').addEventListener('click', () => startGame(1));
 $('sayBtn').addEventListener('click', e => { e.stopPropagation(); speak(target, true); });
 $('sayBtn').addEventListener('pointerdown', e => e.stopPropagation());
