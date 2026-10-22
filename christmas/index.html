@@ -152,7 +152,7 @@ body{margin:0;font-family:var(--body);color:var(--snow);background:var(--night);
 .dbar .btnrow{margin:0}
 .dbar .big{font-size:17px;padding:8px 16px 10px}
 .treewrap{flex:1;min-height:0;display:flex;align-items:flex-end;justify-content:center;padding:0 16px}
-.treebox{position:relative;height:100%;max-height:100%;aspect-ratio:933/1200;max-width:100%}
+.treebox{position:relative;height:100%;max-height:100%;aspect-ratio:935/1200;max-width:100%}
 .treebox > img.tree{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 10px 20px rgba(0,0,0,.4))}
 .orn{position:absolute;width:var(--w);margin-left:calc(var(--w) / -2);transform:translateY(-50%);cursor:grab;touch-action:none;z-index:2}
 .orn img{display:block;width:100%;height:auto;pointer-events:none;filter:drop-shadow(0 4px 4px rgba(0,0,0,.35))}
@@ -177,7 +177,10 @@ body{margin:0;font-family:var(--body);color:var(--snow);background:var(--night);
 .rtree .big{font-size:17px;padding:8px 12px 10px}
 .rtree small{text-align:center;font-size:12px;color:#6a5a5a}
 .rinfo{flex:1;min-width:0;display:flex;flex-direction:column}
-.rhead{display:flex;align-items:flex-end;gap:8px}
+.rsleigh{position:relative;margin:-10px -8px 2px}
+.rsleigh video{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.rsleigh canvas,.rsleigh img{display:block;width:100%;height:auto;aspect-ratio:800/490;max-height:28vh;object-fit:contain}
+.rhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .rhead img{width:96px;height:auto;flex:none}
 .rhead h1{font-size:clamp(30px,6vw,44px)}
 .final{font-family:var(--fest);font-weight:700;font-size:56px;line-height:1;color:var(--berry)}
@@ -210,7 +213,6 @@ body{margin:0;font-family:var(--body);color:var(--snow);background:var(--night);
   .prompt .lbl{font-size:13px}
   .rtree{width:100%}
   .rhead{justify-content:center}
-  .rhead img{width:72px}
   .vocab{max-height:none}
   .dbar{justify-content:center;text-align:center}
 }
@@ -325,7 +327,8 @@ body{margin:0;font-family:var(--body);color:var(--snow);background:var(--night);
         <small>存下來分享給朋友吧！</small>
       </div>
       <div class="rinfo">
-        <div class="rhead"><img src="img/hero-wave.webp" alt="抱著禮物揮手的小勇者"><div><h1 id="endTitle">當慶！</h1><span class="badge" id="endBadge">聖誕快樂</span></div></div>
+        <div class="rsleigh" role="img" aria-label="聖誕老人駕著麋鹿雪橇飛來丟禮物"><video id="endVid" src="img/sleigh-end.mp4" muted playsinline preload="auto" aria-hidden="true"></video><canvas id="endCv" width="800" height="490"></canvas><img id="endImg" src="img/sleigh-still.webp" alt="" hidden></div>
+        <div class="rhead"><h1 id="endTitle">當慶！</h1><span class="badge" id="endBadge">聖誕快樂</span></div>
         <div class="final"><span id="finalScore">0</span><small>分</small></div>
         <div class="stats"><span>到達 <b id="stLevel">第1關</b></span><span>接到 <b id="stCaught">0</b> 個</span><span>最高連續 <b id="stCombo">0</b></span></div>
         <div class="vocab" id="vocab"><h3>今晡日學到个客語</h3></div>
@@ -704,6 +707,7 @@ function stopPlay() { running = false; clearInterval(timer); clearTimeout(switch
 function startGame(lv = 1) {
   audio();
   ['startOv', 'endOv', 'learnOv', 'midOv', 'decorOv'].forEach(id => { $(id).hidden = true; });
+  stopEnd();
   score = 0; combo = 0; maxCombo = 0; caughtTotal = 0; inventory = {}; reached = lv;
   startLevel(lv); showAccentTip();
 }
@@ -735,7 +739,14 @@ const treebox = $('treebox'), tray = $('tray');
 let placed = [];   // {kind, x, y} in % of the tree box
 // is (x,y)% on the tree? a cone from the tip down to the lowest branches, presents allowed under it
 // the tree's outline: half-width (% of the box) grows from the tip to the bottom branches
-const treeHalf = y => Math.min(44, Math.max(3, (y - 2) * .5));
+const TREE_OUTLINE = [[0, 0], [10, 9], [20, 13], [30, 21], [40, 24], [50, 31], [60, 33], [70, 37], [80, 41], [90, 42], [97, 40], [100, 38]];
+const treeHalf = y => {   // measured from the tree picture: half-width (% of box) at each height
+  for (let i = 1; i < TREE_OUTLINE.length; i++) {
+    const [y0, h0] = TREE_OUTLINE[i - 1], [y1, h1] = TREE_OUTLINE[i];
+    if (y <= y1) return Math.max(3, h0 + (h1 - h0) * (y - y0) / (y1 - y0));
+  }
+  return 38;
+};
 function onTree(x, y) { return y >= 3 && y <= 97 && Math.abs(x - 50) <= treeHalf(y); }
 function nudgeOnTree(x, y) {
   y = Math.min(96, Math.max(5, y));
@@ -856,7 +867,7 @@ async function drawTree() {
   const s = Math.max(cw / bg.width, ch / bg.height); g.drawImage(bg, (cw - bg.width * s) / 2, (ch - bg.height * s) / 2, bg.width * s, bg.height * s);
   g.fillStyle = 'rgba(10,6,2,.18)'; g.fillRect(0, 0, cw, ch);
   // tree box: same proportions as on screen
-  const th = 900, tw = th * 933 / 1200, tx = (cw - tw) / 2, ty = 200;
+  const th = 900, tw = th * 935 / 1200, tx = (cw - tw) / 2, ty = 200;
   g.drawImage(tree, tx, ty, tw, th);
   const items = await Promise.all(placed.map(p => loadImg(itemSrc(p.kind))));
   [...placed.map((p, i) => [p, items[i]])].sort((a, b) => a[0].y - b[0].y).forEach(([p, im]) => {
@@ -882,7 +893,7 @@ async function showResult() {
   $('stCaught').textContent = caughtTotal; $('stCombo').textContent = maxCombo;
   $('endTitle').textContent = '當慶！';
   renderVocab();
-  $('endOv').hidden = false; $('againBtn').focus();
+  $('endOv').hidden = false; $('againBtn').focus(); playEnd();
   speak('great'); setTimeout(() => speak('merry'), 1100);
   try {
     const cv = await drawTree();
@@ -892,6 +903,41 @@ async function showResult() {
     $('rTreeImg').src = 'img/tree.webp'; $('saveBtn').hidden = true;
   }
 }
+const endVid = $('endVid'), endCv = $('endCv'), endCtx = endCv.getContext('2d', { willReadFrequently: true });
+const END_LOOP_FROM = 4.6;   // the sleigh has arrived by here; loop the hovering part
+let endOn = false, endOk = true;
+function endFrame() {
+  if (!endOn) return;
+  if (endVid.readyState >= 2) {
+    try {
+      endCtx.drawImage(endVid, 0, 0, endCv.width, endCv.height);
+      const img = endCtx.getImageData(0, 0, endCv.width, endCv.height), d = img.data;
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i], g = d[i + 1], b = d[i + 2], m = r > b ? r : b, k = g - m;
+        if (k > 70) d[i + 3] = 0;
+        else if (k > 22) { d[i + 3] = 255 * (70 - k) / 48; d[i + 1] = m; }
+        else if (k > 0) d[i + 1] = m + k * .3;
+      }
+      endCtx.putImageData(img, 0, 0);
+    } catch (e) { endStill(true); endOk = false; endOn = false; return; }   // e.g. opened from a local file
+  }
+  requestAnimationFrame(endFrame);
+}
+function endStill(on) { endCv.hidden = on; $('endImg').hidden = !on; }
+endVid.addEventListener('ended', () => { endVid.currentTime = END_LOOP_FROM; endVid.play().catch(() => {}); });
+endVid.addEventListener('error', () => { endOk = false; endStill(true); });
+function startEndKeying() { endStill(false); if (!endOn) { endOn = true; requestAnimationFrame(endFrame); } }
+function playEnd() {
+  if (!endOk) return endStill(true);
+  endCtx.clearRect(0, 0, endCv.width, endCv.height);
+  endVid.currentTime = 0;
+  Promise.resolve(endVid.play()).then(startEndKeying).catch(() => {
+    endStill(true);   // autoplay refused: show the still sleigh until the player touches the screen
+    $('endOv').addEventListener('pointerdown', () => { endVid.play().then(startEndKeying).catch(() => {}); }, { once: true });
+  });
+}
+function stopEnd() { endOn = false; endVid.pause(); }
+
 $('saveBtn').addEventListener('click', () => {
   const a = document.createElement('a'); a.href = $('rTreeImg').src; a.download = '我个聖誕樹.png';
   document.body.appendChild(a); a.click(); a.remove();
@@ -919,8 +965,8 @@ function showCard(i, say) {
   const c = $('fcard'); c.classList.remove('turn'); void c.offsetWidth; c.classList.add('turn');
   if (say) speak(k, true);
 }
-function openLearn(from) { learnFrom = from; $(from).hidden = true; $('learnOv').hidden = false; audio(); showCard(0, true); $('lNext').focus(); }
-function closeLearn() { $('learnOv').hidden = true; $(learnFrom).hidden = false; }
+function openLearn(from) { learnFrom = from; $(from).hidden = true; stopEnd(); $('learnOv').hidden = false; audio(); showCard(0, true); $('lNext').focus(); }
+function closeLearn() { $('learnOv').hidden = true; $(learnFrom).hidden = false; if (learnFrom === 'endOv') playEnd(); }
 $('learnBtn').addEventListener('click', () => openLearn('startOv'));
 $('reviewBtn').addEventListener('click', () => openLearn('endOv'));
 $('lBack').addEventListener('click', closeLearn);
@@ -941,7 +987,7 @@ window.addEventListener('keydown', e => {
 
 /* ---------- navigation ---------- */
 function goHome() {
-  stopPlay();
+  stopPlay(); stopEnd();
   ['endOv', 'learnOv', 'midOv', 'decorOv'].forEach(id => { $(id).hidden = true; });
   score = 0; level = 1; levelCaught = 0; setHUD(LEVELS[1].time);
   $('startOv').hidden = false; $('startBtn').focus();
