@@ -88,14 +88,14 @@ body{margin:0;font-family:var(--body);color:var(--snow);background:var(--night);
 .card .txt{flex:1;min-width:0}
 .card p{margin:10px 0 0;font-size:15px;line-height:1.65}
 .card p b{color:var(--berry)}
-.ad-mark{position:absolute;right:14px;top:12px;width:34px;height:auto;opacity:.9}
+.ad-mark{position:absolute;right:12px;bottom:10px;width:22px;height:auto;opacity:.85}
 .card h1{margin:0;font-size:clamp(36px,8.5vw,54px);font-weight:800;line-height:1.05;color:var(--berry);letter-spacing:.06em;-webkit-text-stroke:1.5px var(--ink);paint-order:stroke;text-shadow:0 4px 0 var(--gold-dk);text-wrap:balance}
 .subtitle{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:clamp(17px,4vw,22px);font-weight:800;color:var(--pine)}
 .subtitle .say{width:36px;height:36px;font-size:16px}
 #startOv .card{max-width:760px}
-.start-art{position:relative;width:36%;flex:none;align-self:stretch;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px}
-.start-art .s-sleigh{width:118%;max-width:none;margin-left:-10%;animation:float 3s ease-in-out infinite}
-.start-art .s-hero{width:70%}
+#startOv .card,.result{padding-bottom:34px}
+.start-hero{width:32%;flex:none;align-self:flex-end;display:flex;justify-content:center}
+.start-hero img{width:100%;max-width:260px;height:auto;filter:drop-shadow(0 8px 10px rgba(0,0,0,.2))}
 @keyframes float{50%{transform:translateY(-8px)}}
 .accent{display:flex;align-items:center;gap:6px;margin-top:12px;flex-wrap:wrap}
 .accent span{flex-basis:100%;font-size:13px;font-weight:800;color:#5a4a4a}
@@ -152,7 +152,7 @@ body{margin:0;font-family:var(--body);color:var(--snow);background:var(--night);
 .dbar .btnrow{margin:0}
 .dbar .big{font-size:17px;padding:8px 16px 10px}
 .treewrap{flex:1;min-height:0;display:flex;align-items:flex-end;justify-content:center;padding:0 16px}
-.treebox{position:relative;height:100%;max-height:100%;aspect-ratio:801/1200;max-width:100%}
+.treebox{position:relative;height:100%;max-height:100%;aspect-ratio:933/1200;max-width:100%}
 .treebox > img.tree{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 10px 20px rgba(0,0,0,.4))}
 .orn{position:absolute;width:var(--w);margin-left:calc(var(--w) / -2);transform:translateY(-50%);cursor:grab;touch-action:none;z-index:2}
 .orn img{display:block;width:100%;height:auto;pointer-events:none;filter:drop-shadow(0 4px 4px rgba(0,0,0,.35))}
@@ -202,9 +202,7 @@ body{margin:0;font-family:var(--body);color:var(--snow);background:var(--night);
   .chip small{font-size:12px}
   .chip b{font-size:23px}
   .card{flex-direction:column;text-align:center;padding:18px 16px}
-  .start-art{width:70%;order:-1}
-  .start-art .s-sleigh{width:100%;margin:0}
-  .start-art .s-hero{display:none}
+  .start-hero{width:46%;order:-1;align-self:center}
   .subtitle,.accent,.btnrow,.logos,.stats{justify-content:center}
   .prompt{top:auto;bottom:calc(8px + env(safe-area-inset-bottom,0px));gap:8px;padding:5px 8px 5px 12px}
   .hero{bottom:calc(74px + env(safe-area-inset-bottom,0px))}
@@ -226,8 +224,8 @@ body{margin:0;font-family:var(--body);color:var(--snow);background:var(--night);
 <div id="app">
   <div class="hud">
     <div class="chip"><small>分數</small><b id="score">0</b></div>
-    <div class="chip time" id="timeChip"><small>時間</small><b id="time">40</b></div>
-    <div class="chip"><small id="lvName">第1關</small><b id="lvProg">0/6</b></div>
+    <div class="chip time" id="timeChip"><small>時間</small><b id="time">45</b></div>
+    <div class="chip"><small id="lvName">第1關</small><b id="lvProg">0/8</b></div>
     <div class="chip accent-chip" role="group" aria-label="切換腔調">
       <small>腔調<br>切換</small>
       <button class="seg" type="button" data-accent="xi" aria-pressed="true">四縣</button>
@@ -253,10 +251,6 @@ body{margin:0;font-family:var(--body);color:var(--snow);background:var(--night);
   <div class="overlay" id="startOv">
     <div class="card">
       <img class="ad-mark" src="img/ad-mark.webp" alt="廣告">
-      <div class="start-art" aria-hidden="true">
-        <img class="s-sleigh" src="img/sleigh.webp" alt="">
-        <img class="s-hero" src="img/hero-basket.webp" alt="">
-      </div>
       <div class="txt">
         <h1>叮噹接禮趣</h1>
         <div class="subtitle">布置靚靚个聖誕樹 <button class="say" id="subSay" type="button" aria-label="聽客語">🔊</button></div>
@@ -269,9 +263,9 @@ body{margin:0;font-family:var(--body);color:var(--snow);background:var(--night);
         </div>
         <div class="btnrow"><button class="big alt" id="learnBtn" type="button">📖 先學單字卡</button><button class="big" id="startBtn" type="button">開始接禮物！</button></div>
         <button class="seg bgm-seg" id="bgmSeg" type="button" aria-pressed="true">🎵 背景音樂：開</button>
-        <div class="logos"><img src="img/logo-hakka.webp" alt="哈客網路學院"><img src="img/logo-hac.webp" alt="客家委員會"></div>
         <p class="credit">客語語音：客家委員會「臺灣客語語音資料庫」語音合成（四縣腔、海陸腔）｜背景音樂：Jingle Bells（公共領域）</p>
       </div>
+      <div class="start-hero"><img src="img/hero-wave.webp" alt="抱著禮物揮手的小勇者"></div>
     </div>
   </div>
 
@@ -351,21 +345,20 @@ body{margin:0;font-family:var(--body);color:var(--snow);background:var(--night);
 // 臺灣客家語拼音（調號），依提供的詞彙表
 const WORDS = {
   gift:      { zh: '禮物', lv: 1, xi: { hz: '等路',   py: 'denˋ lu' },     hoi: { hz: '等路',   py: 'denˊ lu+' } },
-  star:      { zh: '星星', lv: 2, xi: { hz: '星仔',   py: 'senˊ eˋ' },     hoi: { hz: '星仔',   py: 'siangˋ er' } },
-  sock:      { zh: '襪子', lv: 2, xi: { hz: '襪仔',   py: 'madˋ eˇ' },     hoi: { hz: '襪',     py: 'mad' } },
-  snowflake: { zh: '雪花', lv: 2, xi: { hz: '雪花',   py: 'xiedˋ faˊ' },   hoi: { hz: '雪花',   py: 'sied faˋ' } },
+  star:      { zh: '星星', lv: 1, xi: { hz: '星仔',   py: 'senˊ eˋ' },     hoi: { hz: '星仔',   py: 'siangˋ er' } },
+  sock:      { zh: '襪子', lv: 1, xi: { hz: '襪仔',   py: 'madˋ eˇ' },     hoi: { hz: '襪',     py: 'mad' } },
+  snowflake: { zh: '雪花', lv: 1, xi: { hz: '雪花',   py: 'xiedˋ faˊ' },   hoi: { hz: '雪花',   py: 'sied faˋ' } },
   candy:     { zh: '糖果', lv: 2, xi: { hz: '糖仔',   py: 'tongˇ eˋ' },    hoi: { hz: '糖仔',   py: 'tong er' } },
-  bell:      { zh: '鈴鐺', lv: 3, xi: { hz: '玲琅仔', py: 'lin long eˋ' }, hoi: { hz: '玲琅仔', py: 'lin long er' } },
-  snowman:   { zh: '雪人', lv: 3, xi: { hz: '雪人',   py: 'xiedˋ nginˇ' }, hoi: { hz: '雪人',   py: 'sied ngin' } },
-  pinecone:  { zh: '松果', lv: 3, xi: { hz: '松果',   py: 'qiungˇ goˋ' },  hoi: { hz: '松果',   py: 'ciung goˊ' } },
-  candle:    { zh: '蠟燭', lv: 3, xi: { hz: '蠟燭',   py: 'lab zugˋ' },    hoi: { hz: '蠟燭',   py: 'labˋ zhug' } },
-  cookie:    { zh: '餅乾', lv: 3, xi: { hz: '餅仔',   py: 'biangˋ eˇ' },   hoi: { hz: '餅',     py: 'biangˊ' } },
+  bell:      { zh: '鈴鐺', lv: 2, xi: { hz: '玲琅仔', py: 'lin long eˋ' }, hoi: { hz: '玲琅仔', py: 'lin long er' } },
+  snowman:   { zh: '雪人', lv: 2, xi: { hz: '雪人',   py: 'xiedˋ nginˇ' }, hoi: { hz: '雪人',   py: 'sied ngin' } },
+  pinecone:  { zh: '松果', lv: 2, xi: { hz: '松果',   py: 'qiungˇ goˋ' },  hoi: { hz: '松果',   py: 'ciung goˊ' } },
+  candle:    { zh: '蠟燭', lv: 2, xi: { hz: '蠟燭',   py: 'lab zugˋ' },    hoi: { hz: '蠟燭',   py: 'labˋ zhug' } },
+  cookie:    { zh: '餅乾', lv: 2, xi: { hz: '餅仔',   py: 'biangˋ eˇ' },   hoi: { hz: '餅',     py: 'biangˊ' } },
 };
 const KINDS = Object.keys(WORDS);
 const LEVELS = {
-  1: { goal: 6,  time: 40, kinds: KINDS.filter(k => WORDS[k].lv <= 1), fall: [.16, .22], every: [.85, 1.25], snow: .18 },
-  2: { goal: 8,  time: 45, kinds: KINDS.filter(k => WORDS[k].lv <= 2), fall: [.2, .28],  every: [.7, 1.0],   snow: .16 },
-  3: { goal: 10, time: 50, kinds: KINDS,                                fall: [.26, .36], every: [.55, .85],  snow: .2 },
+  1: { goal: 8,  time: 45, kinds: KINDS.filter(k => WORDS[k].lv <= 1), fall: [.17, .23], every: [.8, 1.15], snow: .16 },
+  2: { goal: 10, time: 50, kinds: KINDS,                                fall: [.24, .33], every: [.6, .9],   snow: .2 },
 };
 
 const $ = id => document.getElementById(id);
@@ -384,12 +377,16 @@ const VOICE_KEYS = [...KINDS, 'merry', 'great', 'subtitle'];
 const voices = { xi: {}, hoi: {} };
 for (const acc of ['xi', 'hoi']) for (const k of VOICE_KEYS) { const a = new Audio(`audio/${acc}_${k}.wav`); a.preload = 'auto'; voices[acc][k] = a; }
 // asked = the player pressed something to hear it, so play even with sound effects off
+let curVoice = null;
 function speak(key, asked = false) {
   if (muted && !asked) return;
-  bgmDuck(voices[accent][key].duration || 1);
   const a = voices[accent][key];
+  if (curVoice && curVoice !== a) { try { curVoice.pause(); } catch (e) {} }   // never two words at once
+  curVoice = a;
+  bgmDuck(a.duration || 1);
   try { a.currentTime = 0; const p = a.play(); if (p) p.catch(() => {}); } catch (e) {}
 }
+const voiceLen = key => ((voices[accent][key] && voices[accent][key].duration) || .8) * 1000;
 let ac = null;
 function audio() { if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } if (ac && ac.state === 'suspended') ac.resume(); return ac; }
 function tone(f1, f2, dur, type = 'sine', vol = .15, delay = 0) {
@@ -548,6 +545,7 @@ function banner(text) { const b = document.createElement('div'); b.className = '
 /* ---------- game state ---------- */
 let W = 0, H = 0;
 let running = false, level = 1, reached = 1, levelCaught = 0, score = 0, combo = 0, maxCombo = 0, caughtTotal = 0;
+let switchT = 0;
 let target = null, endAt = 0, timer = 0, lastSec = 0, frozenUntil = 0, raf = 0, last = 0, spawnIn = 0, sinceTarget = 0;
 let inventory = {};
 let drops = [];
@@ -668,7 +666,9 @@ function catchDrop(d, x) {
     heroEl.classList.remove('catch'); void heroEl.offsetWidth; heroEl.classList.add('catch');
     if (combo > 0 && combo % 5 === 0) banner(`${combo} 連續！`);
     if (levelCaught >= LEVELS[level].goal) { setHUD(timeLeft()); return levelClear(); }
-    if (LEVELS[level].kinds.length > 1) newTarget(900);
+    // keep the current word up until its sound has finished, then switch to (and say) the next one
+    clearTimeout(switchT);   // a second catch during the pause restarts it, so its word is heard in full too
+    switchT = setTimeout(() => { switchT = 0; if (running) newTarget(60); }, (muted ? 300 : voiceLen(d.kind)) + 450);
   } else {
     combo = 0; endAt -= 2000;
     sfx.bad();
@@ -684,12 +684,12 @@ function startLevel(lv) {
   level = lv; reached = Math.max(reached, lv); levelCaught = 0;
   $('midOv').hidden = true;
   clearDrops(); measure();
-  sleigh.x = -sleigh.w; sleigh.dir = 1; sleigh.sp = W * (lv === 3 ? .2 : lv === 2 ? .17 : .14) + 40;
+  sleigh.x = -sleigh.w; sleigh.dir = 1; sleigh.sp = W * (lv === 2 ? .19 : .14) + 40;
   frozenUntil = 0; heroEl.classList.remove('frozen'); heroImg.src = 'img/hero-basket.webp';
   target = null; newTarget(500);
   running = true; endAt = performance.now() + LEVELS[lv].time * 1000; lastSec = 0; spawnIn = 1.2;
   sfx.start(); setHUD(LEVELS[lv].time);
-  banner(lv === 1 ? '第 1 關：接等路！' : `第 ${lv} 關`);
+  banner(`第 ${lv} 關`);
   clearInterval(timer); timer = setInterval(clock, 100);
   last = performance.now(); if (!raf) raf = requestAnimationFrame(tick);
 }
@@ -700,7 +700,7 @@ function clock() {
   setHUD(t);
   if (t <= 0) timeUp();
 }
-function stopPlay() { running = false; clearInterval(timer); clearDrops(); $('prompt').hidden = true; }
+function stopPlay() { running = false; clearInterval(timer); clearTimeout(switchT); switchT = 0; clearDrops(); $('prompt').hidden = true; }
 function startGame(lv = 1) {
   audio();
   ['startOv', 'endOv', 'learnOv', 'midOv', 'decorOv'].forEach(id => { $(id).hidden = true; });
@@ -710,7 +710,7 @@ function startGame(lv = 1) {
 function levelClear() {
   const left = Math.max(0, Math.ceil(timeLeft())), bonus = left * 2;
   score += bonus; stopPlay(); setHUD(left); sfx.clear();
-  if (level >= 3) return midCard('全部過關！', `剩下 ${left} 秒 → 時間獎勵 <b>+${bonus}</b> 分`, '聖誕老人的東西全部接到了！現在把它們掛到聖誕樹上吧。', [], [['🎄 去布置聖誕樹', 'big green', openDecor]]);
+  if (level >= 2) return midCard('全部過關！', `剩下 ${left} 秒 → 時間獎勵 <b>+${bonus}</b> 分`, '聖誕老人的東西全部接到了！現在把它們掛到聖誕樹上吧。', [], [['🎄 去布置聖誕樹', 'big green', openDecor]]);
   const next = level + 1, newKinds = KINDS.filter(k => WORDS[k].lv === next);
   midCard(`第 ${level} 關過關！`, `剩下 ${left} 秒 → 時間獎勵 <b>+${bonus}</b> 分`,
     `第 ${next} 關會掉得更快，還有 ${newKinds.length} 個新單字：`, newKinds,
@@ -734,30 +734,26 @@ function midCard(title, bonus, text, kinds, buttons) {
 const treebox = $('treebox'), tray = $('tray');
 let placed = [];   // {kind, x, y} in % of the tree box
 // is (x,y)% on the tree? a cone from the tip down to the lowest branches, presents allowed under it
-function onTree(x, y) {
-  if (y < 4 || y > 97) return false;
-  if (y >= 86) return Math.abs(x - 50) <= 46;
-  const half = 4 + (y - 4) / (86 - 4) * 40;
-  return Math.abs(x - 50) <= half;
-}
+// the tree's outline: half-width (% of the box) grows from the tip to the bottom branches
+const treeHalf = y => Math.min(44, Math.max(3, (y - 2) * .5));
+function onTree(x, y) { return y >= 3 && y <= 97 && Math.abs(x - 50) <= treeHalf(y); }
 function nudgeOnTree(x, y) {
-  y = Math.min(96, Math.max(6, y));
+  y = Math.min(96, Math.max(5, y));
   if (onTree(x, y)) return [x, y];
-  const half = y >= 86 ? 46 : 4 + (y - 4) / (86 - 4) * 40;
-  return [50 + Math.sign(x - 50) * (half - 2), y];
+  return [50 + Math.sign(x - 50) * (treeHalf(y) - 2), y];
 }
 function freeSpot(kind) {
-  if (kind === 'star' && !placed.some(p => p.kind === 'star' && p.y < 10)) return [50, 6];
-  if (kind === 'gift') return [rnd(18, 82), rnd(90, 95)];
+  if (kind === 'star' && !placed.some(p => p.kind === 'star' && p.y < 10)) return [50, 5];
+  if (kind === 'gift') return [rnd(14, 86), rnd(90, 96)];
   let best = null, bestD = -1;
   for (let i = 0; i < 40; i++) {
-    const y = rnd(16, 82), half = 4 + (y - 4) / 82 * 40, x = 50 + rnd(-half, half) * .85;
+    const y = rnd(14, 84), x = 50 + rnd(-1, 1) * treeHalf(y) * .82;
     let d = Infinity; for (const p of placed) d = Math.min(d, Math.hypot(p.x - x, (p.y - y) * .67));
     if (d > bestD) { bestD = d; best = [x, y]; }
   }
   return best;
 }
-function ornWidth(kind, y) { return kind === 'star' && y < 10 ? 20 : kind === 'gift' && y >= 86 ? 17 : 12.5; }
+function ornWidth(kind, y) { return kind === 'star' && y < 10 ? 18 : kind === 'gift' && y >= 88 ? 15 : 11; }
 function renderTree() {
   treebox.querySelectorAll('.orn,.twinkle').forEach(n => n.remove());
   placed.forEach((p, i) => {
@@ -773,7 +769,7 @@ function renderTree() {
   // fairy lights
   const cols = ['#ffe36e', '#ff6b6b', '#7fd3ff', '#9cff8a'];
   for (let i = 0; i < 22; i++) {
-    const y = 12 + (i / 22) * 72, half = 4 + (y - 4) / 82 * 40, x = 50 + Math.sin(i * 2.4) * half * .8;
+    const y = 12 + (i / 22) * 74, x = 50 + Math.sin(i * 2.4) * treeHalf(y) * .8;
     const t = document.createElement('i'); t.className = 'twinkle';
     t.style.left = x + '%'; t.style.top = y + '%'; t.style.setProperty('--c', cols[i % 4]); t.style.animationDelay = (-i * .37) + 's';
     treebox.appendChild(t);
@@ -800,7 +796,7 @@ function sayOnTree(kind, x, y) {
 }
 function placeAt(kind, x, y, from) {
   [x, y] = nudgeOnTree(x, y);
-  if (kind === 'star' && y < 20 && Math.abs(x - 50) < 18) { x = 50; y = 6; }   // a star snaps to the top
+  if (kind === 'star' && y < 20 && Math.abs(x - 50) < 18) { x = 50; y = 5; }   // a star snaps to the top
   if (from >= 0) { placed[from].x = x; placed[from].y = y; }
   else { placed.push({ kind, x, y, fresh: true }); inventory[kind]--; }
   renderTree(); renderTray(); sayOnTree(kind, x, y);
@@ -860,7 +856,7 @@ async function drawTree() {
   const s = Math.max(cw / bg.width, ch / bg.height); g.drawImage(bg, (cw - bg.width * s) / 2, (ch - bg.height * s) / 2, bg.width * s, bg.height * s);
   g.fillStyle = 'rgba(10,6,2,.18)'; g.fillRect(0, 0, cw, ch);
   // tree box: same proportions as on screen
-  const th = 900, tw = th * 801 / 1200, tx = (cw - tw) / 2, ty = 200;
+  const th = 900, tw = th * 933 / 1200, tx = (cw - tw) / 2, ty = 200;
   g.drawImage(tree, tx, ty, tw, th);
   const items = await Promise.all(placed.map(p => loadImg(itemSrc(p.kind))));
   [...placed.map((p, i) => [p, items[i]])].sort((a, b) => a[0].y - b[0].y).forEach(([p, im]) => {
@@ -882,7 +878,7 @@ async function drawTree() {
 async function showResult() {
   $('decorOv').hidden = true;
   $('finalScore').textContent = score;
-  $('stLevel').textContent = reached >= 3 && levelCaught >= LEVELS[3].goal ? '全部過關' : `第${reached}關`;
+  $('stLevel').textContent = reached >= 2 && levelCaught >= LEVELS[2].goal ? '全部過關' : `第${reached}關`;
   $('stCaught').textContent = caughtTotal; $('stCombo').textContent = maxCombo;
   $('endTitle').textContent = '當慶！';
   renderVocab();
