@@ -1,0 +1,18 @@
+/* compact station cards: two stations fit on one screen */
+.game-grid{gap:1.6rem}
+.card-visual,.card-visual.station-scene{height:132px!important}
+.station-scene .scene-icons{inset:10px 0 40px!important;font-size:2.6rem!important;gap:.6rem}
+.station-scene .scene-icons img{max-height:72px;width:auto}
+.station-scene .decor{transform:scale(.7)}
+.station-scene .platform{height:34px}
+.station-scene .rail{bottom:9px;height:6px;box-shadow:0 9px 0 #55445f}
+.game-card .season{bottom:8px;font-size:.78rem;padding:.2rem .7rem}
+.card-copy{padding:.9rem 1.1rem .3rem!important;gap:.7rem!important}
+.card-copy h3{font-size:1.4rem!important;margin:0 0 .25rem!important}
+.card-copy p{font-size:.86rem!important;line-height:1.55!important}
+.card-copy .meta{margin-top:.4rem}
+.card-copy .meta span{font-size:.72rem}
+.num{width:34px!important;height:34px!important;font-size:.72rem!important}
+.game-card .play{margin:.5rem 1.1rem 1rem!important;padding:.55rem 1rem!important;min-height:0!important;font-size:.95rem}
+.game-card .track-sign{top:18px}
+@media(max-width:900px){.game-card .track-sign{top:24px}}
