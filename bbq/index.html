@@ -202,6 +202,7 @@ body.brushing .grill{box-shadow:0 8px 0 #0b0f24,0 0 0 4px var(--gold),0 0 20px 4
 
 @media (max-height:700px){ .tray{grid-template-columns:repeat(auto-fill,minmax(56px,1fr))} .item img{height:30px} .item .py{display:none} .customers{min-height:112px} }
 @media (min-width:760px){ .tray{grid-template-columns:repeat(9,1fr)} .dex-grid{grid-template-columns:repeat(5,1fr)} }   /* 桌機圖鑑 5×4 */
+@media (max-height:700px) and (min-width:760px){ .tray{grid-template-columns:repeat(auto-fit,minmax(50px,1fr))} }   /* 寬但矮的螢幕：食材排成一排，讓烤網有空間 */
 @media (max-width:600px){
   #game{padding:6px 8px calc(6px + env(safe-area-inset-bottom));gap:5px}
   .hud{gap:5px;flex-wrap:nowrap}
@@ -726,9 +727,11 @@ function fitGrill(){
   const wrap=$('.grill-wrap'), g=$('#grill'); if(!wrap||$('#game').hidden) return;
   const r=wrap.getBoundingClientRect(), ratio=1000/708;
   let w=r.width-8, h=w/ratio; if(h>r.height-12){ h=r.height-12; w=h*ratio; }
-  g.style.width=Math.max(120,w)+'px'; g.style.height=Math.max(85,h)+'px';
+  g.style.width=Math.max(85,w)+'px'; g.style.height=Math.max(60,h)+'px';
 }
 addEventListener('resize', fitGrill);
+// 客人對話框出現、工具列換行時烤網的空間會變，跟著重新縮放，避免被上下裁掉
+if(window.ResizeObserver) new ResizeObserver(fitGrill).observe($('.grill-wrap'));
 
 /* ============ 事件 ============ */
 $('#startBtn').onclick=startGame;
