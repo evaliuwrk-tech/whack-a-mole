@@ -16,3 +16,8 @@
 .game-card .play{margin:.5rem 1.1rem 1rem!important;padding:.55rem 1rem!important;min-height:0!important;font-size:.95rem}
 .game-card .track-sign{top:18px}
 @media(max-width:900px){.game-card .track-sign{top:24px}}
+/* station number takes the colour family of its game banner */
+.spring .num{background:#9ee0b9!important}
+.autumn .num{background:#8fbfdc!important}
+.halloween .num{background:#b79cec!important}
+.christmas .num{background:#9fdcf2!important}
