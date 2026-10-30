@@ -6,6 +6,7 @@
 @import url("journey-theme.css");
 @import url("banner-containment.css");
 @import url("edge-safe.css");
-@import url("hero-layers.css?v=20261030-7");
-@import url("hero-controls.css?v=20261030-7");
-@import url("train-follow.css?v=20261030-7");
+@import url("hero-layers.css?v=20261030-8");
+@import url("hero-controls.css?v=20261030-8");
+@import url("train-follow.css?v=20261030-8");
+@import url("train-motion.css?v=20261030-8");
