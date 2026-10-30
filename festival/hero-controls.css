@@ -1,0 +1,9 @@
+.hero-note{display:none!important}
+.hero #randomPlay{position:relative;font-size:inherit;animation:flag-wave 4.8s ease-in-out infinite;transform-origin:12% 50%;will-change:transform}
+@keyframes flag-wave{
+  0%,100%{transform:perspective(500px) rotateY(0) rotateZ(-.7deg)}
+  25%{transform:perspective(500px) rotateY(3deg) rotateZ(.5deg) translateY(-1px)}
+  50%{transform:perspective(500px) rotateY(-2deg) rotateZ(-.3deg) translateY(1px)}
+  75%{transform:perspective(500px) rotateY(2deg) rotateZ(.7deg)}
+}
+@media(prefers-reduced-motion:reduce){.hero #randomPlay{animation:none}}
