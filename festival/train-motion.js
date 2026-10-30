@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const train=document.createElement('div');
   train.className='train-runner';
   train.setAttribute('aria-hidden','true');
-  train.innerHTML='<i class="train-smoke s1"></i><i class="train-smoke s2"></i><i class="train-smoke s3"></i><span class="train-engine">🚂</span>';
+  train.innerHTML='<i class="train-smoke s1"></i><i class="train-smoke s2"></i><i class="train-smoke s3"></i><img class="train-engine" src="img/train.webp" alt="">';
   grid.append(train);
   let active=cards[0];
   const moveTo=card=>{active=card;train.style.top=`${card.offsetTop-32}px`};
