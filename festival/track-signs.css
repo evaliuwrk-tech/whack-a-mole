@@ -20,3 +20,6 @@
 /* phones/tablets: the track moves to the left edge, so the sign becomes a compact one sitting on it */
 @media(max-width:900px){.track-sign .sign-base{display:none}.track-sign{width:92px;top:62px;padding:.35rem .3rem .45rem;font-size:.8rem;border-width:3px;box-shadow:inset 0 0 0 1px #aebdbc,3px 4px 0 var(--ink)}.track-sign small{display:none}.track-sign:before,.track-sign:after{width:10px;height:118px;top:-8px}.track-sign:before{left:-12px}.track-sign:after{right:-12px}.game-card .track-sign{top:62px;left:-100px!important;right:auto!important}}
 @media(max-width:430px){.track-sign{width:74px;font-size:.7rem}.game-card .track-sign{left:-80px!important}}
+
+/* track: wooden boardwalk planks in warm brown, so the red train stands out */
+.game-grid:before{background:repeating-linear-gradient(180deg,#c99a66 0 22px,#b4834f 22px 24px,#c99a66 24px 26px,#7a5333 26px 30px)!important;border-inline:5px solid #8a5f3b!important;box-shadow:inset 3px 0 0 #dcb383,inset -3px 0 0 #a8763f}
