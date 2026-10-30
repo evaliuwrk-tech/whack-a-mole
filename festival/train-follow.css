@@ -1,0 +1,6 @@
+.game-grid:after{transition:top .65s cubic-bezier(.22,.8,.3,1),transform .65s cubic-bezier(.22,.8,.3,1)}
+.game-grid:has(.game-card:nth-child(1):is(:hover,:focus-within)):after{top:-32px}
+.game-grid:has(.game-card:nth-child(2):is(:hover,:focus-within)):after{top:calc(25% - 24px)}
+.game-grid:has(.game-card:nth-child(3):is(:hover,:focus-within)):after{top:calc(50% - 24px)}
+.game-grid:has(.game-card:nth-child(4):is(:hover,:focus-within)):after{top:calc(75% - 24px)}
+@media(prefers-reduced-motion:reduce){.game-grid:after{transition:none}}
